@@ -38,12 +38,12 @@ function cleanName(value: string): string {
 function mapRole(path: string): TerrainTextureMap | null {
   const name = path.toLowerCase();
   if (!/\.(png|jpe?g|webp)$/i.test(name)) return null;
-  if (/(^|[_-])(color|albedo|basecolor|base_color|diffuse)([_-.]|$)/i.test(name)) return 'color';
-  if (/(^|[_-])normal[_-]?gl([_-.]|$)/i.test(name)) return 'normal';
-  if (/(^|[_-])normal([_-.]|$)/i.test(name) && !/normal[_-]?dx/i.test(name)) return 'normal';
-  if (/(^|[_-])(roughness|rough)([_-.]|$)/i.test(name)) return 'roughness';
-  if (/(^|[_-])(ambient[_-]?occlusion|ao)([_-.]|$)/i.test(name)) return 'ao';
-  if (/(^|[_-])(height|displacement)([_-.]|$)/i.test(name)) return 'height';
+  if (/(^|[_-])(color|albedo|basecolor|base_color|diffuse)([-_.]|$)/i.test(name)) return 'color';
+  if (/(^|[_-])normal[_-]?gl([-_.]|$)/i.test(name)) return 'normal';
+  if (/(^|[_-])normal([-_.]|$)/i.test(name) && !/normal[_-]?dx/i.test(name)) return 'normal';
+  if (/(^|[_-])(roughness|rough)([-_.]|$)/i.test(name)) return 'roughness';
+  if (/(^|[_-])(ambient[_-]?occlusion|ao)([-_.]|$)/i.test(name)) return 'ao';
+  if (/(^|[_-])(height|displacement)([-_.]|$)/i.test(name)) return 'height';
   return null;
 }
 
