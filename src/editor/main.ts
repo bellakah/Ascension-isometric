@@ -63,10 +63,11 @@ const worldFileInput = root.querySelector<HTMLInputElement>('[data-world-file]')
 if (!canvas || !assetDock || !hierarchyHost || !inspectorHost || !status || !currentMap || !undoButton || !redoButton || !worldFileInput) {
   throw new Error('Editor shell failed to initialize.');
 }
+const statusElement: HTMLElement = status;
 
 function setStatus(message: string, tone: 'normal' | 'success' | 'error' = 'normal'): void {
-  status.textContent = message;
-  status.dataset.tone = tone;
+  statusElement.textContent = message;
+  statusElement.dataset.tone = tone;
 }
 
 const engine = new Engine(canvas);

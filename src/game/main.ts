@@ -37,32 +37,32 @@ async function resolveWorld(playtest: boolean): Promise<WorldDocument> {
   }
   const first = (await database.list())[0];
   if (first) {
-    const document = await database.get(first.id);
-    if (document) return document;
+    const world = await database.get(first.id);
+    if (world) return world;
   }
   return createWorldDocument('Mapa vazio');
 }
 
 async function bootstrap(): Promise<void> {
-  const root = document.querySelector<HTMLElement>('#app');
+  const root = globalThis.document.querySelector<HTMLElement>('#app');
   if (!root) throw new Error('App root not found.');
   const playtest = new URLSearchParams(window.location.search).get('playtest') === '1';
-  const document = await resolveWorld(playtest);
+  const worldDocument = await resolveWorld(playtest);
 
   const shell = createShell(root, {
     mode: 'game',
-    title: playtest ? `Playtest · ${document.name}` : `Ascension · ${document.name}`,
+    title: playtest ? `Playtest · ${worldDocument.name}` : `Ascension · ${worldDocument.name}`,
     subtitle: playtest ? 'WorldDocument ao vivo do editor' : 'Runtime do mapa atual',
     help: '<span class="key">WASD</span> move · <span class="key">mouse wheel</span> zoom · o mundo renderizado vem do mesmo WorldDocument usado pelo editor.',
   });
 
   const engine = new Engine(shell.canvas);
-  const environment = new WorldEnvironment(engine.scene, document, false);
+  const environment = new WorldEnvironment(engine.scene, worldDocument, false);
   const runtime = new WorldRuntime(engine.scene, { onAssetError: (message) => console.warn(message) });
-  await runtime.build(document);
+  await runtime.build(worldDocument);
 
   const player = createPlayer();
-  player.position.set(document.spawn.x, document.spawn.y, document.spawn.z);
+  player.position.set(worldDocument.spawn.x, worldDocument.spawn.y, worldDocument.spawn.z);
   engine.scene.add(player);
   const playerController = new PlayerController(player);
   engine.camera.setTarget(player.position);
@@ -89,6 +89,6 @@ async function bootstrap(): Promise<void> {
 
 void bootstrap().catch((error: unknown) => {
   console.error(error);
-  const root = document.querySelector<HTMLElement>('#app');
+  const root = globalThis.document.querySelector<HTMLElement>('#app');
   if (root) root.innerHTML = `<main style="padding:24px;color:#fff;background:#111;min-height:100vh">Falha ao abrir mapa: ${error instanceof Error ? error.message : String(error)}</main>`;
 });
