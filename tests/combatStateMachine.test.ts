@@ -10,8 +10,10 @@ describe('CombatStateMachine', () => {
     expect(frame.state).toBe('attack-1');
     expect(frame.movementMultiplier).toBeLessThan(0.2);
 
-    machine.update(0.2, { attackPressed: true, blockHeld: false, moved: false, sprinting: false }, durations);
-    frame = machine.update(0.2, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
+    machine.update(0.1, { attackPressed: true, blockHeld: false, moved: false, sprinting: false }, durations);
+    machine.update(0.1, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
+    machine.update(0.1, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
+    frame = machine.update(0.1, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
     expect(frame.state).toBe('attack-2');
   });
 
@@ -20,7 +22,8 @@ describe('CombatStateMachine', () => {
     machine.update(0.01, { attackPressed: true, blockHeld: false, moved: false, sprinting: false }, durations);
     for (let index = 0; index < 8; index += 1) machine.update(0.1, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
     expect(machine.state === 'recover' || machine.state === 'locomotion').toBe(true);
-    machine.update(0.2, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
+    machine.update(0.1, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
+    machine.update(0.1, { attackPressed: false, blockHeld: false, moved: false, sprinting: false }, durations);
     expect(machine.state).toBe('locomotion');
   });
 
