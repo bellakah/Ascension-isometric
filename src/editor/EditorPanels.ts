@@ -1,0 +1,184 @@
+import * as THREE from 'three';
+import type { SerializedVector3, WorldDocument, WorldEntityDocument } from '../world/WorldDocument';
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+  })[character] ?? character);
+}
+
+function numberValue(value: string, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+export interface HierarchyPanelOptions {
+  root: HTMLElement;
+  onSelect(id: string): void;
+  onDuplicate(): void;
+  onDelete(): void;
+  onFocus(): void;
+}
+
+export class HierarchyPanel {
+  private document: WorldDocument | null = null;
+  private selectedId: string | null = null;
+  private search = '';
+
+  constructor(private readonly options: HierarchyPanelOptions) {
+    options.root.classList.add('hierarchy-panel');
+    options.root.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement) || !target.matches('[data-hierarchy-search]')) return;
+      this.search = target.value.toLowerCase();
+      this.renderCurrent();
+    });
+  }
+
+  render(document: WorldDocument, selectedId: string | null): void {
+    this.document = document;
+    this.selectedId = selectedId;
+    this.renderCurrent();
+  }
+
+  private renderCurrent(): void {
+    const document = this.document;
+    const entities = document?.entities.filter((entity) =>
+      !this.search || `${entity.name} ${entity.assetName}`.toLowerCase().includes(this.search),
+    ) ?? [];
+    this.options.root.innerHTML = `
+      <div class="panel-heading">
+        <div><strong>Hierarchy</strong><span>${document?.entities.length ?? 0} entidades</span></div>
+        <div class="panel-actions">
+          <button type="button" title="Duplicar selecionado" data-hierarchy-duplicate>⧉</button>
+          <button type="button" title="Focar selecionado" data-hierarchy-focus>◎</button>
+          <button type="button" title="Excluir selecionado" data-hierarchy-delete>⌫</button>
+        </div>
+      </div>
+      <div class="hierarchy-search-wrap"><input type="search" data-hierarchy-search placeholder="Buscar no mapa..." value="${escapeHtml(this.search)}"></div>
+      <div class="hierarchy-list">
+        ${entities.length === 0
+          ? '<p class="panel-empty">Nenhuma entidade colocada no mapa.</p>'
+          : entities.map((entity) => `
+            <button type="button" class="hierarchy-row${entity.id === this.selectedId ? ' selected' : ''}" data-entity-id="${escapeHtml(entity.id)}">
+              <span class="hierarchy-icon">◇</span>
+              <span class="hierarchy-copy"><strong>${escapeHtml(entity.name)}</strong><small>${escapeHtml(entity.assetName)}</small></span>
+              <span class="hierarchy-visibility">${entity.visible ? '●' : '○'}</span>
+            </button>`).join('')}
+      </div>`;
+
+    this.options.root.querySelectorAll<HTMLElement>('[data-entity-id]').forEach((row) => {
+      row.addEventListener('click', () => this.options.onSelect(row.dataset.entityId ?? ''));
+      row.addEventListener('dblclick', () => this.options.onFocus());
+    });
+    this.options.root.querySelector<HTMLElement>('[data-hierarchy-duplicate]')?.addEventListener('click', () => this.options.onDuplicate());
+    this.options.root.querySelector<HTMLElement>('[data-hierarchy-focus]')?.addEventListener('click', () => this.options.onFocus());
+    this.options.root.querySelector<HTMLElement>('[data-hierarchy-delete]')?.addEventListener('click', () => this.options.onDelete());
+  }
+}
+
+export interface InspectorTransform {
+  position: SerializedVector3;
+  rotationDegrees: SerializedVector3;
+  scale: SerializedVector3;
+}
+
+export interface InspectorPanelOptions {
+  root: HTMLElement;
+  onRename(name: string): void;
+  onTransform(transform: InspectorTransform): void;
+  onVisible(visible: boolean): void;
+  onDuplicate(): void;
+  onDelete(): void;
+  onFocus(): void;
+}
+
+export class InspectorPanel {
+  private entity: WorldEntityDocument | null = null;
+
+  constructor(private readonly options: InspectorPanelOptions) {
+    options.root.classList.add('inspector-panel');
+  }
+
+  render(entity: WorldEntityDocument | null): void {
+    this.entity = entity;
+    if (!entity) {
+      this.options.root.innerHTML = `
+        <div class="panel-heading"><div><strong>Inspector</strong><span>Nenhuma seleção</span></div></div>
+        <div class="inspector-empty"><strong>Selecione um objeto</strong><span>Clique no viewport ou na Hierarchy para editar posição, rotação e escala.</span></div>`;
+      return;
+    }
+
+    const rotation = {
+      x: THREE.MathUtils.radToDeg(entity.rotation.x),
+      y: THREE.MathUtils.radToDeg(entity.rotation.y),
+      z: THREE.MathUtils.radToDeg(entity.rotation.z),
+    };
+    this.options.root.innerHTML = `
+      <div class="panel-heading"><div><strong>Inspector</strong><span>${escapeHtml(entity.assetName)}</span></div></div>
+      <div class="inspector-scroll">
+        <label class="inspector-field"><span>Nome</span><input type="text" data-name value="${escapeHtml(entity.name)}"></label>
+        <div class="inspector-readonly"><span>Asset</span><code title="${escapeHtml(entity.assetId)}">${escapeHtml(entity.assetName)}</code></div>
+        <label class="inspector-visible"><input type="checkbox" data-visible ${entity.visible ? 'checked' : ''}><span>Visível no mundo</span></label>
+
+        ${this.vectorGroup('Posição', 'position', entity.position, 0.5)}
+        ${this.vectorGroup('Rotação', 'rotation', rotation, 15)}
+        ${this.vectorGroup('Escala', 'scale', entity.scale, 0.1)}
+
+        <div class="inspector-actions">
+          <button type="button" class="editor-button" data-focus>Focar</button>
+          <button type="button" class="editor-button" data-duplicate>Duplicar</button>
+          <button type="button" class="editor-button danger" data-delete>Excluir</button>
+        </div>
+      </div>`;
+
+    this.options.root.querySelector<HTMLInputElement>('[data-name]')?.addEventListener('change', (event) => {
+      this.options.onRename((event.currentTarget as HTMLInputElement).value);
+    });
+    this.options.root.querySelector<HTMLInputElement>('[data-visible]')?.addEventListener('change', (event) => {
+      this.options.onVisible((event.currentTarget as HTMLInputElement).checked);
+    });
+    this.options.root.querySelectorAll<HTMLInputElement>('[data-vector]').forEach((input) => {
+      input.addEventListener('change', () => this.emitTransform());
+    });
+    this.options.root.querySelector<HTMLElement>('[data-focus]')?.addEventListener('click', () => this.options.onFocus());
+    this.options.root.querySelector<HTMLElement>('[data-duplicate]')?.addEventListener('click', () => this.options.onDuplicate());
+    this.options.root.querySelector<HTMLElement>('[data-delete]')?.addEventListener('click', () => this.options.onDelete());
+  }
+
+  private vectorGroup(label: string, key: string, value: SerializedVector3, step: number): string {
+    return `
+      <fieldset class="inspector-vector-group">
+        <legend>${label}</legend>
+        <label><span>X</span><input type="number" data-vector="${key}" data-axis="x" step="${step}" value="${value.x.toFixed(3)}"></label>
+        <label><span>Y</span><input type="number" data-vector="${key}" data-axis="y" step="${step}" value="${value.y.toFixed(3)}"></label>
+        <label><span>Z</span><input type="number" data-vector="${key}" data-axis="z" step="${step}" value="${value.z.toFixed(3)}"></label>
+      </fieldset>`;
+  }
+
+  private emitTransform(): void {
+    const entity = this.entity;
+    if (!entity) return;
+    const read = (group: string, axis: keyof SerializedVector3, fallback: number): number => {
+      const input = this.options.root.querySelector<HTMLInputElement>(`[data-vector="${group}"][data-axis="${axis}"]`);
+      return numberValue(input?.value ?? '', fallback);
+    };
+    this.options.onTransform({
+      position: {
+        x: read('position', 'x', entity.position.x),
+        y: read('position', 'y', entity.position.y),
+        z: read('position', 'z', entity.position.z),
+      },
+      rotationDegrees: {
+        x: read('rotation', 'x', THREE.MathUtils.radToDeg(entity.rotation.x)),
+        y: read('rotation', 'y', THREE.MathUtils.radToDeg(entity.rotation.y)),
+        z: read('rotation', 'z', THREE.MathUtils.radToDeg(entity.rotation.z)),
+      },
+      scale: {
+        x: read('scale', 'x', entity.scale.x),
+        y: read('scale', 'y', entity.scale.y),
+        z: read('scale', 'z', entity.scale.z),
+      },
+    });
+  }
+}
