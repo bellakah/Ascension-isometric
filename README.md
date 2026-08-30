@@ -15,18 +15,25 @@ The project is intentionally split so the **game and editor reuse the same engin
 1. Download or clone the repository.
 2. Extract it if you downloaded a ZIP.
 3. Double-click **`start.bat`**.
-4. On first run, Corepack activates **pnpm 10.34.5** and dependencies are installed automatically.
-5. The game opens at `http://localhost:5173/`.
+4. The starter checks Node.js/npm, downloads the project-pinned **pnpm 10.34.5** into the current user's npm cache using `npx`, and installs all project dependencies automatically.
+5. No Administrator permission and no global pnpm installation are required.
+6. The game opens at `http://localhost:5173/`.
+
+On the first run, internet access is required to download pnpm and the JavaScript dependencies. Later runs reuse the local npm/pnpm caches and only synchronize dependency changes.
 
 The editor is available at `http://localhost:5173/editor.html` or through the **Editor** button in the game header.
 
+### Why the starter does not use `corepack enable`
+
+`corepack enable` tries to create command shims such as `pnpm.CMD` beside the Node.js installation. On Windows installations under `C:\Program Files\nodejs`, a normal user may receive an `EPERM: operation not permitted` error. `start.bat` therefore runs the pinned pnpm through `npx`, which writes only to the user's npm cache and the project directory.
+
 ## Manual run
 
+Windows/Linux/macOS users can also run:
+
 ```bash
-corepack enable
-corepack prepare pnpm@10.34.5 --activate
-pnpm install --no-frozen-lockfile
-pnpm run dev
+npx --yes pnpm@10.34.5 install --frozen-lockfile
+npx --yes pnpm@10.34.5 run dev
 ```
 
 ## Foundation v0.1
@@ -57,11 +64,12 @@ pnpm run dev
 - pnpm 10.34.5 is the project package manager.
 - Engineering rules recorded in `AGENTS.md`.
 - Architecture notes in `docs/ARCHITECTURE.md`.
+- Initial KayKit asset packs recorded in `docs/ASSETS.md`.
 
 ## Validation
 
 ```bash
-pnpm run ci
+npx --yes pnpm@10.34.5 run ci
 ```
 
 ## Next milestones
