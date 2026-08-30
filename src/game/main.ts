@@ -26,112 +26,64 @@ async function resolveWorld(playtest: boolean): Promise<WorldDocument> {
   if (playtest) { const session = readPlaytestWorld(); if (session) return session; }
   const database = new WorldDatabase(); const currentId = await database.getCurrentId();
   if (currentId) { const current = await database.get(currentId); if (current) return current; }
-  const first = (await database.list())[0];
-  if (first) { const world = await database.get(first.id); if (world) return world; }
+  const first = (await database.list())[0]; if (first) { const world = await database.get(first.id); if (world) return world; }
   return createWorldDocument('Mapa vazio');
 }
 
 function attackClipForState(preset: CharacterPreset, state: CombatState): string {
-  if (state === 'attack-1') return preset.combat.clips.attack1;
-  if (state === 'attack-2') return preset.combat.clips.attack2;
-  if (state === 'attack-3') return preset.combat.clips.attack3;
-  return '';
+  if (state === 'attack-1') return preset.combat.clips.attack1; if (state === 'attack-2') return preset.combat.clips.attack2; if (state === 'attack-3') return preset.combat.clips.attack3; return '';
 }
 
 function stateLabel(state: CombatState): string {
-  if (state === 'attack-1') return 'Combo 1';
-  if (state === 'attack-2') return 'Combo 2';
-  if (state === 'attack-3') return 'Combo 3';
-  if (state === 'block') return 'Defendendo';
-  if (state === 'recover') return 'Recuperando';
-  return 'Livre';
+  if (state === 'attack-1') return 'Combo 1'; if (state === 'attack-2') return 'Combo 2'; if (state === 'attack-3') return 'Combo 3'; if (state === 'block') return 'Defendendo'; if (state === 'recover') return 'Recuperando'; return 'Livre';
 }
 
 async function bootstrap(): Promise<void> {
-  const root = globalThis.document.querySelector<HTMLElement>('#app');
-  if (!root) throw new Error('App root not found.');
-  const playtest = new URLSearchParams(window.location.search).get('playtest') === '1';
-  const worldDocument = await resolveWorld(playtest);
-  const characterDatabase = new CharacterDatabase();
-  const activeCharacter = await characterDatabase.getActive();
+  const root = globalThis.document.querySelector<HTMLElement>('#app'); if (!root) throw new Error('App root not found.');
+  const playtest = new URLSearchParams(window.location.search).get('playtest') === '1'; const worldDocument = await resolveWorld(playtest);
+  const characterDatabase = new CharacterDatabase(); const activeCharacter = await characterDatabase.getActive();
   const shell = createShell(root, {
-    mode: 'game',
-    title: playtest ? `Playtest · ${worldDocument.name}` : `Ascension · ${worldDocument.name}`,
+    mode: 'game', title: playtest ? `Playtest · ${worldDocument.name}` : `Ascension · ${worldDocument.name}`,
     subtitle: activeCharacter ? `Personagem: ${activeCharacter.name} · ${activeCharacter.combat.profile}` : 'Nenhum preset ativo · usando personagem placeholder',
-    help: '<span class="key">WASD</span> move · <span class="key">Shift</span> corre · <span class="key">LMB/J</span> ataca/continua combo · <span class="key">RMB/K</span> defende · <span class="key">mouse wheel</span> zoom.',
+    help: '<span class="key">WASD</span> move · <span class="key">Shift</span> corre · <span class="key">LMB/J</span> ataca · <span class="key">RMB/K</span> defende · terreno e colisões vêm do World Editor.',
   });
   const engine = new Engine(shell.canvas);
   const environment = new WorldEnvironment(engine.scene, worldDocument, false);
-  const runtime = new WorldRuntime(engine.scene, { onAssetError: (message) => console.warn(message) });
+  const runtime = new WorldRuntime(engine.scene, { onAssetError: (message) => console.warn(message), heightAt: (x, z) => environment.terrainHeight(x, z) });
   await runtime.build(worldDocument);
 
-  let characterActor: CharacterActor | null = null;
-  let fallbackPlayer: THREE.Group | null = null;
-  let player: THREE.Object3D;
-  if (activeCharacter?.base) {
-    characterActor = new CharacterActor({ onWarning: (message) => console.warn(message) });
-    await characterActor.build(activeCharacter);
-    player = characterActor.root;
-  } else {
-    fallbackPlayer = createFallbackPlayer();
-    player = fallbackPlayer;
-  }
-  player.position.set(worldDocument.spawn.x, worldDocument.spawn.y, worldDocument.spawn.z);
-  engine.scene.add(player);
-  const playerController = new PlayerController(player);
-  const combat = new CombatStateMachine();
-  const combatHud = document.createElement('div');
-  combatHud.className = 'combat-hud';
-  root.append(combatHud);
-  engine.camera.setTarget(player.position);
-  shell.canvas.addEventListener('wheel', (event) => { event.preventDefault(); engine.camera.zoomByWheel(event.deltaY); }, { passive: false });
+  let characterActor: CharacterActor | null = null; let fallbackPlayer: THREE.Group | null = null; let player: THREE.Object3D;
+  if (activeCharacter?.base) { characterActor = new CharacterActor({ onWarning: (message) => console.warn(message) }); await characterActor.build(activeCharacter); player = characterActor.root; }
+  else { fallbackPlayer = createFallbackPlayer(); player = fallbackPlayer; }
+  const spawnY = environment.terrainHeight(worldDocument.spawn.x, worldDocument.spawn.z);
+  player.position.set(worldDocument.spawn.x, spawnY, worldDocument.spawn.z); engine.scene.add(player);
+  const playerController = new PlayerController(player, { document: worldDocument, heightAt: (x, z) => environment.terrainHeight(x, z) });
+  const combat = new CombatStateMachine(); const combatHud = document.createElement('div'); combatHud.className = 'combat-hud'; root.append(combatHud);
+  engine.camera.setTarget(player.position); shell.canvas.addEventListener('wheel', (event) => { event.preventDefault(); engine.camera.zoomByWheel(event.deltaY); }, { passive: false });
 
   const durations: CombatAttackDurations = activeCharacter && characterActor ? {
-    attack1: characterActor.clipDuration(activeCharacter.combat.clips.attack1),
-    attack2: characterActor.clipDuration(activeCharacter.combat.clips.attack2),
-    attack3: characterActor.clipDuration(activeCharacter.combat.clips.attack3),
+    attack1: characterActor.clipDuration(activeCharacter.combat.clips.attack1), attack2: characterActor.clipDuration(activeCharacter.combat.clips.attack2), attack3: characterActor.clipDuration(activeCharacter.combat.clips.attack3),
   } : { attack1: 0, attack2: 0, attack3: 0 };
 
   engine.start(({ delta, elapsed }) => {
     const motion = playerController.update(delta, combat.movementMultiplier);
-    const frame = combat.update(delta, {
-      attackPressed: playerController.consumeAttackPressed(),
-      blockHeld: playerController.isBlockHeld,
-      moved: motion.moved,
-      sprinting: motion.sprinting,
-    }, durations);
+    const frame = combat.update(delta, { attackPressed: playerController.consumeAttackPressed(), blockHeld: playerController.isBlockHeld, moved: motion.moved, sprinting: motion.sprinting }, durations);
     if (motion.moved) engine.camera.setTarget(player.position);
-
     if (characterActor && activeCharacter) {
       if (frame.changed) {
         const attackClip = attackClipForState(activeCharacter, frame.state);
         if (attackClip) characterActor.playOneShot(attackClip, 0.08);
-        else if (frame.state === 'block') {
-          if (!characterActor.playClip(activeCharacter.combat.clips.block, 0.08)) characterActor.setMotion('idle', 0.08);
-        } else if (frame.state === 'recover') characterActor.setMotion('idle', 0.1);
+        else if (frame.state === 'block') { if (!characterActor.playClip(activeCharacter.combat.clips.block, 0.08)) characterActor.setMotion('idle', 0.08); }
+        else if (frame.state === 'recover') characterActor.setMotion('idle', 0.1);
       }
-      if (frame.state === 'locomotion') characterActor.setMotion(motion.sprinting ? 'run' : motion.moved ? 'walk' : 'idle');
-      characterActor.update(delta);
+      if (frame.state === 'locomotion') characterActor.setMotion(motion.sprinting ? 'run' : motion.moved ? 'walk' : 'idle'); characterActor.update(delta);
     } else if (fallbackPlayer?.children[0]) fallbackPlayer.children[0].position.y = 1.08 + Math.sin(elapsed * 3.5) * 0.025;
-
-    const profile = activeCharacter?.combat.profile ?? 'placeholder';
-    combatHud.innerHTML = `<strong>${stateLabel(frame.state)}</strong><span>${profile} · movimento ${Math.round(frame.movementMultiplier * 100)}%</span>`;
-    combatHud.dataset.state = frame.state;
+    const profile = activeCharacter?.combat.profile ?? 'placeholder'; combatHud.innerHTML = `<strong>${stateLabel(frame.state)}</strong><span>${profile} · movimento ${Math.round(frame.movementMultiplier * 100)}%</span>`; combatHud.dataset.state = frame.state;
   });
 
-  window.addEventListener('beforeunload', () => {
-    playerController.dispose();
-    characterActor?.dispose();
-    runtime.dispose();
-    environment.dispose();
-    combatHud.remove();
-    engine.dispose();
-    shell.dispose();
-  });
+  window.addEventListener('beforeunload', () => { playerController.dispose(); characterActor?.dispose(); runtime.dispose(); environment.dispose(); combatHud.remove(); engine.dispose(); shell.dispose(); });
 }
 
 void bootstrap().catch((error: unknown) => {
-  console.error(error);
-  const root = globalThis.document.querySelector<HTMLElement>('#app');
-  if (root) root.innerHTML = `<main style="padding:24px;color:#fff;background:#111;min-height:100vh">Falha ao abrir mapa/personagem: ${error instanceof Error ? error.message : String(error)}</main>`;
+  console.error(error); const root = globalThis.document.querySelector<HTMLElement>('#app'); if (root) root.innerHTML = `<main style="padding:24px;color:#fff;background:#111;min-height:100vh">Falha ao abrir mapa/personagem: ${error instanceof Error ? error.message : String(error)}</main>`;
 });
