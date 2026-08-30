@@ -1,4 +1,4 @@
-export type AssetFormat = 'glb' | 'gltf';
+export type AssetFormat = 'glb' | 'gltf' | 'fbx';
 
 export type AssetCategory =
   | 'characters'
@@ -8,6 +8,7 @@ export type AssetCategory =
   | 'resources'
   | 'tools'
   | 'monsters'
+  | 'animations'
   | 'props'
   | 'uncategorized';
 
@@ -19,17 +20,22 @@ export interface StoredAssetFile {
   blob: Blob;
 }
 
-export interface AssetRecord {
-  id: string;
+export interface AssetDraft {
   name: string;
   format: AssetFormat;
   category: AssetCategory;
   entryFile: string;
   files: StoredAssetFile[];
-  thumbnail: string;
-  animations: string[];
   source: string;
   license: string;
+  sourcePackId?: string;
+  sourceArchive?: string;
+}
+
+export interface AssetRecord extends AssetDraft {
+  id: string;
+  thumbnail: string;
+  animations: string[];
   createdAt: number;
 }
 

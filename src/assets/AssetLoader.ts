@@ -1,12 +1,21 @@
 import * as THREE from 'three';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
-import { normalizedFileKey } from './assetUtils';
+import { assetFileAliases, normalizeArchivePath, normalizedFileKey } from './assetUtils';
 import type { AssetRecord } from './types';
 
 export interface LoadedAsset {
   scene: THREE.Group;
   animations: THREE.AnimationClip[];
+}
+
+function prepareObject(object: THREE.Object3D): void {
+  object.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) return;
+    child.castShadow = true;
+    child.receiveShadow = true;
+  });
 }
 
 export async function loadStoredAsset(asset: AssetRecord): Promise<LoadedAsset> {
@@ -15,32 +24,40 @@ export async function loadStoredAsset(asset: AssetRecord): Promise<LoadedAsset> 
 
   for (const file of asset.files) {
     const objectUrl = URL.createObjectURL(file.blob);
-    objectUrls.set(normalizedFileKey(file.name), objectUrl);
-    objectUrls.set(normalizedFileKey(file.relativePath), objectUrl);
+    for (const alias of assetFileAliases(file.name)) objectUrls.set(alias, objectUrl);
+    objectUrls.set(normalizeArchivePath(file.relativePath).toLowerCase(), objectUrl);
   }
 
   manager.setURLModifier((url) => {
-    const cleanUrl = decodeURIComponent(url.split('?')[0] ?? url);
-    return objectUrls.get(normalizedFileKey(cleanUrl)) ?? url;
+    const cleanUrl = decodeURIComponent(url.split('?')[0] ?? url).replace(/^blob:[^/]+\//, '');
+    const archiveKey = normalizeArchivePath(cleanUrl).toLowerCase();
+    return objectUrls.get(archiveKey) ?? objectUrls.get(normalizedFileKey(cleanUrl)) ?? url;
   });
 
-  const loader = new GLTFLoader(manager);
-  const entry = asset.files.find((file) => file.name === asset.entryFile || file.relativePath === asset.entryFile);
+  const entry = asset.files.find((file) =>
+    file.name === asset.entryFile ||
+    file.relativePath === asset.entryFile ||
+    normalizeArchivePath(file.relativePath) === normalizeArchivePath(asset.entryFile),
+  );
   if (!entry) throw new Error(`Arquivo principal ${asset.entryFile} não encontrado.`);
 
   try {
+    if (asset.format === 'fbx') {
+      const loader = new FBXLoader(manager);
+      const group = loader.parse(await entry.blob.arrayBuffer(), '');
+      prepareObject(group);
+      return { scene: group, animations: group.animations ?? [] };
+    }
+
+    const loader = new GLTFLoader(manager);
     const payload = asset.format === 'glb' ? await entry.blob.arrayBuffer() : await entry.blob.text();
     const gltf = await new Promise<GLTF>((resolve, reject) => {
       loader.parse(payload, '', resolve, reject);
     });
-    gltf.scene.traverse((object) => {
-      if (!(object instanceof THREE.Mesh)) return;
-      object.castShadow = true;
-      object.receiveShadow = true;
-    });
+    prepareObject(gltf.scene);
     return { scene: gltf.scene, animations: gltf.animations };
   } finally {
-    for (const url of objectUrls.values()) URL.revokeObjectURL(url);
+    for (const url of new Set(objectUrls.values())) URL.revokeObjectURL(url);
   }
 }
 

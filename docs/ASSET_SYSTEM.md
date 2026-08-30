@@ -1,54 +1,60 @@
-# Asset System — Etapa 2
+# Asset System
 
-A Etapa 2 transforma o editor em uma biblioteca de conteúdo reutilizável para assets 3D.
+The Ascension editor stores reusable 3D assets independently from world placement data.
 
-## Formatos suportados
+## Supported runtime formats
 
-### GLB
-Selecione ou arraste um ou vários arquivos `.glb`. Cada GLB é tratado como um asset independente.
+- GLB
+- GLTF + BIN + referenced textures
+- FBX + external/embedded textures
 
-### GLTF com arquivos externos
-Selecione o `.gltf` junto com todos os arquivos referenciados por ele, normalmente `.bin` e texturas `.png/.jpg/.webp`.
+The loader uses the same Three.js runtime for editor preview and world placement.
 
-O importador lê `buffers[].uri` e `images[].uri` do GLTF, valida se todos os arquivos necessários foram fornecidos e mostra uma mensagem específica caso algo esteja ausente.
+## Loose-file import
 
-## Persistência local
+Use **+ Importar modelo** for individual GLB files, GLTF bundles selected with their dependencies, or FBX files selected with their textures.
 
-Assets importados são armazenados em IndexedDB no navegador. Isso permite recarregar o editor e continuar usando a biblioteca sem importar novamente.
+## ZIP package import
 
-O identificador do asset usa SHA-256 do arquivo principal no formato `user/<sha256>`, preparando a futura sincronização com servidor sem depender do nome do arquivo.
+Use **Importar ZIP** for complete downloaded asset packs.
 
-## Asset Browser
+The ZIP Package Inspector:
+- extracts the archive temporarily in memory;
+- identifies GLB, GLTF and FBX models;
+- resolves GLTF dependency paths inside the archive;
+- handles known duplicated image-extension aliases used by some exported GLTF files;
+- hides lower-priority FBX/OBJ duplicates when GLB/GLTF exists;
+- provides a searchable list on the left;
+- provides an interactive 3D viewer on the right;
+- supports individual checkbox selection;
+- supports Select All, Clear Selection, Import Selected and Import All;
+- persists only confirmed models.
 
-O dock inferior do editor oferece:
+See `docs/ZIP_IMPORTER.md`.
 
-- importação por botão ou drag-and-drop;
-- busca por nome/origem/categoria;
-- filtros por categoria;
-- thumbnail WebP gerada no navegador;
-- preview 3D separado;
-- reprodução automática da primeira animação disponível no preview;
-- metadata de formato, origem, licença, arquivos e animações;
-- exclusão da biblioteca local;
-- modo `Colocar no mapa`.
+## Persistence
 
-## Colocação no mapa
+Imported assets are stored in IndexedDB using `user/<sha256>` identity. Records preserve:
+- source archive;
+- official source pack id when recognized;
+- author/source;
+- license;
+- category;
+- entry model;
+- required supporting files;
+- thumbnail;
+- animation clip names.
 
-Ao clicar em `Colocar no mapa`, o editor carrega o modelo e mostra um ghost transparente sobre o plano do mundo.
+## Preview
 
-- mouse move: posiciona o ghost;
-- snap atual: 0,5 unidade;
-- clique esquerdo: cria uma instância real;
-- `Esc`: cancela o modo de colocação.
+The 3D preview supports:
+- drag to orbit;
+- mouse wheel zoom;
+- automatic slow orbit after idle;
+- automatic playback of the first detected animation.
 
-Transform gizmos, seleção, edição de rotação/escala e persistência das instâncias entram na etapa seguinte.
+## World placement
 
-## KayKit
+The existing placement tool loads the same persisted asset record. Models can be placed with a transparent ghost and 0.5-unit snap.
 
-Os oito packs enviados inicialmente ficam registrados em `officialPacks.ts`. O importador reconhece caminhos/nome KayKit e marca a origem/licença como CC0 quando consegue identificar o pack.
-
-Prioridade de runtime:
-
-1. GLB para personagens e arquivos autocontidos;
-2. GLTF + BIN + texturas para cenários/props;
-3. FBX/OBJ permanecem como formatos-fonte e não são carregados diretamente no navegador nesta etapa.
+Entity selection, transform gizmos and WorldDocument persistence are the next editor milestone.

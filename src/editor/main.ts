@@ -1,5 +1,6 @@
 import '../styles.css';
 import './editor.css';
+import './zip-import.css';
 import { AssetBrowser } from './AssetBrowser';
 import { EditorAssetPlacement } from './EditorAssetPlacement';
 import { Engine } from '../engine/Engine';
@@ -17,7 +18,7 @@ root.innerHTML = `
           <div class="brand-mark">A</div>
           <div class="brand-copy">
             <h1 class="brand-title">Ascension World Editor</h1>
-            <p class="brand-subtitle">Etapa 2 · Asset System</p>
+            <p class="brand-subtitle">v0.2.1 · Quaternius art direction · ZIP Package Inspector</p>
           </div>
         </div>
         <div class="editor-top-actions">
