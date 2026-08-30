@@ -2,7 +2,12 @@ import * as THREE from 'three';
 import { AssetDatabase } from '../assets/AssetDatabase';
 import { loadStoredAsset } from '../assets/AssetLoader';
 import type { AssetRecord } from '../assets/types';
-import type { CharacterAssetRef, CharacterPreset } from './CharacterPreset';
+import type {
+  CharacterAssetRef,
+  CharacterEquipmentAttachment,
+  CharacterEquipmentSlot,
+  CharacterPreset,
+} from './CharacterPreset';
 
 export type CharacterMotion = 'idle' | 'walk' | 'run';
 export interface CharacterActorOptions { onWarning?(message: string): void; }
@@ -11,6 +16,14 @@ interface LoadedVisual { root: THREE.Object3D; asset: AssetRecord; }
 function hasBone(root: THREE.Object3D): boolean {
   let found = false;
   root.traverse((child) => { if (child instanceof THREE.Bone) found = true; });
+  return found;
+}
+
+function findBone(root: THREE.Object3D, name: string): THREE.Bone | null {
+  let found: THREE.Bone | null = null;
+  root.traverse((child) => {
+    if (!found && child instanceof THREE.Bone && child.name === name) found = child;
+  });
   return found;
 }
 
@@ -69,6 +82,25 @@ function hasClothing(preset: CharacterPreset): boolean {
   return Boolean(preset.visuals.outfit || preset.visuals.body || preset.visuals.arms || preset.visuals.legs || preset.visuals.feet || preset.visuals.headgear || preset.visuals.accessory);
 }
 
+function configureShadows(root: THREE.Object3D): void {
+  root.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+}
+
+function applyAttachmentTransform(root: THREE.Object3D, attachment: CharacterEquipmentAttachment): void {
+  root.position.set(attachment.transform.position.x, attachment.transform.position.y, attachment.transform.position.z);
+  root.rotation.set(
+    THREE.MathUtils.degToRad(attachment.transform.rotationDegrees.x),
+    THREE.MathUtils.degToRad(attachment.transform.rotationDegrees.y),
+    THREE.MathUtils.degToRad(attachment.transform.rotationDegrees.z),
+  );
+  root.scale.set(attachment.transform.scale.x, attachment.transform.scale.y, attachment.transform.scale.z);
+}
+
 export class CharacterActor {
   readonly root = new THREE.Group();
   private readonly database = new AssetDatabase();
@@ -93,6 +125,7 @@ export class CharacterActor {
       try {
         const loaded = await loadStoredAsset(asset);
         loaded.scene.name = asset.name;
+        configureShadows(loaded.scene);
         loadedVisuals.push({ root: loaded.scene, asset });
       } catch (error) {
         this.options.onWarning?.(`Falha ao carregar ${asset.name}: ${error instanceof Error ? error.message : String(error)}`);
@@ -106,6 +139,11 @@ export class CharacterActor {
     visualRoot.updateMatrixWorld(true);
     const bounds = new THREE.Box3().setFromObject(visualRoot);
     if (!bounds.isEmpty()) visualRoot.position.y -= bounds.min.y;
+
+    const baseVisual = loadedVisuals.find((entry) => entry.asset.id === preset.base?.assetId);
+    const rigRoot = baseVisual?.root ?? loadedVisuals.find((entry) => hasBone(entry.root))?.root;
+    if (rigRoot) await this.attachEquipment(preset, rigRoot);
+    else if (Object.keys(preset.equipment).length > 0) this.options.onWarning?.('Não foi possível localizar um rig para anexar equipamentos.');
 
     for (const libraryRef of preset.animationLibraries) {
       const asset = await this.database.get(libraryRef.assetId);
@@ -129,24 +167,74 @@ export class CharacterActor {
   }
 
   playClip(name: string, fadeSeconds = 0.18): boolean {
-    if (!name || this.currentClipName === name) return Boolean(this.clips.get(name));
+    return this.startClip(name, fadeSeconds, false) > 0;
+  }
+
+  playOneShot(name: string, fadeSeconds = 0.08): number {
+    return this.startClip(name, fadeSeconds, true);
+  }
+
+  clipDuration(name: string): number {
+    return this.clips.get(name)?.duration ?? 0;
+  }
+
+  update(delta: number): void { for (const mixer of this.mixers) mixer.update(delta); }
+  dispose(): void { this.clear(); }
+
+  private startClip(name: string, fadeSeconds: number, oneShot: boolean): number {
+    if (!name) return 0;
     const clip = this.clips.get(name);
-    if (!clip) return false;
+    if (!clip) return 0;
+    if (!oneShot && this.currentClipName === name) return clip.duration;
     for (const action of this.currentActions) fadeSeconds > 0 ? action.fadeOut(fadeSeconds) : action.stop();
     this.currentActions.length = 0;
     for (const mixer of this.mixers) {
       const action = mixer.clipAction(clip);
-      action.reset(); action.enabled = true; action.setEffectiveTimeScale(1); action.setEffectiveWeight(1);
+      action.reset();
+      action.enabled = true;
+      action.setEffectiveTimeScale(1);
+      action.setEffectiveWeight(1);
+      if (oneShot) {
+        action.setLoop(THREE.LoopOnce, 1);
+        action.clampWhenFinished = true;
+      } else {
+        action.setLoop(THREE.LoopRepeat, Infinity);
+        action.clampWhenFinished = false;
+      }
       if (fadeSeconds > 0) action.fadeIn(fadeSeconds);
       action.play();
       this.currentActions.push(action);
     }
     this.currentClipName = name;
-    return this.currentActions.length > 0;
+    return this.currentActions.length > 0 ? clip.duration : 0;
   }
 
-  update(delta: number): void { for (const mixer of this.mixers) mixer.update(delta); }
-  dispose(): void { this.clear(); }
+  private async attachEquipment(preset: CharacterPreset, rigRoot: THREE.Object3D): Promise<void> {
+    for (const slot of ['mainHand', 'offHand', 'back'] as const satisfies readonly CharacterEquipmentSlot[]) {
+      const attachment = preset.equipment[slot];
+      if (!attachment) continue;
+      const socket = findBone(rigRoot, attachment.socket);
+      if (!socket) {
+        this.options.onWarning?.(`Socket ${attachment.socket} não encontrado para ${attachment.asset.assetName}.`);
+        continue;
+      }
+      const asset = await this.database.get(attachment.asset.assetId);
+      if (!asset) {
+        this.options.onWarning?.(`Equipamento ausente: ${attachment.asset.assetName}.`);
+        continue;
+      }
+      try {
+        const loaded = await loadStoredAsset(asset);
+        const equipmentRoot = loaded.scene;
+        equipmentRoot.name = `${slot}: ${asset.name}`;
+        configureShadows(equipmentRoot);
+        applyAttachmentTransform(equipmentRoot, attachment);
+        socket.add(equipmentRoot);
+      } catch (error) {
+        this.options.onWarning?.(`Falha ao carregar equipamento ${asset.name}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+  }
 
   private clear(): void {
     for (const action of this.currentActions) action.stop();

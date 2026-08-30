@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import '../styles.css';
+import './combat.css';
 import { CharacterActor } from '../character/CharacterActor';
+import { CombatStateMachine, type CombatAttackDurations, type CombatState } from '../character/CombatStateMachine';
 import { CharacterDatabase } from '../character/CharacterDatabase';
+import type { CharacterPreset } from '../character/CharacterPreset';
 import { Engine } from '../engine/Engine';
 import { createShell } from '../ui/createShell';
 import { WorldDatabase } from '../world/WorldDatabase';
@@ -28,6 +31,22 @@ async function resolveWorld(playtest: boolean): Promise<WorldDocument> {
   return createWorldDocument('Mapa vazio');
 }
 
+function attackClipForState(preset: CharacterPreset, state: CombatState): string {
+  if (state === 'attack-1') return preset.combat.clips.attack1;
+  if (state === 'attack-2') return preset.combat.clips.attack2;
+  if (state === 'attack-3') return preset.combat.clips.attack3;
+  return '';
+}
+
+function stateLabel(state: CombatState): string {
+  if (state === 'attack-1') return 'Combo 1';
+  if (state === 'attack-2') return 'Combo 2';
+  if (state === 'attack-3') return 'Combo 3';
+  if (state === 'block') return 'Defendendo';
+  if (state === 'recover') return 'Recuperando';
+  return 'Livre';
+}
+
 async function bootstrap(): Promise<void> {
   const root = globalThis.document.querySelector<HTMLElement>('#app');
   if (!root) throw new Error('App root not found.');
@@ -38,8 +57,8 @@ async function bootstrap(): Promise<void> {
   const shell = createShell(root, {
     mode: 'game',
     title: playtest ? `Playtest · ${worldDocument.name}` : `Ascension · ${worldDocument.name}`,
-    subtitle: activeCharacter ? `Personagem: ${activeCharacter.name} · Universal Character Rig` : 'Nenhum preset ativo · usando personagem placeholder',
-    help: '<span class="key">WASD</span> move · <span class="key">Shift</span> corre · <span class="key">mouse wheel</span> zoom · personagem e mundo vêm dos mesmos dados do editor.',
+    subtitle: activeCharacter ? `Personagem: ${activeCharacter.name} · ${activeCharacter.combat.profile}` : 'Nenhum preset ativo · usando personagem placeholder',
+    help: '<span class="key">WASD</span> move · <span class="key">Shift</span> corre · <span class="key">LMB/J</span> ataca/continua combo · <span class="key">RMB/K</span> defende · <span class="key">mouse wheel</span> zoom.',
   });
   const engine = new Engine(shell.canvas);
   const environment = new WorldEnvironment(engine.scene, worldDocument, false);
@@ -60,15 +79,55 @@ async function bootstrap(): Promise<void> {
   player.position.set(worldDocument.spawn.x, worldDocument.spawn.y, worldDocument.spawn.z);
   engine.scene.add(player);
   const playerController = new PlayerController(player);
+  const combat = new CombatStateMachine();
+  const combatHud = document.createElement('div');
+  combatHud.className = 'combat-hud';
+  root.append(combatHud);
   engine.camera.setTarget(player.position);
   shell.canvas.addEventListener('wheel', (event) => { event.preventDefault(); engine.camera.zoomByWheel(event.deltaY); }, { passive: false });
+
+  const durations: CombatAttackDurations = activeCharacter && characterActor ? {
+    attack1: characterActor.clipDuration(activeCharacter.combat.clips.attack1),
+    attack2: characterActor.clipDuration(activeCharacter.combat.clips.attack2),
+    attack3: characterActor.clipDuration(activeCharacter.combat.clips.attack3),
+  } : { attack1: 0, attack2: 0, attack3: 0 };
+
   engine.start(({ delta, elapsed }) => {
-    const motion = playerController.update(delta);
+    const motion = playerController.update(delta, combat.movementMultiplier);
+    const frame = combat.update(delta, {
+      attackPressed: playerController.consumeAttackPressed(),
+      blockHeld: playerController.isBlockHeld,
+      moved: motion.moved,
+      sprinting: motion.sprinting,
+    }, durations);
     if (motion.moved) engine.camera.setTarget(player.position);
-    if (characterActor) { characterActor.setMotion(motion.sprinting ? 'run' : motion.moved ? 'walk' : 'idle'); characterActor.update(delta); }
-    else if (fallbackPlayer?.children[0]) fallbackPlayer.children[0].position.y = 1.08 + Math.sin(elapsed * 3.5) * 0.025;
+
+    if (characterActor && activeCharacter) {
+      if (frame.changed) {
+        const attackClip = attackClipForState(activeCharacter, frame.state);
+        if (attackClip) characterActor.playOneShot(attackClip, 0.08);
+        else if (frame.state === 'block') {
+          if (!characterActor.playClip(activeCharacter.combat.clips.block, 0.08)) characterActor.setMotion('idle', 0.08);
+        } else if (frame.state === 'recover') characterActor.setMotion('idle', 0.1);
+      }
+      if (frame.state === 'locomotion') characterActor.setMotion(motion.sprinting ? 'run' : motion.moved ? 'walk' : 'idle');
+      characterActor.update(delta);
+    } else if (fallbackPlayer?.children[0]) fallbackPlayer.children[0].position.y = 1.08 + Math.sin(elapsed * 3.5) * 0.025;
+
+    const profile = activeCharacter?.combat.profile ?? 'placeholder';
+    combatHud.innerHTML = `<strong>${stateLabel(frame.state)}</strong><span>${profile} · movimento ${Math.round(frame.movementMultiplier * 100)}%</span>`;
+    combatHud.dataset.state = frame.state;
   });
-  window.addEventListener('beforeunload', () => { playerController.dispose(); characterActor?.dispose(); runtime.dispose(); environment.dispose(); engine.dispose(); shell.dispose(); });
+
+  window.addEventListener('beforeunload', () => {
+    playerController.dispose();
+    characterActor?.dispose();
+    runtime.dispose();
+    environment.dispose();
+    combatHud.remove();
+    engine.dispose();
+    shell.dispose();
+  });
 }
 
 void bootstrap().catch((error: unknown) => {
