@@ -2,11 +2,13 @@ import { AssetDatabase } from '../assets/AssetDatabase';
 import { AssetImporter } from '../assets/AssetImporter';
 import type { AssetCategory, AssetRecord } from '../assets/types';
 import { AssetPreview } from './AssetPreview';
+import { ZipImportDialog } from './ZipImportDialog';
 
 const CATEGORIES: Array<{ value: 'all' | AssetCategory; label: string }> = [
   { value: 'all', label: 'Todas as categorias' },
   { value: 'characters', label: 'Personagens' },
   { value: 'monsters', label: 'Monstros' },
+  { value: 'animations', label: 'Animações' },
   { value: 'nature', label: 'Natureza' },
   { value: 'buildings', label: 'Construções' },
   { value: 'weapons', label: 'Armas' },
@@ -37,12 +39,14 @@ export class AssetBrowser {
   private readonly database = new AssetDatabase();
   private readonly importer = new AssetImporter(this.database);
   private readonly input: HTMLInputElement;
+  private readonly zipInput: HTMLInputElement;
   private readonly grid: HTMLElement;
   private readonly search: HTMLInputElement;
   private readonly category: HTMLSelectElement;
   private readonly counter: HTMLElement;
   private readonly detail: HTMLElement;
   private readonly preview: AssetPreview;
+  private readonly zipDialog: ZipImportDialog;
   private assets: AssetRecord[] = [];
   private selected: AssetRecord | null = null;
 
@@ -52,14 +56,17 @@ export class AssetBrowser {
         <div>
           <strong>Asset Browser</strong>
           <span class="asset-counter">0 assets</span>
+          <span class="art-direction-badge">Quaternius primary</span>
         </div>
         <div class="asset-browser-filters">
           <input class="asset-search" type="search" placeholder="Buscar assets..." aria-label="Buscar assets">
           <select class="asset-category" aria-label="Filtrar categoria">
             ${CATEGORIES.map((entry) => `<option value="${entry.value}">${entry.label}</option>`).join('')}
           </select>
-          <button class="editor-button primary asset-import" type="button">+ Importar asset</button>
-          <input class="asset-file-input" type="file" multiple accept=".glb,.gltf,.bin,.png,.jpg,.jpeg,.webp" hidden>
+          <button class="editor-button asset-import-zip" type="button">Importar ZIP</button>
+          <button class="editor-button primary asset-import" type="button">+ Importar modelo</button>
+          <input class="asset-file-input" type="file" multiple accept=".glb,.gltf,.fbx,.bin,.png,.jpg,.jpeg,.webp,.tga,.bmp" hidden>
+          <input class="asset-zip-input" type="file" accept=".zip,application/zip" hidden>
         </div>
       </div>
       <div class="asset-browser-body">
@@ -69,18 +76,31 @@ export class AssetBrowser {
           <div class="asset-detail-content"><p class="asset-empty">Selecione um asset para visualizar.</p></div>
         </aside>
       </div>
-      <div class="asset-drop-overlay"><strong>Solte os arquivos aqui</strong><span>GLB ou GLTF + BIN + texturas</span></div>`;
+      <div class="asset-drop-overlay">
+        <strong>Solte assets ou um pacote ZIP aqui</strong>
+        <span>ZIP · GLB · GLTF + BIN/texturas · FBX + texturas</span>
+      </div>`;
 
     this.input = this.required<HTMLInputElement>('.asset-file-input');
+    this.zipInput = this.required<HTMLInputElement>('.asset-zip-input');
     this.grid = this.required<HTMLElement>('.asset-grid');
     this.search = this.required<HTMLInputElement>('.asset-search');
     this.category = this.required<HTMLSelectElement>('.asset-category');
     this.counter = this.required<HTMLElement>('.asset-counter');
     this.detail = this.required<HTMLElement>('.asset-detail-content');
     this.preview = new AssetPreview(this.required<HTMLCanvasElement>('.asset-preview'));
+    this.zipDialog = new ZipImportDialog({
+      importer: this.importer,
+      onStatus: options.onStatus,
+      onImported: async (assets) => {
+        await this.refresh(assets[0]?.id);
+      },
+    });
 
     this.required<HTMLButtonElement>('.asset-import').addEventListener('click', this.openPicker);
+    this.required<HTMLButtonElement>('.asset-import-zip').addEventListener('click', this.openZipPicker);
     this.input.addEventListener('change', this.handleInput);
+    this.zipInput.addEventListener('change', this.handleZipInput);
     this.search.addEventListener('input', this.render);
     this.category.addEventListener('change', this.render);
     options.dropTarget.addEventListener('dragenter', this.handleDragEnter);
@@ -95,6 +115,7 @@ export class AssetBrowser {
 
   dispose(): void {
     this.preview.dispose();
+    this.zipDialog.dispose();
     this.options.dropTarget.removeEventListener('dragenter', this.handleDragEnter);
     this.options.dropTarget.removeEventListener('dragover', this.handleDragOver);
     this.options.dropTarget.removeEventListener('dragleave', this.handleDragLeave);
@@ -118,13 +139,17 @@ export class AssetBrowser {
     const query = this.search.value.trim().toLowerCase();
     const category = this.category.value;
     const filtered = this.assets.filter((asset) => {
-      const matchesText = !query || `${asset.name} ${asset.source} ${asset.category}`.toLowerCase().includes(query);
+      const matchesText = !query || `${asset.name} ${asset.source} ${asset.category} ${asset.sourceArchive ?? ''}`.toLowerCase().includes(query);
       const matchesCategory = category === 'all' || asset.category === category;
       return matchesText && matchesCategory;
     });
 
     if (filtered.length === 0) {
-      this.grid.innerHTML = `<div class="asset-grid-empty"><strong>Nenhum asset encontrado.</strong><span>Importe um .glb ou selecione .gltf + .bin + texturas juntos.</span></div>`;
+      this.grid.innerHTML = `
+        <div class="asset-grid-empty">
+          <strong>Nenhum asset encontrado.</strong>
+          <span>Use “Importar ZIP” para inspecionar um pack completo antes de adicionar modelos.</span>
+        </div>`;
       return;
     }
 
@@ -153,6 +178,7 @@ export class AssetBrowser {
         <div><dt>Categoria</dt><dd>${asset.category}</dd></div>
         <div><dt>Origem</dt><dd>${escapeHtml(asset.source)}</dd></div>
         <div><dt>Licença</dt><dd>${escapeHtml(asset.license)}</dd></div>
+        <div><dt>Pacote</dt><dd>${escapeHtml(asset.sourceArchive ?? 'Importação avulsa')}</dd></div>
         <div><dt>Arquivos</dt><dd>${asset.files.length}</dd></div>
         <div><dt>Animações</dt><dd>${asset.animations.length}</dd></div>
       </dl>
@@ -177,7 +203,7 @@ export class AssetBrowser {
     this.render();
   }
 
-  private async import(files: FileList | File[]): Promise<void> {
+  private async importLoose(files: File[]): Promise<void> {
     if (files.length === 0) return;
     this.options.onStatus(`Importando ${files.length} arquivo(s)...`);
     const result = await this.importer.importFiles(files);
@@ -188,6 +214,16 @@ export class AssetBrowser {
     if (result.failures.length > 0) {
       const details = result.failures.map((failure) => `${failure.file}: ${failure.reason}`).join(' | ');
       this.options.onStatus(details, 'error');
+    }
+  }
+
+  private async handleFiles(files: File[]): Promise<void> {
+    const zipFiles = files.filter((file) => /\.zip$/i.test(file.name));
+    const looseFiles = files.filter((file) => !/\.zip$/i.test(file.name));
+    if (looseFiles.length > 0) await this.importLoose(looseFiles);
+    if (zipFiles.length > 0) await this.zipDialog.open(zipFiles[0]!);
+    if (zipFiles.length > 1) {
+      this.options.onStatus('Abra um ZIP por vez para revisar e selecionar os modelos antes da importação.');
     }
   }
 
@@ -202,11 +238,18 @@ export class AssetBrowser {
   }
 
   private openPicker = (): void => this.input.click();
+  private openZipPicker = (): void => this.zipInput.click();
 
   private handleInput = (): void => {
     const files = this.input.files;
-    if (files) void this.import(files);
+    if (files) void this.handleFiles([...files]);
     this.input.value = '';
+  };
+
+  private handleZipInput = (): void => {
+    const file = this.zipInput.files?.[0];
+    if (file) void this.zipDialog.open(file);
+    this.zipInput.value = '';
   };
 
   private handleDragEnter = (event: DragEvent): void => {
@@ -228,7 +271,7 @@ export class AssetBrowser {
   private handleDrop = (event: DragEvent): void => {
     event.preventDefault();
     this.options.root.classList.remove('drag-active');
-    if (event.dataTransfer?.files) void this.import(event.dataTransfer.files);
+    if (event.dataTransfer?.files) void this.handleFiles([...event.dataTransfer.files]);
   };
 
   private required<T extends Element>(selector: string): T {
