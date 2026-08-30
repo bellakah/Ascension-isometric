@@ -2,37 +2,30 @@
 
 Browser-first 3D isometric RPG/MMO foundation built with **TypeScript + Three.js + Vite**.
 
-The project is intentionally split so the **game and editor reuse the same engine and world runtime**. The current `v0.1` foundation is the first vertical slice; the next milestones add the GLB asset pipeline and real world-editing tools.
+The project is intentionally split so the **game and editor reuse the same engine and world runtime**. The current foundation includes the first production-oriented Asset System for importing and placing real GLB/GLTF content in the editor.
 
 ## Requirements
 
 - Windows 10/11 for `start.bat` (manual commands also work on Linux/macOS)
 - Node.js **22.12.0 or newer**
 - A WebGL-capable browser
+- Internet access on the first run so project dependencies can be installed
 
 ## Run on Windows
 
 1. Download or clone the repository.
 2. Extract it if you downloaded a ZIP.
 3. Double-click **`start.bat`**.
-4. The starter checks Node.js/npm, downloads the project-pinned **pnpm 10.34.5** into the current user's npm cache using `npx`, and installs all project dependencies automatically.
-5. No Administrator permission and no global pnpm installation are required.
+4. The starter uses `npx` to run the pinned **pnpm 10.34.5** from the user cache, without requiring Administrator access or writing into `C:\Program Files\nodejs`.
+5. On first run all project dependencies are installed automatically.
 6. The game opens at `http://localhost:5173/`.
-
-On the first run, internet access is required to download pnpm and the JavaScript dependencies. Later runs reuse the local npm/pnpm caches and only synchronize dependency changes.
 
 The editor is available at `http://localhost:5173/editor.html` or through the **Editor** button in the game header.
 
-### Why the starter does not use `corepack enable`
-
-`corepack enable` tries to create command shims such as `pnpm.CMD` beside the Node.js installation. On Windows installations under `C:\Program Files\nodejs`, a normal user may receive an `EPERM: operation not permitted` error. `start.bat` therefore runs the pinned pnpm through `npx`, which writes only to the user's npm cache and the project directory.
-
 ## Manual run
 
-Windows/Linux/macOS users can also run:
-
 ```bash
-npx --yes pnpm@10.34.5 install --frozen-lockfile
+npx --yes pnpm@10.34.5 install --no-frozen-lockfile
 npx --yes pnpm@10.34.5 run dev
 ```
 
@@ -56,15 +49,32 @@ npx --yes pnpm@10.34.5 run dev
 - Q/E rotates the view by 90°.
 - Browser context menu disabled inside the viewport.
 
-### Engineering
+## Etapa 2 — Asset System
+
+- Importação `.glb`.
+- Importação `.gltf` com resolução de `.bin` e texturas externas.
+- Seleção múltipla e drag-and-drop.
+- Validação de dependências GLTF com erro específico para arquivos ausentes.
+- Persistência dos assets em IndexedDB.
+- IDs `user/<sha256>` para deduplicação e futura sincronização.
+- Thumbnail WebP gerada localmente.
+- Asset Browser com busca e categorias.
+- Preview 3D com reprodução da primeira animação disponível.
+- Metadata de origem, licença, arquivos e animações.
+- Modo de colocação no mapa com ghost, snap de 0,5 e clique para instanciar.
+- Catálogo dos primeiros oito packs KayKit CC0 enviado para o projeto.
+
+Detalhes em `docs/ASSET_SYSTEM.md` e `docs/ASSETS.md`.
+
+## Engineering
+
 - Strict TypeScript.
 - Vite multi-page build.
-- Vitest unit tests for isometric-camera and movement math.
+- Vitest unit tests for isometric-camera, movement and asset import helpers.
 - GitHub Action **Validate Ascension Isometric** runs typecheck, tests and production build.
 - pnpm 10.34.5 is the project package manager.
 - Engineering rules recorded in `AGENTS.md`.
 - Architecture notes in `docs/ARCHITECTURE.md`.
-- Initial KayKit asset packs recorded in `docs/ASSETS.md`.
 
 ## Validation
 
@@ -74,12 +84,12 @@ npx --yes pnpm@10.34.5 run ci
 
 ## Next milestones
 
-1. GLB/GLTF asset registry and drag/drop import.
-2. Asset Browser with thumbnails and metadata.
-3. Entity selection and transform gizmos.
-4. Hierarchy + Inspector.
-5. Serializable WorldDocument, save/load/autosave and undo/redo.
-6. Instant playtest using the editor's current world document.
+1. Seleção de entidades já colocadas no mundo.
+2. Gizmos profissionais de Move / Rotate / Scale.
+3. Hierarchy + Inspector.
+4. WorldDocument serializável, save/load/autosave e undo/redo.
+5. Asset defaults: escala, rotação, pivot, collider e sombras.
+6. Instant playtest usando o WorldDocument atual do editor.
 
 ## Inspiration
 
