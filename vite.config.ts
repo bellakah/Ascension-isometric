@@ -9,8 +9,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        game: resolve(__dirname, 'index.html'),
-        editor: resolve(__dirname, 'editor.html'),
+        game: resolve(process.cwd(), 'index.html'),
+        editor: resolve(process.cwd(), 'editor.html'),
       },
     },
   },
