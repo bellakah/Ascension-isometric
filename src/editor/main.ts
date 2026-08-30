@@ -2,12 +2,13 @@ import '../styles.css';
 import './editor.css';
 import './zip-import.css';
 import './world-editor.css';
+import './world-project.css';
 import { AssetBrowser } from './AssetBrowser';
 import { EditorAssetPlacement } from './EditorAssetPlacement';
 import { HierarchyPanel, InspectorPanel } from './EditorPanels';
 import { WorldEditor, type TransformMode } from './WorldEditor';
+import { WorldProjectDialog } from './WorldProjectDialog';
 import { Engine } from '../engine/Engine';
-import { createDemoWorld } from '../world/createDemoWorld';
 
 const root = document.querySelector<HTMLElement>('#app');
 if (!root) throw new Error('App root not found.');
@@ -23,17 +24,18 @@ root.innerHTML = `
             <div class="brand-mark">A</div>
             <div class="brand-copy">
               <h1 class="brand-title">Ascension World Editor</h1>
-              <p class="brand-subtitle">v0.3.0 · WorldDocument · Hierarchy · Inspector · Gizmos</p>
+              <p class="brand-subtitle">v0.4.0 · Multi-map Projects · Real Playtest</p>
             </div>
           </div>
           <div class="editor-top-actions">
+            <span class="current-map-badge" data-current-map>Mapa</span>
             <span class="editor-status" data-tone="normal">Editor pronto.</span>
             <button class="editor-button compact" type="button" data-undo title="Desfazer (Ctrl+Z)">↶</button>
             <button class="editor-button compact" type="button" data-redo title="Refazer (Ctrl+Y)">↷</button>
-            <button class="editor-button" type="button" data-save-world>Salvar JSON</button>
-            <button class="editor-button" type="button" data-load-world>Carregar</button>
+            <button class="editor-button" type="button" data-projects>Mapas</button>
+            <button class="editor-button" type="button" data-import-world>Importar JSON</button>
             <input type="file" accept=".json,application/json" data-world-file hidden>
-            <a class="editor-button primary" href="/">Jogar</a>
+            <button class="editor-button playtest" type="button" data-playtest>▶ Playtest</button>
           </div>
         </header>
         <aside class="editor-toolrail" aria-label="Ferramentas de transformação">
@@ -54,21 +56,20 @@ const assetDock = root.querySelector<HTMLElement>('.asset-dock');
 const hierarchyHost = root.querySelector<HTMLElement>('.hierarchy-host');
 const inspectorHost = root.querySelector<HTMLElement>('.inspector-host');
 const status = root.querySelector<HTMLElement>('.editor-status');
+const currentMap = root.querySelector<HTMLElement>('[data-current-map]');
 const undoButton = root.querySelector<HTMLButtonElement>('[data-undo]');
 const redoButton = root.querySelector<HTMLButtonElement>('[data-redo]');
 const worldFileInput = root.querySelector<HTMLInputElement>('[data-world-file]');
-if (!canvas || !assetDock || !hierarchyHost || !inspectorHost || !status || !undoButton || !redoButton || !worldFileInput) {
+if (!canvas || !assetDock || !hierarchyHost || !inspectorHost || !status || !currentMap || !undoButton || !redoButton || !worldFileInput) {
   throw new Error('Editor shell failed to initialize.');
 }
-const statusElement: HTMLElement = status;
 
 function setStatus(message: string, tone: 'normal' | 'success' | 'error' = 'normal'): void {
-  statusElement.textContent = message;
-  statusElement.dataset.tone = tone;
+  status.textContent = message;
+  status.dataset.tone = tone;
 }
 
 const engine = new Engine(canvas);
-createDemoWorld(engine.scene);
 engine.camera.setTarget(engine.camera.target.set(0, 0, 0));
 
 let hierarchyPanel: HierarchyPanel | null = null;
@@ -87,6 +88,8 @@ const updateModeButtons = (mode: TransformMode): void => {
 
 const worldEditor = new WorldEditor(engine, canvas, {
   onDocumentChanged: (document) => {
+    currentMap.textContent = document.name;
+    currentMap.title = `${document.name} · ${document.entities.length} entidades`;
     hierarchyPanel?.render(document, worldEditor.selectedEntityId);
     inspectorPanel?.render(worldEditor.getSelectedEntity());
     updateHistoryButtons();
@@ -117,18 +120,12 @@ inspectorPanel = new InspectorPanel({
   onFocus: () => worldEditor.focusSelected(),
 });
 
-const placement = new EditorAssetPlacement(
-  engine,
-  canvas,
-  (asset, position) => worldEditor.placeAsset(asset, position),
-  (message) => setStatus(message),
-);
+const projectDialog = new WorldProjectDialog(worldEditor);
+const placement = new EditorAssetPlacement(engine, canvas, (asset, position) => worldEditor.placeAsset(asset, position), setStatus);
 const browser = new AssetBrowser({
   root: assetDock,
   dropTarget: root,
-  onPlace: (asset) => void placement.activate(asset).catch((error: unknown) => {
-    setStatus(`Não foi possível preparar ${asset.name}: ${error instanceof Error ? error.message : String(error)}`, 'error');
-  }),
+  onPlace: (asset) => void placement.activate(asset).catch((error: unknown) => setStatus(`Não foi possível preparar ${asset.name}: ${error instanceof Error ? error.message : String(error)}`, 'error')),
   onStatus: setStatus,
 });
 
@@ -139,12 +136,9 @@ void Promise.all([browser.initialize(), worldEditor.initialize()]).catch((error:
 let cameraDragging = false;
 let lastX = 0;
 let lastY = 0;
-
 canvas.addEventListener('contextmenu', (event) => event.preventDefault());
 canvas.addEventListener('pointerdown', (event) => {
-  if (event.button === 0 && !placement.isActive && !worldEditor.isTransformInteracting) {
-    worldEditor.selectFromPointer(event);
-  }
+  if (event.button === 0 && !placement.isActive && !worldEditor.isTransformInteracting) worldEditor.selectFromPointer(event);
   if (event.button !== 2 || worldEditor.isTransformInteracting) return;
   cameraDragging = true;
   lastX = event.clientX;
@@ -164,34 +158,16 @@ canvas.addEventListener('pointerup', (event) => {
   cameraDragging = false;
   if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
 });
-canvas.addEventListener('wheel', (event) => {
-  event.preventDefault();
-  engine.camera.zoomByWheel(event.deltaY);
-}, { passive: false });
+canvas.addEventListener('wheel', (event) => { event.preventDefault(); engine.camera.zoomByWheel(event.deltaY); }, { passive: false });
 
 window.addEventListener('keydown', (event) => {
   const target = event.target;
   if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
-
   if (event.ctrlKey || event.metaKey) {
-    if (event.code === 'KeyZ') {
-      event.preventDefault();
-      if (event.shiftKey) void worldEditor.redo();
-      else void worldEditor.undo();
-      return;
-    }
-    if (event.code === 'KeyY') {
-      event.preventDefault();
-      void worldEditor.redo();
-      return;
-    }
-    if (event.code === 'KeyD') {
-      event.preventDefault();
-      void worldEditor.duplicateSelected();
-      return;
-    }
+    if (event.code === 'KeyZ') { event.preventDefault(); if (event.shiftKey) void worldEditor.redo(); else void worldEditor.undo(); return; }
+    if (event.code === 'KeyY') { event.preventDefault(); void worldEditor.redo(); return; }
+    if (event.code === 'KeyD') { event.preventDefault(); void worldEditor.duplicateSelected(); return; }
   }
-
   if (event.code === 'KeyG') worldEditor.setMode('translate');
   if (event.code === 'KeyR') worldEditor.setMode('rotate');
   if (event.code === 'KeyS') worldEditor.setMode('scale');
@@ -202,36 +178,26 @@ window.addEventListener('keydown', (event) => {
   if (event.code === 'KeyE') engine.camera.rotateQuarter(1);
 });
 
-root.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => {
-  button.addEventListener('click', () => worldEditor.setMode(button.dataset.transformMode as TransformMode));
-});
+root.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => button.addEventListener('click', () => worldEditor.setMode(button.dataset.transformMode as TransformMode)));
 root.querySelector<HTMLElement>('[data-open-assets]')?.addEventListener('click', () => assetDock.classList.toggle('collapsed'));
+root.querySelector<HTMLButtonElement>('[data-projects]')?.addEventListener('click', () => void projectDialog.open());
+root.querySelector<HTMLButtonElement>('[data-playtest]')?.addEventListener('click', () => void worldEditor.preparePlaytest().then(() => window.open('/?playtest=1', 'ascension-playtest')));
+root.querySelector<HTMLButtonElement>('[data-import-world]')?.addEventListener('click', () => worldFileInput.click());
 undoButton.addEventListener('click', () => void worldEditor.undo());
 redoButton.addEventListener('click', () => void worldEditor.redo());
-root.querySelector<HTMLElement>('[data-save-world]')?.addEventListener('click', () => {
-  const blob = new Blob([worldEditor.serialize()], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = 'ascension-world.json';
-  anchor.click();
-  URL.revokeObjectURL(url);
-  setStatus('WorldDocument exportado como JSON.', 'success');
-});
-root.querySelector<HTMLElement>('[data-load-world]')?.addEventListener('click', () => worldFileInput.click());
 worldFileInput.addEventListener('change', () => {
   const file = worldFileInput.files?.[0];
   if (!file) return;
-  void file.text()
-    .then((json) => worldEditor.replaceFromJson(json))
-    .catch((error: unknown) => setStatus(`Falha ao carregar mapa: ${error instanceof Error ? error.message : String(error)}`, 'error'));
+  void file.text().then((json) => worldEditor.importWorldJson(json)).catch((error: unknown) => setStatus(`Falha ao importar mapa: ${error instanceof Error ? error.message : String(error)}`, 'error'));
   worldFileInput.value = '';
 });
 
 engine.start();
 window.addEventListener('beforeunload', () => {
+  void worldEditor.saveCurrent();
   placement.dispose();
   browser.dispose();
+  projectDialog.dispose();
   worldEditor.dispose();
   engine.dispose();
 });

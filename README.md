@@ -1,66 +1,52 @@
 # Ascension Isometric
 
-Browser-first 3D isometric RPG/MMO foundation built with **TypeScript + Three.js + Vite**.
+Browser-first 3D isometric RPG/MMO foundation built with **TypeScript + Three.js + Vite**. The game and editor share the same WorldDocument runtime. Quaternius is the primary stylized low-poly art direction; KayKit remains supported as a secondary library.
 
-The game and editor reuse the same engine/world runtime. Starting in **v0.2.1**, the primary visual direction is Quaternius stylized low-poly fantasy, while KayKit remains supported as a secondary library.
+## Run
 
-## Requirements
+- Node.js 22.12+.
+- Double-click `start.bat` on Windows.
+- Game: `http://localhost:5173/`
+- Editor: `http://localhost:5173/editor.html`
 
-- Windows 10/11 for `start.bat`
-- Node.js **22.12.0 or newer**
-- A WebGL-capable browser
-- Internet access on first run
+## v0.4 — Multi-map project + real playtest
 
-## Run on Windows
+The editor now supports multiple maps stored in IndexedDB instead of one hidden localStorage document.
 
-1. Download or clone the repository.
-2. Extract the repository ZIP.
-3. Double-click **`start.bat`**.
-4. Dependencies are installed automatically without Administrator access.
-5. Game: `http://localhost:5173/`
-6. Editor: `http://localhost:5173/editor.html`
+- create/open/duplicate/delete maps;
+- map name and description;
+- spawn point XYZ;
+- ground size/color and background color;
+- autosave per map;
+- legacy v0.3 map migration;
+- JSON import/export;
+- clean editor world without the old primitive demo houses/trees;
+- **Playtest** launches the exact current WorldDocument in the game runtime;
+- normal game runtime also resolves the current saved map;
+- shared `WorldRuntime` loads the same imported GLB/GLTF/FBX assets in editor and game.
 
-## Editor Asset System
+## World Editor
 
-The editor supports:
+- WorldDocument entities;
+- Hierarchy + Inspector;
+- click selection and outline;
+- TransformControls: G move, R rotate, S scale;
+- F focus;
+- Ctrl+D duplicate;
+- Delete remove;
+- Ctrl+Z / Ctrl+Y undo/redo;
+- save/import JSON;
+- Asset Browser + ZIP Package Inspector.
+
+## Asset pipeline
+
 - GLB;
 - GLTF + BIN + referenced textures;
 - FBX + textures;
-- drag-and-drop;
-- IndexedDB persistence;
-- thumbnails;
-- category/search filters;
-- 3D preview with animation playback;
-- placing assets in the world.
-
-### ZIP Package Inspector
-
-Use **Importar ZIP** to open a complete source pack.
-
-The browser:
-1. extracts the ZIP temporarily;
-2. discovers the models;
-3. hides duplicate export formats;
-4. shows a searchable model list on the left;
-5. shows a live 3D viewer on the right;
-6. lets you select individual models, select all, or import everything;
-7. persists only the models you actually confirm.
-
-Runtime format priority is **GLB > GLTF > FBX**.
-
-Details: `docs/ZIP_IMPORTER.md`.
-
-## Art direction
-
-The primary approved Quaternius library currently includes:
-- Universal Base Characters;
-- Universal Animation Library;
-- Universal Animation Library 2;
-- Fantasy Props MegaKit;
-- Stylized Nature MegaKit;
-- Easy Enemy Pack.
-
-These packs are CC0. See `docs/ART_DIRECTION.md` and `docs/ASSETS.md`.
+- ZIP package inspection;
+- format deduplication priority: GLB > GLTF > FBX;
+- IndexedDB asset persistence;
+- thumbnails and interactive 3D preview.
 
 ## Validation
 
@@ -72,9 +58,8 @@ GitHub Action **Validate Ascension Isometric** runs typecheck, unit tests and pr
 
 ## Next milestones
 
-1. Entity selection in the world.
-2. Move / Rotate / Scale gizmos.
-3. Hierarchy + Inspector.
-4. Serializable WorldDocument.
-5. Save/load/autosave and undo/redo.
-6. Character rig/animation assignment and retargeting workflow.
+1. Character rig/animation assignment and retargeting.
+2. NPC/monster entity types and gameplay components.
+3. Collision authoring and nav/walkable data.
+4. Terrain/world sculpting and painting tools.
+5. Server-authoritative multiplayer world synchronization.
