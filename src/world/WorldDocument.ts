@@ -298,7 +298,7 @@ export function cloneWorldDocument(document: WorldDocument): WorldDocument {
 
 export function parseWorldDocument(value: unknown): WorldDocument {
   if (!value || typeof value !== 'object') throw new Error('WorldDocument inválido.');
-  const raw = value as Partial<WorldDocument> & { version?: number; entities?: unknown[] };
+  const raw = value as Omit<Partial<WorldDocument>, 'version'> & { version?: number; entities?: unknown[] };
   const legacy = raw.version === 1 || raw.version === 2;
   if (raw.version !== WORLD_DOCUMENT_VERSION && !legacy) throw new Error(`Versão de WorldDocument não suportada: ${String(raw.version)}.`);
   const name = text(raw.name, 'Ascension World');
