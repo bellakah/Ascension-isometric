@@ -39,10 +39,11 @@ const viewportWrap = root.querySelector<HTMLElement>('.editor-viewport-wrap');
 const assetDock = root.querySelector<HTMLElement>('.asset-dock');
 const status = root.querySelector<HTMLElement>('.editor-status');
 if (!canvas || !viewportWrap || !assetDock || !status) throw new Error('Editor shell failed to initialize.');
+const statusElement: HTMLElement = status;
 
 function setStatus(message: string, tone: 'normal' | 'success' | 'error' = 'normal'): void {
-  status.textContent = message;
-  status.dataset.tone = tone;
+  statusElement.textContent = message;
+  statusElement.dataset.tone = tone;
 }
 
 const engine = new Engine(canvas);
