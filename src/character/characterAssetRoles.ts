@@ -1,7 +1,7 @@
 import type { AssetRecord } from '../assets/types';
 import type { CharacterVisualSlot } from './CharacterPreset';
 
-export type CharacterAssetRole = 'base' | 'hair' | 'outfit' | 'body' | 'arms' | 'legs' | 'feet' | 'headgear' | 'accessory' | 'animation' | 'other';
+export type CharacterAssetRole = 'base' | 'hair' | 'outfit' | 'body' | 'arms' | 'legs' | 'feet' | 'headgear' | 'accessory' | 'animation' | 'weapon' | 'shield' | 'other';
 
 const BASE_PACK = 'quaternius-universal-base-characters';
 const OUTFIT_PACK = 'quaternius-modular-character-outfits-fantasy';
@@ -28,6 +28,10 @@ export function inferCharacterAssetRole(asset: AssetRecord): CharacterAssetRole 
     if (/_head(?:_|\b)|hood/i.test(text)) return 'headgear';
     if (/_acc(?:_|\b)|pauldron/i.test(text)) return 'accessory';
   }
+  if (asset.category === 'weapons' || /\b(sword|axe|bow|crossbow|dagger|staff|wand|mace|spear|weapon)\b/i.test(text)) {
+    return /\bshield\b/i.test(text) ? 'shield' : 'weapon';
+  }
+  if (/\bshield\b/i.test(text)) return 'shield';
   return 'other';
 }
 
