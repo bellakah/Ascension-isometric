@@ -75,8 +75,10 @@ if errorlevel 1 goto :pnpm_error
 
 rem ------------------------------------------------
 rem 3. Install/sync every browser project dependency.
-rem    On the first run this creates node_modules.
-rem    On later runs pnpm only synchronizes changes.
+rem    Always use --no-frozen-lockfile locally. This
+rem    lets pnpm repair an old lockfile left behind
+rem    when the user updates/extracts a newer project
+rem    version over an existing folder.
 rem ------------------------------------------------
 echo.
 if not exist "node_modules" (
@@ -86,23 +88,23 @@ if not exist "node_modules" (
 )
 
 if exist "pnpm-lock.yaml" (
-  call npx --yes pnpm@%PNPM_VERSION% install --frozen-lockfile
-) else (
-  call npx --yes pnpm@%PNPM_VERSION% install
+  echo [INFO] Lockfile local encontrado. Ele sera sincronizado automaticamente.
 )
+
+call npx --yes pnpm@%PNPM_VERSION% install --no-frozen-lockfile
 if errorlevel 1 goto :install_error
 
 if not exist "node_modules\.bin\vite.cmd" (
   echo.
   echo [ERRO] A instalacao terminou, mas o Vite nao foi encontrado.
-  echo Apague a pasta node_modules e execute start.bat novamente.
+  echo Tente executar o start.bat novamente.
   pause
   exit /b 1
 )
 
 echo.
 echo [3/4] Dependencias prontas.
-echo [OK] Three.js, Vite, TypeScript e ferramentas de desenvolvimento instaladas.
+echo [OK] Three.js, Vite, TypeScript, fflate e ferramentas de desenvolvimento instaladas.
 
 rem ------------------------------------------------
 rem 4. Start the browser development server.
@@ -131,8 +133,8 @@ exit /b 1
 
 :install_error
 echo.
-echo [ERRO] Nao foi possivel instalar as dependencias do projeto.
+echo [ERRO] Nao foi possivel instalar ou atualizar as dependencias do projeto.
 echo Verifique sua conexao com a internet e tente novamente.
-echo Se existir uma pasta node_modules incompleta, apague-a e rode start.bat de novo.
+echo O starter ja permite atualizar automaticamente lockfiles antigos.
 pause
 exit /b 1
