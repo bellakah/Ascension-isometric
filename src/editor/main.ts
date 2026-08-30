@@ -1,6 +1,7 @@
 import '../styles.css';
 import './editor.css';
 import './zip-import.css';
+import './world-editor.css';
 import { AssetBrowser } from './AssetBrowser';
 import { EditorAssetPlacement } from './EditorAssetPlacement';
 import { HierarchyPanel, InspectorPanel } from './EditorPanels';
