@@ -22,14 +22,20 @@ jobs:
         with:
           node-version: '22.12.0'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.34.5'
+          run_install: false
+
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: pnpm install --no-frozen-lockfile
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Unit tests
-        run: npm run test
+        run: pnpm run test
 
       - name: Production build
-        run: npm run build
+        run: pnpm run build

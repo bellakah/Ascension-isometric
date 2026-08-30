@@ -15,7 +15,7 @@ The project is intentionally split so the **game and editor reuse the same engin
 1. Download or clone the repository.
 2. Extract it if you downloaded a ZIP.
 3. Double-click **`start.bat`**.
-4. On first run, dependencies are installed automatically.
+4. On first run, Corepack activates **pnpm 10.34.5** and dependencies are installed automatically.
 5. The game opens at `http://localhost:5173/`.
 
 The editor is available at `http://localhost:5173/editor.html` or through the **Editor** button in the game header.
@@ -23,8 +23,10 @@ The editor is available at `http://localhost:5173/editor.html` or through the **
 ## Manual run
 
 ```bash
-npm install
-npm run dev
+corepack enable
+corepack prepare pnpm@10.34.5 --activate
+pnpm install --no-frozen-lockfile
+pnpm run dev
 ```
 
 ## Foundation v0.1
@@ -52,13 +54,14 @@ npm run dev
 - Vite multi-page build.
 - Vitest unit tests for isometric-camera and movement math.
 - GitHub Action **Validate Ascension Isometric** runs typecheck, tests and production build.
+- pnpm 10.34.5 is the project package manager.
 - Engineering rules recorded in `AGENTS.md`.
 - Architecture notes in `docs/ARCHITECTURE.md`.
 
 ## Validation
 
 ```bash
-npm run ci
+pnpm run ci
 ```
 
 ## Next milestones
