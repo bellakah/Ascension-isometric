@@ -1,5 +1,5 @@
 import { unzip } from 'fflate';
-import { archiveDirname, assetFileAliases, collectExternalGltfUris, inferAssetCategory, normalizeArchivePath, normalizedFileKey, resolveArchiveDependency, stripExtension } from './assetUtils';
+import { archiveDirname, assetFileAliases, collectExternalGltfUris, inferAssetCategory, normalizeArchivePath, resolveArchiveDependency, stripExtension } from './assetUtils';
 import { inferAssetOrigin, matchOfficialAssetPack } from './officialPacks';
 import type { AssetCategory, AssetDraft, AssetFormat, StoredAssetFile } from './types';
 
