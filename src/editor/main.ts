@@ -23,7 +23,7 @@ const appRoot: HTMLElement = root;
 appRoot.innerHTML = `
   <main class="editor-shell">
     <header class="editor-menubar">
-      <div class="editor-brand"><div class="brand-mark">A</div><div class="editor-brand-copy"><strong>Ascension World Editor</strong><span>v0.7.1 · Professional Workspace</span></div></div>
+      <div class="editor-brand"><div class="brand-mark">A</div><div class="editor-brand-copy"><strong>Ascension World Editor</strong><span>v0.7.3 · Regions · Multi-select · Scatter</span></div></div>
       <div class="editor-menubar-center">
         <span class="current-map-badge" data-current-map>Mapa</span>
         <span class="editor-status" data-tone="normal">Editor pronto.</span>
@@ -63,13 +63,14 @@ appRoot.innerHTML = `
           <button class="tool-button world-tool" type="button" data-world-tool="water"><span class="tool-icon">≈</span><span class="tool-name">Water</span></button>
           <button class="tool-button world-tool" type="button" data-world-tool="spawn"><span class="tool-icon">✦</span><span class="tool-name">Spawn</span></button>
           <button class="tool-button world-tool" type="button" data-world-tool="blocker"><span class="tool-icon">▰</span><span class="tool-name">Blocker</span></button>
+          <button class="tool-button world-tool" type="button" title="Selecionar região (U)" data-world-tool="region"><span class="tool-icon">▧</span><span class="tool-name">Region</span></button>
           <span class="tool-group-label">CONTENT</span>
           <button class="tool-button" type="button" data-open-assets><span class="tool-icon">▦</span><span class="tool-name">Assets</span></button>
           <button class="tool-button" type="button" data-open-character><span class="tool-icon">♟</span><span class="tool-name">Personagem</span></button>
           <button class="tool-button toolrail-collapse" type="button" data-toolbar-compact><span class="tool-icon">«</span><span class="tool-name">Recolher barra</span></button>
         </aside>
         <div class="active-tool-chip" data-active-tool><strong>Selecionar</strong><span>Clique em um objeto para editar.</span></div>
-        <div class="editor-hint"><strong>V</strong> selecionar · <strong>G/R/S</strong> transform · <strong>LMB</strong> ferramenta · <strong>RMB</strong> câmera · <strong>Ctrl+Z/Y</strong> undo/redo · <strong>Q/E</strong> gira câmera</div>
+        <div class="editor-hint"><strong>V</strong> select · <strong>Shift+Click</strong> multi-select · <strong>G/R/S</strong> transform · <strong>U</strong> region · <strong>RMB</strong> câmera · <strong>Ctrl+Z/Y</strong> undo/redo · <strong>Q/E</strong> gira câmera</div>
       </section>
       <div class="editor-splitter" data-right-splitter title="Arraste para redimensionar painel"></div>
       <aside class="editor-side-panel" aria-label="Painel de propriedades">
@@ -116,17 +117,7 @@ const activeToolChip = required<HTMLElement>('[data-active-tool]');
 
 function setStatus(message: string, tone: 'normal' | 'success' | 'error' = 'normal'): void { statusElement.textContent = message; statusElement.dataset.tone = tone; }
 
-const editorWorkspace = new EditorWorkspace({
-  shell,
-  workspace: workspaceElement,
-  assetDock,
-  assetResizer: required<HTMLElement>('[data-asset-resizer]'),
-  leftSplitter: required<HTMLElement>('[data-left-splitter]'),
-  rightSplitter: required<HTMLElement>('[data-right-splitter]'),
-  toolrail,
-  tabButtons: appRoot.querySelectorAll<HTMLElement>('[data-right-tab]'),
-  tabPanes: appRoot.querySelectorAll<HTMLElement>('[data-right-pane]'),
-});
+const editorWorkspace = new EditorWorkspace({ shell, workspace: workspaceElement, assetDock, assetResizer: required<HTMLElement>('[data-asset-resizer]'), leftSplitter: required<HTMLElement>('[data-left-splitter]'), rightSplitter: required<HTMLElement>('[data-right-splitter]'), toolrail, tabButtons: appRoot.querySelectorAll<HTMLElement>('[data-right-tab]'), tabPanes: appRoot.querySelectorAll<HTMLElement>('[data-right-pane]') });
 
 const engine = new Engine(canvas); engine.camera.setTarget(engine.camera.target.set(0, 0, 0));
 let hierarchyPanel: HierarchyPanel | null = null;
@@ -135,11 +126,15 @@ let authoringPanel: WorldAuthoringPanel | null = null;
 let currentTool: WorldAuthoringTool = 'select';
 let currentMode: TransformMode = 'translate';
 
-const toolNames: Record<WorldAuthoringTool, string> = { select: 'Selecionar', raise: 'Raise Terrain', lower: 'Lower Terrain', smooth: 'Smooth Terrain', flatten: 'Flatten Terrain', paint: 'Paint Terrain', erase: 'Erase Terrain', water: 'Water', spawn: 'Spawn', blocker: 'Blocker' };
+const toolNames: Record<WorldAuthoringTool, string> = { select: 'Selecionar', raise: 'Raise Terrain', lower: 'Lower Terrain', smooth: 'Smooth Terrain', flatten: 'Flatten Terrain', paint: 'Paint Terrain', erase: 'Erase Terrain', water: 'Water', spawn: 'Spawn', blocker: 'Blocker', region: 'Region' };
 function updateActiveToolChip(): void {
   const brush = worldEditor.brushSettings;
   const terrain = currentTool === 'raise' || currentTool === 'lower' || currentTool === 'smooth' || currentTool === 'flatten' || currentTool === 'paint' || currentTool === 'erase';
-  activeToolChip.innerHTML = `<strong>${toolNames[currentTool]}</strong><span>${currentTool === 'select' ? `Transform: ${currentMode}` : terrain ? `Radius ${brush.radius.toFixed(1)} · Strength ${brush.strength.toFixed(1)} · ${brush.falloff}` : 'Use o viewport para editar o mundo.'}</span>`;
+  let detail = 'Use o viewport para editar o mundo.';
+  if (currentTool === 'select') detail = worldEditor.selectionCount > 1 ? `${worldEditor.selectionCount} objetos · Transform: ${currentMode}` : `Transform: ${currentMode}`;
+  else if (terrain) detail = `Radius ${brush.radius.toFixed(1)} · Strength ${brush.strength.toFixed(1)} · ${brush.falloff}`;
+  else if (currentTool === 'region') detail = worldEditor.isPasteArmed ? 'Paste armado · clique no terreno' : 'Arraste no terreno para selecionar uma região';
+  activeToolChip.innerHTML = `<strong>${toolNames[currentTool]}</strong><span>${detail}</span>`;
 }
 const updateHistoryButtons = (): void => { undoButton.disabled = !worldEditor.canUndo(); redoButton.disabled = !worldEditor.canRedo(); };
 const updateModeButtons = (mode: TransformMode): void => { currentMode = mode; appRoot.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => button.classList.toggle('active', currentTool === 'select' && button.dataset.transformMode === mode)); updateActiveToolChip(); };
@@ -148,9 +143,9 @@ const updateToolButtons = (tool: WorldAuthoringTool): void => { appRoot.querySel
 const worldEditor = new WorldEditor(engine, canvas, {
   onDocumentChanged: (document) => {
     currentMap.textContent = document.name; currentMap.title = `${document.name} · ${document.entities.length} objetos · ${document.terrain.heightStamps.length} terrain edits`;
-    hierarchyPanel?.render(document, worldEditor.selectedEntityId); inspectorPanel?.render(worldEditor.getSelectedEntity()); authoringPanel?.render(currentTool, document); updateHistoryButtons();
+    hierarchyPanel?.render(document, worldEditor.selectedEntityId); inspectorPanel?.render(worldEditor.getSelectedEntity()); authoringPanel?.render(currentTool, document); updateHistoryButtons(); updateActiveToolChip();
   },
-  onSelectionChanged: (entity) => { hierarchyPanel?.render(worldEditor.document, entity?.id ?? null); inspectorPanel?.render(entity); if (entity) editorWorkspace.setRightTab('inspector'); },
+  onSelectionChanged: (entity) => { hierarchyPanel?.render(worldEditor.document, entity?.id ?? null); inspectorPanel?.render(entity); if (entity && currentTool === 'select') editorWorkspace.setRightTab('inspector'); updateActiveToolChip(); },
   onModeChanged: updateModeButtons,
   onToolChanged: (tool) => { currentTool = tool; updateToolButtons(tool); editorWorkspace.focusForTool(tool); authoringPanel?.render(tool, worldEditor.document); },
   onStatus: setStatus,
@@ -187,6 +182,7 @@ window.addEventListener('keydown', (event) => {
     if (event.code === 'KeyD') { event.preventDefault(); void worldEditor.duplicateSelected(); return; }
   }
   if (event.code === 'KeyV') worldEditor.setAuthoringTool('select');
+  if (event.code === 'KeyU') worldEditor.setAuthoringTool('region');
   if (event.code === 'KeyG') worldEditor.setMode('translate'); if (event.code === 'KeyR') worldEditor.setMode('rotate'); if (event.code === 'KeyS') worldEditor.setMode('scale');
   if (event.code === 'KeyF' && currentTool === 'select') worldEditor.focusSelected(); if (event.code === 'Delete' && currentTool === 'select') worldEditor.deleteSelected(); if (event.code === 'Escape' && !placement.isActive) worldEditor.setAuthoringTool('select');
   if (event.code === 'KeyQ') engine.camera.rotateQuarter(-1); if (event.code === 'KeyE') engine.camera.rotateQuarter(1);
