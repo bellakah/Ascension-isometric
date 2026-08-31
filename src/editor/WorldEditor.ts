@@ -1,13 +1,15 @@
 import * as THREE from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { AssetDatabase } from '../assets/AssetDatabase';
 import type { AssetRecord } from '../assets/types';
 import type { Engine } from '../engine/Engine';
 import { storePlaytestWorld } from '../world/PlaytestSession';
 import { WorldDatabase, type WorldSummary } from '../world/WorldDatabase';
 import { WorldEnvironment, type EditorWorldLayer } from '../world/WorldEnvironment';
-import { WorldRuntime, applyEntityTransform, syncEntityTransform } from '../world/WorldRuntime';
+import { WorldRuntime, applyEntityTransform, syncEntityTransform, syncEntityWorldTransform } from '../world/WorldRuntime';
 import {
   averageTerrainHeight,
+  dominantTerrainLayerId,
   latestHeightStampIndex,
   latestPaintStampIndex,
   stampRegion,
@@ -28,23 +30,65 @@ import {
   type EntityCollisionMode,
   type SerializedVector3,
   type TerrainFalloff,
+  type TerrainHeightStamp,
   type TerrainLayerDocument,
+  type TerrainPaintStamp,
+  type WorldBlockerDocument,
   type WorldDocument,
   type WorldEntityDocument,
 } from '../world/WorldDocument';
+import { pointInRegion, regionBounds, regionCenter, regionSize, scatterCandidates, type RegionBounds, type ScatterCandidate, type ScatterSettings } from './RegionTools';
 
 const LEGACY_STORAGE_KEY = 'ascension-isometric-world-document-v1';
 const HISTORY_LIMIT = 80;
 const MAX_STAMPS = 12000;
 
 export type TransformMode = 'translate' | 'rotate' | 'scale';
-export type WorldAuthoringTool = 'select' | 'raise' | 'lower' | 'smooth' | 'flatten' | 'paint' | 'erase' | 'water' | 'spawn' | 'blocker';
+export type WorldAuthoringTool = 'select' | 'raise' | 'lower' | 'smooth' | 'flatten' | 'paint' | 'erase' | 'water' | 'spawn' | 'blocker' | 'region';
 
 export interface TerrainBrushSettings {
   radius: number;
   strength: number;
   falloff: TerrainFalloff;
   paintLayerId: string;
+}
+
+export interface RegionCopyOptions {
+  objects: boolean;
+  terrainSculpt: boolean;
+  terrainPaint: boolean;
+  blockers: boolean;
+}
+
+export interface RegionStats {
+  objects: number;
+  heightEdits: number;
+  paintEdits: number;
+  blockers: number;
+}
+
+export interface ScatterRules {
+  avoidWater: boolean;
+  avoidObjects: boolean;
+  maxSlope: number;
+  terrainLayerId?: string;
+}
+
+interface RelativeEntity {
+  entity: WorldEntityDocument;
+  dx: number;
+  dz: number;
+}
+interface RelativeHeightStamp { stamp: TerrainHeightStamp; dx: number; dz: number; }
+interface RelativePaintStamp { stamp: TerrainPaintStamp; dx: number; dz: number; }
+interface RelativeBlocker { blocker: WorldBlockerDocument; dx1: number; dz1: number; dx2: number; dz2: number; }
+interface RegionClipboard {
+  width: number;
+  depth: number;
+  entities: RelativeEntity[];
+  heights: RelativeHeightStamp[];
+  paints: RelativePaintStamp[];
+  blockers: RelativeBlocker[];
 }
 
 export interface WorldEditorEvents {
@@ -75,15 +119,22 @@ function brushColor(tool: WorldAuthoringTool, erasePaint = false): number {
   return 0x66c6ff;
 }
 
+function cloneEntity(entity: WorldEntityDocument): WorldEntityDocument {
+  return { ...entity, position: { ...entity.position }, rotation: { ...entity.rotation }, scale: { ...entity.scale }, collision: { ...entity.collision } };
+}
+
 export class WorldEditor {
   private readonly worlds = new WorldDatabase();
+  private readonly assets = new AssetDatabase();
   private readonly runtime: WorldRuntime;
   private readonly environment: WorldEnvironment;
   private readonly raycaster = new THREE.Raycaster();
   private readonly pointer = new THREE.Vector2();
   private readonly transformControls: TransformControls;
   private readonly transformEvents: LooseEventTarget;
-  private selectionBox: THREE.BoxHelper | null = null;
+  private readonly selectedIds = new Set<string>();
+  private readonly selectionBoxes = new Map<string, THREE.BoxHelper>();
+  private selectionPivot: THREE.Group | null = null;
   private selectedId: string | null = null;
   private transformDragging = false;
   private history: WorldDocument[] = [];
@@ -100,6 +151,11 @@ export class WorldEditor {
   private strokePaintErase = false;
   private maskPreviewLayerId: string | null = null;
   private objectsVisible = true;
+  private regionState: RegionBounds | null = null;
+  private regionStart: THREE.Vector3 | null = null;
+  private regionClipboard: RegionClipboard | null = null;
+  private pasteArmed = false;
+  private scatterPreview: ScatterCandidate[] = [];
 
   constructor(private readonly engine: Engine, private readonly canvas: HTMLCanvasElement, private readonly events: WorldEditorEvents) {
     this.environment = new WorldEnvironment(engine.scene, this.documentState, true);
@@ -121,11 +177,17 @@ export class WorldEditor {
 
   get document(): WorldDocument { return this.documentState; }
   get selectedEntityId(): string | null { return this.selectedId; }
+  get selectedEntityIds(): string[] { return [...this.selectedIds]; }
+  get selectionCount(): number { return this.selectedIds.size; }
   get activeTool(): WorldAuthoringTool { return this.toolState; }
   get brushSettings(): TerrainBrushSettings { return { ...this.brush }; }
   get terrainMaskPreviewLayerId(): string | null { return this.maskPreviewLayerId; }
+  get regionBounds(): RegionBounds | null { return this.regionState ? { ...this.regionState } : null; }
+  get hasRegionClipboard(): boolean { return this.regionClipboard !== null; }
+  get isPasteArmed(): boolean { return this.pasteArmed; }
+  get scatterPreviewCount(): number { return this.scatterPreview.length; }
   get isTransformInteracting(): boolean { return this.transformDragging || this.transformControls.axis !== null; }
-  get isAuthoringInteracting(): boolean { return this.strokeActive || this.blockerStart !== null; }
+  get isAuthoringInteracting(): boolean { return this.strokeActive || this.blockerStart !== null || this.regionStart !== null; }
 
   async initialize(): Promise<void> {
     let summaries = await this.worlds.list();
@@ -148,7 +210,7 @@ export class WorldEditor {
 
   dispose(): void {
     if (this.saveTimer) window.clearTimeout(this.saveTimer);
-    this.clearSelection(); this.environment.setBrushPreview(null, this.brush.radius); this.environment.setBlockerPreview(null, null);
+    this.clearSelection(); this.environment.setBrushPreview(null, this.brush.radius); this.environment.setBlockerPreview(null, null); this.environment.setRegionPreview(null); this.environment.setScatterPreview(null);
     this.transformEvents.removeEventListener('dragging-changed', this.handleDraggingChanged);
     this.transformEvents.removeEventListener('objectChange', this.handleObjectChange);
     this.transformEvents.removeEventListener('mouseUp', this.handleTransformEnd);
@@ -311,20 +373,101 @@ export class WorldEditor {
     this.environment.setTerrainMaskPreview(this.documentState, this.maskPreviewLayerId); this.events.onDocumentChanged(this.documentState);
   }
 
+  getRegionStats(): RegionStats {
+    const bounds = this.regionState; if (!bounds) return { objects: 0, heightEdits: 0, paintEdits: 0, blockers: 0 };
+    return {
+      objects: this.documentState.entities.filter((entity) => pointInRegion(bounds, entity.position.x, entity.position.z)).length,
+      heightEdits: this.documentState.terrain.heightStamps.filter((stamp) => pointInRegion(bounds, stamp.x, stamp.z)).length,
+      paintEdits: this.documentState.terrain.paintStamps.filter((stamp) => pointInRegion(bounds, stamp.x, stamp.z)).length,
+      blockers: this.documentState.blockers.filter((blocker) => pointInRegion(bounds, (blocker.x1 + blocker.x2) * 0.5, (blocker.z1 + blocker.z2) * 0.5)).length,
+    };
+  }
+
+  clearRegion(): void { this.regionState = null; this.regionStart = null; this.pasteArmed = false; this.environment.setRegionPreview(null); this.clearScatterPreview(); this.events.onDocumentChanged(this.documentState); }
+
+  copyRegion(options: RegionCopyOptions): boolean {
+    const bounds = this.regionState; if (!bounds) { this.events.onStatus('Selecione uma região primeiro.', 'error'); return false; }
+    const center = regionCenter(bounds); const size = regionSize(bounds);
+    const entities = options.objects ? this.documentState.entities.filter((entity) => pointInRegion(bounds, entity.position.x, entity.position.z)).map((entity) => ({ entity: cloneEntity(entity), dx: entity.position.x - center.x, dz: entity.position.z - center.z })) : [];
+    const heights = options.terrainSculpt ? this.documentState.terrain.heightStamps.filter((stamp) => pointInRegion(bounds, stamp.x, stamp.z)).map((stamp) => ({ stamp: { ...stamp }, dx: stamp.x - center.x, dz: stamp.z - center.z })) : [];
+    const paints = options.terrainPaint ? this.documentState.terrain.paintStamps.filter((stamp) => pointInRegion(bounds, stamp.x, stamp.z)).map((stamp) => ({ stamp: { ...stamp }, dx: stamp.x - center.x, dz: stamp.z - center.z })) : [];
+    const blockers = options.blockers ? this.documentState.blockers.filter((blocker) => pointInRegion(bounds, (blocker.x1 + blocker.x2) * 0.5, (blocker.z1 + blocker.z2) * 0.5)).map((blocker) => ({ blocker: { ...blocker }, dx1: blocker.x1 - center.x, dz1: blocker.z1 - center.z, dx2: blocker.x2 - center.x, dz2: blocker.z2 - center.z })) : [];
+    this.regionClipboard = { width: size.width, depth: size.depth, entities, heights, paints, blockers };
+    const total = entities.length + heights.length + paints.length + blockers.length; this.events.onStatus(`${total} elemento(s) copiado(s) da região.`, 'success'); return true;
+  }
+
+  async cutRegion(options: RegionCopyOptions): Promise<void> { if (!this.copyRegion(options)) return; await this.deleteRegion(options); }
+
+  armRegionPaste(): void {
+    if (!this.regionClipboard) { this.events.onStatus('O clipboard de região está vazio.', 'error'); return; }
+    this.pasteArmed = true; this.setAuthoringTool('region'); this.events.onStatus('Paste armado: clique no terreno para posicionar o centro da cópia.', 'success');
+  }
+
+  async duplicateRegion(options: RegionCopyOptions): Promise<void> {
+    const bounds = this.regionState; if (!bounds || !this.copyRegion(options) || !this.regionClipboard) return;
+    const center = regionCenter(bounds); const offset = Math.max(3, this.regionClipboard.width + 3); await this.pasteRegionAt(center.x + offset, center.z);
+  }
+
+  async deleteRegion(options: RegionCopyOptions): Promise<void> {
+    const bounds = this.regionState; if (!bounds) return;
+    this.releaseSelectionPivot(true); this.clearSelectionVisuals(false); this.selectedIds.clear(); this.selectedId = null;
+    if (options.objects) this.documentState.entities = this.documentState.entities.filter((entity) => !pointInRegion(bounds, entity.position.x, entity.position.z));
+    if (options.terrainSculpt) this.documentState.terrain.heightStamps = this.documentState.terrain.heightStamps.filter((stamp) => !pointInRegion(bounds, stamp.x, stamp.z));
+    if (options.terrainPaint) this.documentState.terrain.paintStamps = this.documentState.terrain.paintStamps.filter((stamp) => !pointInRegion(bounds, stamp.x, stamp.z));
+    if (options.blockers) this.documentState.blockers = this.documentState.blockers.filter((blocker) => !pointInRegion(bounds, (blocker.x1 + blocker.x2) * 0.5, (blocker.z1 + blocker.z2) * 0.5));
+    await this.rebuildAfterBatch(); this.recordHistory(); this.events.onStatus('Conteúdo da região removido.', 'success');
+  }
+
+  previewScatter(settings: ScatterSettings, rules: ScatterRules): number {
+    const bounds = this.regionState; if (!bounds) { this.events.onStatus('Selecione uma região antes de usar Scatter.', 'error'); return 0; }
+    const spacing = Math.max(0, settings.minSpacing);
+    const reject = (candidate: ScatterCandidate): boolean => {
+      const y = this.terrainHeightAt(candidate.x, candidate.z);
+      if (rules.avoidWater && this.documentState.water.enabled && y <= this.documentState.water.level + 0.05) return true;
+      if (rules.terrainLayerId && dominantTerrainLayerId(this.documentState, candidate.x, candidate.z) !== rules.terrainLayerId) return true;
+      if (Number.isFinite(rules.maxSlope) && this.slopeAt(candidate.x, candidate.z) > Math.max(0, rules.maxSlope)) return true;
+      if (rules.avoidObjects && spacing > 0 && this.documentState.entities.some((entity) => Math.hypot(entity.position.x - candidate.x, entity.position.z - candidate.z) < spacing)) return true;
+      return false;
+    };
+    this.scatterPreview = scatterCandidates(settings, bounds, reject); this.environment.setScatterPreview(this.scatterPreview); this.events.onDocumentChanged(this.documentState);
+    this.events.onStatus(`Scatter preview: ${this.scatterPreview.length}/${Math.max(0, settings.count)} placements.`, this.scatterPreview.length ? 'success' : 'error'); return this.scatterPreview.length;
+  }
+
+  clearScatterPreview(): void { this.scatterPreview = []; this.environment.setScatterPreview(null); }
+
+  async applyScatterPreview(): Promise<void> {
+    if (!this.scatterPreview.length) { this.events.onStatus('Não há Scatter Preview para aplicar.', 'error'); return; }
+    this.releaseSelectionPivot(true); this.clearSelectionVisuals(false); this.selectedIds.clear(); this.selectedId = null;
+    const ids = [...new Set(this.scatterPreview.map((candidate) => candidate.assetId))];
+    const records = new Map<string, AssetRecord>();
+    for (const id of ids) { const record = await this.assets.get(id); if (record) records.set(id, record); }
+    const created: string[] = [];
+    for (const candidate of this.scatterPreview) {
+      const asset = records.get(candidate.assetId); if (!asset) continue;
+      const entity = createWorldEntity({ assetId: asset.id, assetName: asset.name, position: { x: candidate.x, y: this.terrainHeightAt(candidate.x, candidate.z), z: candidate.z } });
+      entity.rotation.y = candidate.rotationY; entity.scale = { x: candidate.scale, y: candidate.scale, z: candidate.scale }; entity.grounded = true; entity.groundOffset = 0;
+      this.documentState.entities.push(entity); created.push(entity.id);
+    }
+    this.clearScatterPreview(); await this.rebuildAfterBatch(); this.selectMany(created); this.recordHistory(); this.events.onStatus(`${created.length} objeto(s) do Scatter aplicados.`, 'success');
+  }
+
   surfaceAt(clientX: number, clientY: number): THREE.Vector3 | null { return this.environment.surfaceAt(this.engine.camera.camera, this.canvas, clientX, clientY); }
   terrainHeightAt(x: number, z: number): number { return this.environment.terrainHeight(x, z); }
 
   handleAuthoringPointerDown(event: PointerEvent): boolean {
     if (event.button !== 0 || this.toolState === 'select' || this.toolState === 'water') return false;
     const point = this.surfaceAt(event.clientX, event.clientY); if (!point) return false;
+    if (this.toolState === 'region') {
+      if (this.pasteArmed) { this.pasteArmed = false; void this.pasteRegionAt(point.x, point.z); return true; }
+      this.regionStart = point.clone(); this.regionState = regionBounds(point, point); this.environment.setRegionPreview(this.regionState); this.clearScatterPreview(); return true;
+    }
     if (this.toolState === 'spawn') {
       this.documentState.spawn = { x: point.x, y: point.y, z: point.z }; this.environment.update(this.documentState); this.touchDocument(); this.recordHistory(); this.events.onStatus('Spawn definido no terreno.', 'success'); return true;
     }
     if (this.toolState === 'blocker') { this.blockerStart = point.clone(); this.environment.setBlockerPreview(this.blockerStart, point); return true; }
     if (isTerrainTool(this.toolState)) {
       if (this.toolState === 'paint') {
-        const layer = this.layerById(this.brush.paintLayerId);
-        if (!layer) return false;
+        const layer = this.layerById(this.brush.paintLayerId); if (!layer) return false;
         if (layer.locked) { this.events.onStatus(`Layer “${layer.name}” está bloqueada.`, 'error'); return true; }
         this.strokePaintErase = event.shiftKey;
       }
@@ -336,6 +479,7 @@ export class WorldEditor {
   handleAuthoringPointerMove(event: PointerEvent): boolean {
     if (this.toolState === 'select' || this.toolState === 'water') return false;
     const point = this.surfaceAt(event.clientX, event.clientY);
+    if (this.toolState === 'region' && this.regionStart && point) { this.regionState = regionBounds(this.regionStart, point); this.environment.setRegionPreview(this.regionState); return true; }
     if (isTerrainTool(this.toolState)) this.environment.setBrushPreview(point, this.brush.radius, brushColor(this.toolState, this.toolState === 'paint' && (this.strokePaintErase || event.shiftKey)));
     if (this.blockerStart && point) { this.environment.setBlockerPreview(this.blockerStart, point); return true; }
     if (this.strokeActive && point) { this.applyBrush(point); return true; }
@@ -344,37 +488,45 @@ export class WorldEditor {
 
   handleAuthoringPointerUp(event: PointerEvent): boolean {
     if (event.button !== 0) return false;
+    if (this.regionStart) {
+      const end = this.surfaceAt(event.clientX, event.clientY); const start = this.regionStart; this.regionStart = null;
+      if (end) { this.regionState = regionBounds(start, end); this.environment.setRegionPreview(this.regionState); const ids = this.documentState.entities.filter((entity) => pointInRegion(this.regionState!, entity.position.x, entity.position.z)).map((entity) => entity.id); this.selectMany(ids); const size = regionSize(this.regionState); this.events.onStatus(`Região ${size.width.toFixed(1)} × ${size.depth.toFixed(1)} m · ${ids.length} objeto(s).`, 'success'); this.events.onDocumentChanged(this.documentState); }
+      return true;
+    }
     if (this.blockerStart) {
       const end = this.surfaceAt(event.clientX, event.clientY); const start = this.blockerStart; this.blockerStart = null; this.environment.setBlockerPreview(null, null);
-      if (end && Math.hypot(end.x - start.x, end.z - start.z) >= 0.5) {
-        this.documentState.blockers.push(createBlocker({ x1: start.x, z1: start.z, x2: end.x, z2: end.z }));
-        this.environment.update(this.documentState); this.touchDocument(); this.recordHistory(); this.events.onStatus('Blocker adicionado.', 'success');
-      }
+      if (end && Math.hypot(end.x - start.x, end.z - start.z) >= 0.5) { this.documentState.blockers.push(createBlocker({ x1: start.x, z1: start.z, x2: end.x, z2: end.z })); this.environment.update(this.documentState); this.touchDocument(); this.recordHistory(); this.events.onStatus('Blocker adicionado.', 'success'); }
       return true;
     }
     if (this.strokeActive) { this.strokeActive = false; this.strokePaintErase = false; this.lastStrokePoint = null; this.schedulePersist(); this.recordHistory(); return true; }
     return false;
   }
 
-  select(entityId: string | null): void {
-    if (entityId === this.selectedId) return; this.clearSelectionVisuals(); this.selectedId = entityId;
-    if (!entityId) { this.events.onSelectionChanged(null); return; }
-    const object = this.runtime.getObject(entityId); const entity = this.getEntity(entityId);
-    if (!object || !entity) { this.selectedId = null; this.events.onSelectionChanged(null); return; }
-    this.transformControls.attach(object); this.selectionBox = new THREE.BoxHelper(object, 0x78baff); this.selectionBox.userData.editorHelper = true; this.engine.scene.add(this.selectionBox); this.events.onSelectionChanged(entity);
+  select(entityId: string | null, additive = false): void {
+    if (!entityId) { if (!additive) this.clearSelection(); return; }
+    if (additive) {
+      if (this.selectedIds.has(entityId)) this.selectedIds.delete(entityId); else this.selectedIds.add(entityId);
+      this.selectedId = this.selectedIds.has(entityId) ? entityId : [...this.selectedIds].at(-1) ?? null;
+    } else { this.selectedIds.clear(); this.selectedIds.add(entityId); this.selectedId = entityId; }
+    this.refreshSelectionVisuals(); this.events.onSelectionChanged(this.getSelectedEntity());
   }
 
-  clearSelection(): void { this.select(null); }
+  selectMany(ids: readonly string[], additive = false): void {
+    if (!additive) this.selectedIds.clear();
+    for (const id of ids) if (this.getEntity(id)) this.selectedIds.add(id);
+    this.selectedId = [...this.selectedIds].at(-1) ?? null; this.refreshSelectionVisuals(); this.events.onSelectionChanged(this.getSelectedEntity());
+  }
+
+  clearSelection(): void { this.releaseSelectionPivot(true); this.clearSelectionVisuals(false); this.selectedIds.clear(); this.selectedId = null; this.events.onSelectionChanged(null); }
 
   selectFromPointer(event: PointerEvent): boolean {
     if (this.toolState !== 'select' || event.button !== 0 || this.isTransformInteracting) return false;
-    const rect = this.canvas.getBoundingClientRect(); this.pointer.x = ((event.clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1; this.pointer.y = -((event.clientY - rect.top) / Math.max(1, rect.height)) * 2 + 1;
-    this.raycaster.setFromCamera(this.pointer, this.engine.camera.camera);
+    const rect = this.canvas.getBoundingClientRect(); this.pointer.x = ((event.clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1; this.pointer.y = -((event.clientY - rect.top) / Math.max(1, rect.height)) * 2 + 1; this.raycaster.setFromCamera(this.pointer, this.engine.camera.camera);
     for (const hit of this.raycaster.intersectObjects(this.runtime.getObjects(), true)) {
       let current: THREE.Object3D | null = hit.object;
-      while (current) { const id = current.userData.worldEntityId as string | undefined; if (id) { this.select(id); return true; } current = current.parent; }
+      while (current) { const id = current.userData.worldEntityId as string | undefined; if (id) { this.select(id, event.shiftKey); return true; } current = current.parent; }
     }
-    this.clearSelection(); return false;
+    if (!event.shiftKey) this.clearSelection(); return false;
   }
 
   async placeAsset(asset: AssetRecord, position: SerializedVector3): Promise<void> {
@@ -383,44 +535,52 @@ export class WorldEditor {
   }
 
   async duplicateSelected(): Promise<void> {
-    const source = this.getSelectedEntity(); if (!source) return;
-    const copy = createWorldEntity({ assetId: source.assetId, assetName: source.assetName, name: `${source.name} Copy`, position: { x: source.position.x + 0.5, y: source.position.y, z: source.position.z + 0.5 } });
-    copy.rotation = { ...source.rotation }; copy.scale = { ...source.scale }; copy.visible = source.visible; copy.grounded = source.grounded; copy.groundOffset = source.groundOffset; copy.collision = { ...source.collision };
-    if (copy.grounded) copy.position.y = this.terrainHeightAt(copy.position.x, copy.position.z) + copy.groundOffset;
-    this.documentState.entities.push(copy); await this.runtime.add(copy); this.touchDocument(); this.recordHistory(); this.select(copy.id);
+    const sources = [...this.selectedIds].map((id) => this.getEntity(id)).filter((entity): entity is WorldEntityDocument => Boolean(entity)); if (!sources.length) return;
+    this.releaseSelectionPivot(true); this.clearSelectionVisuals(false); const created: string[] = [];
+    for (const source of sources) {
+      const copy = createWorldEntity({ assetId: source.assetId, assetName: source.assetName, name: `${source.name} Copy`, position: { x: source.position.x + 0.75, y: source.position.y, z: source.position.z + 0.75 } });
+      copy.rotation = { ...source.rotation }; copy.scale = { ...source.scale }; copy.visible = source.visible; copy.grounded = source.grounded; copy.groundOffset = source.groundOffset; copy.collision = { ...source.collision };
+      if (copy.grounded) copy.position.y = this.terrainHeightAt(copy.position.x, copy.position.z) + copy.groundOffset; this.documentState.entities.push(copy); await this.runtime.add(copy); created.push(copy.id);
+    }
+    this.selectMany(created); this.touchDocument(); this.recordHistory();
   }
 
   deleteSelected(): void {
-    const entity = this.getSelectedEntity(); if (!entity) return; this.clearSelection(); this.runtime.remove(entity.id); this.documentState.entities = this.documentState.entities.filter((candidate) => candidate.id !== entity.id); this.touchDocument(); this.recordHistory();
+    if (!this.selectedIds.size) return; const ids = new Set(this.selectedIds); this.releaseSelectionPivot(true); this.clearSelectionVisuals(false);
+    for (const id of ids) this.runtime.remove(id); this.documentState.entities = this.documentState.entities.filter((entity) => !ids.has(entity.id)); this.selectedIds.clear(); this.selectedId = null; this.touchDocument(); this.recordHistory(); this.events.onSelectionChanged(null);
   }
 
   focusSelected(): void {
-    const object = this.selectedId ? this.runtime.getObject(this.selectedId) : undefined; if (!object) return; const bounds = new THREE.Box3().setFromObject(object); this.engine.camera.setTarget(bounds.isEmpty() ? object.position.clone() : bounds.getCenter(new THREE.Vector3()));
+    const objects = [...this.selectedIds].map((id) => this.runtime.getObject(id)).filter((object): object is THREE.Object3D => Boolean(object)); if (!objects.length) return;
+    const bounds = new THREE.Box3(); for (const object of objects) bounds.expandByObject(object); if (!bounds.isEmpty()) this.engine.camera.setTarget(bounds.getCenter(new THREE.Vector3()));
   }
 
   renameSelected(name: string): void { const entity = this.getSelectedEntity(); const normalized = name.trim(); if (!entity || !normalized || normalized === entity.name) return; entity.name = normalized; const object = this.runtime.getObject(entity.id); if (object) object.name = normalized; this.touchDocument(); this.recordHistory(); }
-  setSelectedVisible(visible: boolean): void { const entity = this.getSelectedEntity(); if (!entity || entity.visible === visible) return; entity.visible = visible; const object = this.runtime.getObject(entity.id); if (object) object.visible = visible; this.touchDocument(); this.recordHistory(); }
+
+  setSelectedVisible(visible: boolean): void {
+    const ids = this.selectedIds.size ? [...this.selectedIds] : this.selectedId ? [this.selectedId] : []; if (!ids.length) return;
+    for (const id of ids) { const entity = this.getEntity(id); const object = this.runtime.getObject(id); if (entity) entity.visible = visible; if (object) object.visible = visible; } this.touchDocument(); this.recordHistory();
+  }
 
   setSelectedGrounding(grounded: boolean, offset?: number): void {
-    const entity = this.getSelectedEntity(); const object = entity ? this.runtime.getObject(entity.id) : undefined; if (!entity || !object) return;
-    entity.grounded = grounded; if (offset !== undefined && Number.isFinite(offset)) entity.groundOffset = offset;
-    if (grounded) entity.position.y = this.terrainHeightAt(entity.position.x, entity.position.z) + entity.groundOffset;
-    applyEntityTransform(entity, object); this.selectionBox?.update(); this.touchDocument(); this.recordHistory();
+    const ids = this.selectedIds.size ? [...this.selectedIds] : this.selectedId ? [this.selectedId] : []; if (!ids.length) return;
+    this.releaseSelectionPivot(true);
+    for (const id of ids) { const entity = this.getEntity(id); const object = this.runtime.getObject(id); if (!entity || !object) continue; entity.grounded = grounded; if (offset !== undefined && Number.isFinite(offset)) entity.groundOffset = offset; if (grounded) entity.position.y = this.terrainHeightAt(entity.position.x, entity.position.z) + entity.groundOffset; applyEntityTransform(entity, object); }
+    this.refreshSelectionVisuals(); this.touchDocument(); this.recordHistory();
   }
 
   snapSelectedToGround(): void { const entity = this.getSelectedEntity(); if (!entity) return; this.setSelectedGrounding(true, entity.groundOffset); }
 
   setSelectedCollision(mode: EntityCollisionMode, radius?: number): void {
-    const entity = this.getSelectedEntity(); if (!entity) return; entity.collision = mode === 'radius' ? { mode, radius: Math.max(0.1, Math.min(30, radius ?? entity.collision.radius ?? 1)) } : { mode }; this.touchDocument(); this.recordHistory();
+    const ids = this.selectedIds.size ? [...this.selectedIds] : this.selectedId ? [this.selectedId] : []; if (!ids.length) return;
+    for (const id of ids) { const entity = this.getEntity(id); if (!entity) continue; entity.collision = mode === 'radius' ? { mode, radius: Math.max(0.1, Math.min(30, radius ?? entity.collision.radius ?? 1)) } : { mode }; }
+    this.environment.refreshCollisionFootprints(this.documentState); this.touchDocument(); this.recordHistory();
   }
 
   updateSelectedTransform(transform: { position: SerializedVector3; rotationDegrees: SerializedVector3; scale: SerializedVector3 }): void {
-    const entity = this.getSelectedEntity(); const object = entity ? this.runtime.getObject(entity.id) : undefined; if (!entity || !object) return;
-    entity.position = { ...transform.position };
-    entity.rotation = { x: THREE.MathUtils.degToRad(transform.rotationDegrees.x), y: THREE.MathUtils.degToRad(transform.rotationDegrees.y), z: THREE.MathUtils.degToRad(transform.rotationDegrees.z) };
-    entity.scale = { x: Math.max(0.001, transform.scale.x), y: Math.max(0.001, transform.scale.y), z: Math.max(0.001, transform.scale.z) };
-    if (entity.grounded) entity.position.y = this.terrainHeightAt(entity.position.x, entity.position.z) + entity.groundOffset;
-    applyEntityTransform(entity, object); this.selectionBox?.update(); this.touchDocument(); this.recordHistory();
+    const entity = this.getSelectedEntity(); const object = entity ? this.runtime.getObject(entity.id) : undefined; if (!entity || !object || this.selectedIds.size > 1) return;
+    entity.position = { ...transform.position }; entity.rotation = { x: THREE.MathUtils.degToRad(transform.rotationDegrees.x), y: THREE.MathUtils.degToRad(transform.rotationDegrees.y), z: THREE.MathUtils.degToRad(transform.rotationDegrees.z) }; entity.scale = { x: Math.max(0.001, transform.scale.x), y: Math.max(0.001, transform.scale.y), z: Math.max(0.001, transform.scale.z) };
+    if (entity.grounded) entity.position.y = this.terrainHeightAt(entity.position.x, entity.position.z) + entity.groundOffset; applyEntityTransform(entity, object); this.updateSelectionBoxes(); this.touchDocument(); this.recordHistory();
   }
 
   getSelectedEntity(): WorldEntityDocument | null { return this.selectedId ? this.getEntity(this.selectedId) ?? null : null; }
@@ -429,17 +589,36 @@ export class WorldEditor {
   async undo(): Promise<void> { if (!this.canUndo()) return; this.historyIndex -= 1; await this.restoreHistory(); }
   async redo(): Promise<void> { if (!this.canRedo()) return; this.historyIndex += 1; await this.restoreHistory(); }
 
+  private async pasteRegionAt(centerX: number, centerZ: number): Promise<void> {
+    const clipboard = this.regionClipboard; if (!clipboard) return;
+    this.releaseSelectionPivot(true); this.clearSelectionVisuals(false); this.selectedIds.clear(); this.selectedId = null;
+    const created: string[] = [];
+    for (const relative of clipboard.entities) {
+      const source = relative.entity; const x = centerX + relative.dx; const z = centerZ + relative.dz;
+      const copy = createWorldEntity({ assetId: source.assetId, assetName: source.assetName, name: source.name, position: { x, y: source.position.y, z } });
+      copy.rotation = { ...source.rotation }; copy.scale = { ...source.scale }; copy.visible = source.visible; copy.grounded = source.grounded; copy.groundOffset = source.groundOffset; copy.collision = { ...source.collision }; if (copy.grounded) copy.position.y = this.terrainHeightAt(x, z) + copy.groundOffset;
+      this.documentState.entities.push(copy); created.push(copy.id);
+    }
+    for (const relative of clipboard.heights) this.documentState.terrain.heightStamps.push(createHeightStamp({ ...relative.stamp, x: centerX + relative.dx, z: centerZ + relative.dz }));
+    for (const relative of clipboard.paints) if (this.layerById(relative.stamp.layerId)) this.documentState.terrain.paintStamps.push(createPaintStamp({ ...relative.stamp, x: centerX + relative.dx, z: centerZ + relative.dz }));
+    for (const relative of clipboard.blockers) this.documentState.blockers.push(createBlocker({ x1: centerX + relative.dx1, z1: centerZ + relative.dz1, x2: centerX + relative.dx2, z2: centerZ + relative.dz2 }));
+    this.regionState = { minX: centerX - clipboard.width * 0.5, maxX: centerX + clipboard.width * 0.5, minZ: centerZ - clipboard.depth * 0.5, maxZ: centerZ + clipboard.depth * 0.5 }; this.environment.setRegionPreview(this.regionState);
+    await this.rebuildAfterBatch(); this.selectMany(created); this.recordHistory(); this.events.onStatus(`Região colada com ${created.length} objeto(s).`, 'success');
+  }
+
+  private slopeAt(x: number, z: number): number {
+    const sample = 0.65; const dx = (this.terrainHeightAt(x + sample, z) - this.terrainHeightAt(x - sample, z)) / (sample * 2); const dz = (this.terrainHeightAt(x, z + sample) - this.terrainHeightAt(x, z - sample)) / (sample * 2); return THREE.MathUtils.radToDeg(Math.atan(Math.hypot(dx, dz)));
+  }
+
   private applyBrush(point: THREE.Vector3): void {
     if (this.lastStrokePoint && point.distanceTo(this.lastStrokePoint) < Math.max(0.18, this.brush.radius * 0.2)) return;
     this.lastStrokePoint = point.clone(); let region: TerrainRegion | null = null;
     if (this.toolState === 'paint') {
       if (this.documentState.terrain.paintStamps.length >= MAX_STAMPS) { this.events.onStatus('Limite de pintura do terreno atingido.', 'error'); return; }
       const layer = this.layerById(this.brush.paintLayerId); if (!layer || layer.locked) return;
-      const stamp = createPaintStamp({ x: point.x, z: point.z, radius: this.brush.radius, layerId: layer.id, strength: Math.min(1, this.brush.strength / 10), mode: this.strokePaintErase ? 'erase' : 'paint' });
-      this.documentState.terrain.paintStamps.push(stamp); region = stampRegion(stamp);
+      const stamp = createPaintStamp({ x: point.x, z: point.z, radius: this.brush.radius, layerId: layer.id, strength: Math.min(1, this.brush.strength / 10), mode: this.strokePaintErase ? 'erase' : 'paint' }); this.documentState.terrain.paintStamps.push(stamp); region = stampRegion(stamp);
     } else if (this.toolState === 'erase') {
-      const paintIndex = latestPaintStampIndex(this.documentState.terrain.paintStamps, point.x, point.z);
-      const heightIndex = latestHeightStampIndex(this.documentState.terrain.heightStamps, point.x, point.z);
+      const paintIndex = latestPaintStampIndex(this.documentState.terrain.paintStamps, point.x, point.z); const heightIndex = latestHeightStampIndex(this.documentState.terrain.heightStamps, point.x, point.z);
       if (paintIndex >= 0) { const [removed] = this.documentState.terrain.paintStamps.splice(paintIndex, 1); if (removed) region = stampRegion(removed); }
       else if (heightIndex >= 0) { const [removed] = this.documentState.terrain.heightStamps.splice(heightIndex, 1); if (removed) region = stampRegion(removed); }
     } else {
@@ -451,32 +630,61 @@ export class WorldEditor {
       const stamp = createHeightStamp({ x: point.x, z: point.z, radius: this.brush.radius, delta, falloff: this.brush.falloff, mode }); this.documentState.terrain.heightStamps.push(stamp); region = stampRegion(stamp);
     }
     if (!region) return;
-    this.strokeRegion = unionTerrainRegion(this.strokeRegion, region); this.documentState.updatedAt = Date.now(); this.environment.refreshTerrain(this.documentState, region); this.runtime.reseatGrounded(this.documentState, region); this.selectionBox?.update();
+    this.strokeRegion = unionTerrainRegion(this.strokeRegion, region); this.documentState.updatedAt = Date.now(); this.environment.refreshTerrain(this.documentState, region); this.runtime.reseatGrounded(this.documentState, region); this.updateSelectionBoxes();
   }
 
   private layerById(layerId: string): TerrainLayerDocument | undefined { return this.documentState.terrain.layers.find((layer) => layer.id === layerId); }
 
-  private refreshTerrainAndCommit(): void {
-    this.ensureBrushLayer(); this.environment.refreshTerrain(this.documentState); this.environment.setTerrainMaskPreview(this.documentState, this.maskPreviewLayerId); this.touchDocument(); this.recordHistory();
-  }
-
-  private ensureBrushLayer(): void {
-    if (!this.layerById(this.brush.paintLayerId)) this.brush.paintLayerId = this.documentState.terrain.layers[0]?.id ?? '';
-  }
+  private refreshTerrainAndCommit(): void { this.ensureBrushLayer(); this.environment.refreshTerrain(this.documentState); this.environment.setTerrainMaskPreview(this.documentState, this.maskPreviewLayerId); this.touchDocument(); this.recordHistory(); }
+  private ensureBrushLayer(): void { if (!this.layerById(this.brush.paintLayerId)) this.brush.paintLayerId = this.documentState.terrain.layers[0]?.id ?? ''; }
 
   private finishAuthoringGesture(): void {
     if (this.strokeActive) { this.strokeActive = false; this.lastStrokePoint = null; if (this.strokeRegion) this.recordHistory(); }
-    this.strokePaintErase = false; this.strokeRegion = null; this.blockerStart = null; this.environment.setBlockerPreview(null, null);
+    this.strokePaintErase = false; this.strokeRegion = null; this.blockerStart = null; this.regionStart = null; this.environment.setBlockerPreview(null, null);
   }
 
   private async activateDocument(document: WorldDocument): Promise<void> {
-    this.finishAuthoringGesture(); this.clearSelection(); this.documentState = cloneWorldDocument(document); this.ensureBrushLayer(); this.maskPreviewLayerId = null;
-    this.environment.update(this.documentState); this.environment.setTerrainMaskPreview(this.documentState, null); await this.runtime.build(this.documentState); this.runtime.setObjectsVisible(this.objectsVisible);
+    this.finishAuthoringGesture(); this.clearSelection(); this.documentState = cloneWorldDocument(document); this.ensureBrushLayer(); this.maskPreviewLayerId = null; this.regionState = null; this.regionClipboard = null; this.pasteArmed = false; this.scatterPreview = [];
+    this.environment.update(this.documentState); this.environment.setTerrainMaskPreview(this.documentState, null); this.environment.setRegionPreview(null); this.environment.setScatterPreview(null); await this.runtime.build(this.documentState); this.runtime.setObjectsVisible(this.objectsVisible);
     await this.worlds.setCurrentId(this.documentState.id); this.resetHistory(); this.emitDocumentChanged();
   }
 
+  private async rebuildAfterBatch(): Promise<void> {
+    this.environment.update(this.documentState); this.environment.setTerrainMaskPreview(this.documentState, this.maskPreviewLayerId); await this.runtime.build(this.documentState); this.runtime.setObjectsVisible(this.objectsVisible); this.touchDocument(false);
+  }
+
+  private refreshSelectionVisuals(): void {
+    this.releaseSelectionPivot(true); this.clearSelectionVisuals(false);
+    const validIds = [...this.selectedIds].filter((id) => this.getEntity(id) && this.runtime.getObject(id)); this.selectedIds.clear(); validIds.forEach((id) => this.selectedIds.add(id));
+    if (!this.selectedIds.size) { this.selectedId = null; return; }
+    if (!this.selectedId || !this.selectedIds.has(this.selectedId)) this.selectedId = [...this.selectedIds].at(-1) ?? null;
+    for (const id of this.selectedIds) { const object = this.runtime.getObject(id); if (!object) continue; const box = new THREE.BoxHelper(object, id === this.selectedId ? 0x78baff : 0x69d9a9); box.userData.editorHelper = true; this.selectionBoxes.set(id, box); this.engine.scene.add(box); }
+    if (this.selectedIds.size === 1) { const object = this.selectedId ? this.runtime.getObject(this.selectedId) : undefined; if (object) this.transformControls.attach(object); return; }
+    const pivot = new THREE.Group(); pivot.name = 'Multi Selection Pivot'; pivot.userData.editorHelper = true; const center = new THREE.Vector3(); let count = 0;
+    for (const id of this.selectedIds) { const object = this.runtime.getObject(id); if (!object) continue; center.add(object.getWorldPosition(new THREE.Vector3())); count += 1; }
+    if (count > 0) center.multiplyScalar(1 / count); pivot.position.copy(center); this.engine.scene.add(pivot);
+    for (const id of this.selectedIds) { const object = this.runtime.getObject(id); if (object) pivot.attach(object); }
+    this.selectionPivot = pivot; this.transformControls.attach(pivot);
+  }
+
+  private releaseSelectionPivot(sync: boolean): void {
+    const pivot = this.selectionPivot; if (!pivot) return;
+    this.transformControls.detach();
+    for (const id of this.selectedIds) {
+      const object = this.runtime.getObject(id); const entity = this.getEntity(id); if (!object || object.parent !== pivot) continue;
+      this.engine.scene.attach(object);
+      if (sync && entity) { syncEntityWorldTransform(entity, object); if (entity.grounded) entity.groundOffset = entity.position.y - this.terrainHeightAt(entity.position.x, entity.position.z); }
+    }
+    this.engine.scene.remove(pivot); this.selectionPivot = null;
+  }
+
+  private clearSelectionVisuals(releasePivot = true): void {
+    if (releasePivot) this.releaseSelectionPivot(true); this.transformControls.detach();
+    for (const box of this.selectionBoxes.values()) this.engine.scene.remove(box); this.selectionBoxes.clear();
+  }
+
+  private updateSelectionBoxes(): void { for (const box of this.selectionBoxes.values()) box.update(); }
   private getEntity(id: string): WorldEntityDocument | undefined { return this.documentState.entities.find((entity) => entity.id === id); }
-  private clearSelectionVisuals(): void { this.transformControls.detach(); if (this.selectionBox) this.engine.scene.remove(this.selectionBox); this.selectionBox = null; }
   private touchDocument(emit = true): void { this.documentState.updatedAt = Date.now(); this.schedulePersist(); if (emit) this.emitDocumentChanged(); }
 
   private schedulePersist(): void {
@@ -489,13 +697,17 @@ export class WorldEditor {
   private recordHistory(): void { this.history.splice(this.historyIndex + 1); this.history.push(cloneWorldDocument(this.documentState)); if (this.history.length > HISTORY_LIMIT) this.history.shift(); this.historyIndex = this.history.length - 1; this.emitDocumentChanged(); }
 
   private async restoreHistory(): Promise<void> {
-    const snapshot = this.history[this.historyIndex]; if (!snapshot) return; this.documentState = cloneWorldDocument(snapshot); this.ensureBrushLayer(); this.environment.update(this.documentState); this.environment.setTerrainMaskPreview(this.documentState, this.maskPreviewLayerId); await this.runtime.build(this.documentState); this.runtime.setObjectsVisible(this.objectsVisible); this.touchDocument();
+    const snapshot = this.history[this.historyIndex]; if (!snapshot) return; this.clearSelection(); this.documentState = cloneWorldDocument(snapshot); this.ensureBrushLayer(); this.environment.update(this.documentState); this.environment.setTerrainMaskPreview(this.documentState, this.maskPreviewLayerId); await this.runtime.build(this.documentState); this.runtime.setObjectsVisible(this.objectsVisible); this.touchDocument();
   }
 
   private handleDraggingChanged = (event: unknown): void => { this.transformDragging = Boolean((event as { value?: boolean }).value); };
   private handleObjectChange = (): void => {
-    const entity = this.getSelectedEntity(); const object = entity ? this.runtime.getObject(entity.id) : undefined; if (!entity || !object) return; syncEntityTransform(entity, object);
-    if (entity.grounded) entity.groundOffset = object.position.y - this.terrainHeightAt(object.position.x, object.position.z); this.selectionBox?.update(); this.touchDocument();
+    if (this.selectionPivot) { this.updateSelectionBoxes(); return; }
+    const entity = this.getSelectedEntity(); const object = entity ? this.runtime.getObject(entity.id) : undefined; if (!entity || !object) return; syncEntityTransform(entity, object); if (entity.grounded) entity.groundOffset = object.position.y - this.terrainHeightAt(object.position.x, object.position.z); this.updateSelectionBoxes(); this.touchDocument();
   };
-  private handleTransformEnd = (): void => { if (!this.getSelectedEntity()) return; this.touchDocument(); this.recordHistory(); };
+  private handleTransformEnd = (): void => {
+    if (!this.selectedIds.size) return;
+    if (this.selectionPivot) { this.releaseSelectionPivot(true); this.refreshSelectionVisuals(); this.touchDocument(); this.recordHistory(); return; }
+    if (this.getSelectedEntity()) { this.touchDocument(); this.recordHistory(); }
+  };
 }
