@@ -6,11 +6,16 @@ export interface EngineFrame {
   elapsed: number;
 }
 
+export interface EngineCamera {
+  readonly camera: THREE.Camera;
+  resize(width: number, height: number): void;
+}
+
 export type FrameHandler = (frame: EngineFrame) => void;
 
-export class Engine {
+export class Engine<TCamera extends EngineCamera = IsometricCamera> {
   readonly scene = new THREE.Scene();
-  readonly camera = new IsometricCamera();
+  readonly camera: TCamera;
   readonly renderer: THREE.WebGLRenderer;
 
   private readonly clock = new THREE.Clock();
@@ -18,7 +23,8 @@ export class Engine {
   private animationFrame = 0;
   private readonly resizeObserver: ResizeObserver;
 
-  constructor(readonly canvas: HTMLCanvasElement) {
+  constructor(readonly canvas: HTMLCanvasElement, camera?: TCamera) {
+    this.camera = camera ?? (new IsometricCamera() as TCamera);
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
