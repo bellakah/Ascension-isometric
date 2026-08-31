@@ -37,6 +37,8 @@ export class WorldEnvironment {
     this.currentDocument = document; this.terrain.update(document, region); this.rebuildSpawn(); this.rebuildBlockers(); this.refreshCollisionFootprints(document); this.applyVisibility();
   }
 
+  setTerrainMaskPreview(document: WorldDocument, layerId: string | null): void { this.currentDocument = document; this.terrain.setMaskPreview(document, layerId); }
+
   refreshCollisionFootprints(document: WorldDocument): void {
     this.currentDocument = document;
     for (const child of [...this.collisionGroup.children]) { this.collisionGroup.remove(child); if (child instanceof THREE.Mesh) this.disposeMesh(child); }
