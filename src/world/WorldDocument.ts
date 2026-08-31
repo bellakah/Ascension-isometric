@@ -1,9 +1,11 @@
-export const WORLD_DOCUMENT_VERSION = 3 as const;
-export const LEGACY_WORLD_DOCUMENT_VERSIONS = [1, 2] as const;
+export const WORLD_DOCUMENT_VERSION = 4 as const;
+export const LEGACY_WORLD_DOCUMENT_VERSIONS = [1, 2, 3] as const;
+export const MAX_TERRAIN_LAYERS = 16;
 
 export interface SerializedVector3 { x: number; y: number; z: number; }
 export type TerrainFalloff = 'smooth' | 'flat';
 export type TerrainStampMode = 'add' | 'level';
+export type TerrainPaintMode = 'paint' | 'erase';
 export type EntityCollisionMode = 'none' | 'auto' | 'radius';
 
 export interface WorldEnvironmentDocument {
@@ -27,8 +29,9 @@ export interface TerrainPaintStamp {
   x: number;
   z: number;
   radius: number;
-  layer: number;
+  layerId: string;
   strength: number;
+  mode: TerrainPaintMode;
 }
 
 export interface TerrainLayerDocument {
@@ -37,7 +40,16 @@ export interface TerrainLayerDocument {
   materialId?: string;
   materialName?: string;
   fallbackColor: string;
+  tint: string;
   tileScale: number;
+  rotation: number;
+  opacity: number;
+  normalStrength: number;
+  roughnessMultiplier: number;
+  visible: boolean;
+  locked: boolean;
+  solo: boolean;
+  fill: number;
 }
 
 export interface TerrainDocument {
@@ -97,9 +109,8 @@ export interface WorldDocument {
 }
 
 const MAX_TERRAIN_STAMPS = 4000;
-const MAX_PAINT_STAMPS = 4000;
+const MAX_PAINT_STAMPS = 12000;
 const MAX_BLOCKERS = 256;
-const MAX_TERRAIN_LAYERS = 4;
 
 const DEFAULT_ENVIRONMENT: WorldEnvironmentDocument = {
   groundSize: 100,
@@ -107,11 +118,11 @@ const DEFAULT_ENVIRONMENT: WorldEnvironmentDocument = {
   backgroundColor: '#9fc2da',
 };
 
-const DEFAULT_LAYERS: TerrainLayerDocument[] = [
-  { id: 'grass', name: 'Grass', fallbackColor: '#71955f', tileScale: 10 },
-  { id: 'dirt', name: 'Dirt', fallbackColor: '#8b7355', tileScale: 10 },
-  { id: 'rock', name: 'Rock', fallbackColor: '#7c817e', tileScale: 8 },
-  { id: 'sand', name: 'Sand', fallbackColor: '#c9b77d', tileScale: 9 },
+const DEFAULT_LAYER_SEEDS: Array<Pick<TerrainLayerDocument, 'id' | 'name' | 'fallbackColor' | 'tileScale' | 'fill'>> = [
+  { id: 'grass', name: 'Grass', fallbackColor: '#71955f', tileScale: 10, fill: 1 },
+  { id: 'dirt', name: 'Dirt', fallbackColor: '#8b7355', tileScale: 10, fill: 0 },
+  { id: 'rock', name: 'Rock', fallbackColor: '#7c817e', tileScale: 8, fill: 0 },
+  { id: 'sand', name: 'Sand', fallbackColor: '#c9b77d', tileScale: 9, fill: 0 },
 ];
 
 const DEFAULT_WATER: WorldWaterDocument = {
@@ -123,6 +134,10 @@ const DEFAULT_WATER: WorldWaterDocument = {
 
 function finite(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
 
 function vector(value: unknown, fallback: SerializedVector3): SerializedVector3 {
@@ -147,62 +162,137 @@ function worldId(): string { return id('world'); }
 function entityId(): string { return id('entity'); }
 function stampId(): string { return id('stamp'); }
 function blockerId(): string { return id('blocker'); }
+export function terrainLayerId(): string { return id('terrain-layer'); }
 
 function legacyWorldId(name: string, updatedAt: number): string {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'world';
   return `legacy-${slug}-${Math.max(0, Math.floor(updatedAt))}`;
 }
 
-function parseLayer(value: unknown, index: number): TerrainLayerDocument {
-  const fallback = DEFAULT_LAYERS[index] ?? DEFAULT_LAYERS[0]!;
-  const raw = value && typeof value === 'object' ? value as Partial<TerrainLayerDocument> : {};
-  const materialId = typeof raw.materialId === 'string' && raw.materialId.trim() ? raw.materialId.trim() : undefined;
-  const materialName = typeof raw.materialName === 'string' && raw.materialName.trim() ? raw.materialName.trim() : undefined;
+function defaultLayer(index: number): TerrainLayerDocument {
+  const seed = DEFAULT_LAYER_SEEDS[index] ?? {
+    id: terrainLayerId(),
+    name: `Layer ${index + 1}`,
+    fallbackColor: '#808080',
+    tileScale: 10,
+    fill: 0,
+  };
   return {
-    id: text(raw.id, fallback.id),
-    name: text(raw.name, fallback.name),
-    ...(materialId ? { materialId } : {}),
-    ...(materialName ? { materialName } : {}),
-    fallbackColor: color(raw.fallbackColor, fallback.fallbackColor),
-    tileScale: Math.max(0.25, Math.min(100, finite(raw.tileScale, fallback.tileScale))),
+    id: seed.id,
+    name: seed.name,
+    fallbackColor: seed.fallbackColor,
+    tint: '#ffffff',
+    tileScale: seed.tileScale,
+    rotation: 0,
+    opacity: 1,
+    normalStrength: 1,
+    roughnessMultiplier: 1,
+    visible: true,
+    locked: false,
+    solo: false,
+    fill: seed.fill,
   };
 }
 
-function parseTerrain(value: unknown): TerrainDocument {
-  const raw = value && typeof value === 'object' ? value as Partial<TerrainDocument> : {};
+export function createTerrainLayer(input: Partial<TerrainLayerDocument> = {}): TerrainLayerDocument {
+  const fallback = defaultLayer(99);
+  const materialId = typeof input.materialId === 'string' && input.materialId.trim() ? input.materialId.trim() : undefined;
+  const materialName = typeof input.materialName === 'string' && input.materialName.trim() ? input.materialName.trim() : undefined;
+  return {
+    id: text(input.id, terrainLayerId()),
+    name: text(input.name, 'New Layer'),
+    ...(materialId ? { materialId } : {}),
+    ...(materialName ? { materialName } : {}),
+    fallbackColor: color(input.fallbackColor, fallback.fallbackColor),
+    tint: color(input.tint, '#ffffff'),
+    tileScale: clamp(finite(input.tileScale, 10), 0.25, 100),
+    rotation: clamp(finite(input.rotation, 0), -3600, 3600),
+    opacity: clamp(finite(input.opacity, 1), 0, 1),
+    normalStrength: clamp(finite(input.normalStrength, 1), 0, 4),
+    roughnessMultiplier: clamp(finite(input.roughnessMultiplier, 1), 0, 4),
+    visible: input.visible !== false,
+    locked: input.locked === true,
+    solo: input.solo === true,
+    fill: clamp(finite(input.fill, 0), 0, 1),
+  };
+}
+
+function parseLayer(value: unknown, index: number): TerrainLayerDocument {
+  const fallback = defaultLayer(index);
+  if (!value || typeof value !== 'object') return fallback;
+  const raw = value as Partial<TerrainLayerDocument>;
+  return createTerrainLayer({
+    ...fallback,
+    ...raw,
+    id: text(raw.id, fallback.id),
+    name: text(raw.name, fallback.name),
+    fallbackColor: color(raw.fallbackColor, fallback.fallbackColor),
+    tint: color(raw.tint, '#ffffff'),
+    fill: finite(raw.fill, fallback.fill),
+  });
+}
+
+function normalizeLayerIds(layers: TerrainLayerDocument[]): TerrainLayerDocument[] {
+  const used = new Set<string>();
+  return layers.map((layer) => {
+    let nextId = layer.id;
+    while (!nextId || used.has(nextId)) nextId = terrainLayerId();
+    used.add(nextId);
+    return nextId === layer.id ? layer : { ...layer, id: nextId };
+  });
+}
+
+function parseTerrain(value: unknown, sourceVersion: number): TerrainDocument {
+  const raw = value && typeof value === 'object' ? value as Partial<TerrainDocument> & { paintStamps?: unknown[]; layers?: unknown[] } : {};
   const rawLayers = Array.isArray(raw.layers) ? raw.layers.slice(0, MAX_TERRAIN_LAYERS) : [];
-  const layers = Array.from({ length: MAX_TERRAIN_LAYERS }, (_, index) => parseLayer(rawLayers[index], index));
+  let layers = rawLayers.length > 0 ? rawLayers.map((entry, index) => parseLayer(entry, index)) : DEFAULT_LAYER_SEEDS.map((_, index) => defaultLayer(index));
+  layers = normalizeLayerIds(layers);
+  if (layers.length === 0) layers.push(defaultLayer(0));
+  const soloIndex = layers.findIndex((layer) => layer.solo);
+  if (soloIndex >= 0) layers = layers.map((layer, index) => ({ ...layer, solo: index === soloIndex }));
+
   const heightStamps: TerrainHeightStamp[] = [];
   if (Array.isArray(raw.heightStamps)) {
     for (const entry of raw.heightStamps.slice(0, MAX_TERRAIN_STAMPS)) {
       if (!entry || typeof entry !== 'object') continue;
       const stamp = entry as Partial<TerrainHeightStamp>;
-      const radius = Math.max(0.25, Math.min(200, finite(stamp.radius, 4)));
       heightStamps.push({
         id: text(stamp.id, stampId()),
-        x: finite(stamp.x, 0), z: finite(stamp.z, 0), radius,
-        delta: Math.max(-200, Math.min(200, finite(stamp.delta, 0))),
+        x: finite(stamp.x, 0),
+        z: finite(stamp.z, 0),
+        radius: clamp(finite(stamp.radius, 4), 0.25, 200),
+        delta: clamp(finite(stamp.delta, 0), -200, 200),
         falloff: stamp.falloff === 'flat' ? 'flat' : 'smooth',
         mode: stamp.mode === 'level' ? 'level' : 'add',
       });
     }
   }
+
   const paintStamps: TerrainPaintStamp[] = [];
   if (Array.isArray(raw.paintStamps)) {
     for (const entry of raw.paintStamps.slice(0, MAX_PAINT_STAMPS)) {
       if (!entry || typeof entry !== 'object') continue;
-      const stamp = entry as Partial<TerrainPaintStamp>;
+      const stamp = entry as Partial<TerrainPaintStamp> & { layer?: number };
+      let layerId = typeof stamp.layerId === 'string' ? stamp.layerId : '';
+      if (!layerId && sourceVersion <= 3) {
+        const legacyIndex = clamp(Math.floor(finite(stamp.layer, 0)), 0, layers.length - 1);
+        layerId = layers[legacyIndex]?.id ?? layers[0]!.id;
+      }
+      if (!layers.some((layer) => layer.id === layerId)) layerId = layers[0]!.id;
       paintStamps.push({
         id: text(stamp.id, stampId()),
-        x: finite(stamp.x, 0), z: finite(stamp.z, 0),
-        radius: Math.max(0.25, Math.min(200, finite(stamp.radius, 4))),
-        layer: Math.max(0, Math.min(MAX_TERRAIN_LAYERS - 1, Math.floor(finite(stamp.layer, 0)))),
-        strength: Math.max(0.01, Math.min(1, finite(stamp.strength, 1))),
+        x: finite(stamp.x, 0),
+        z: finite(stamp.z, 0),
+        radius: clamp(finite(stamp.radius, 4), 0.25, 200),
+        layerId,
+        strength: clamp(finite(stamp.strength, 1), 0.01, 1),
+        mode: stamp.mode === 'erase' ? 'erase' : 'paint',
       });
     }
   }
+
   return {
-    resolution: Math.max(16, Math.min(192, Math.round(finite(raw.resolution, 64)))),
+    resolution: clamp(Math.round(finite(raw.resolution, 64)), 16, 192),
     heightStamps,
     paintStamps,
     layers,
@@ -213,9 +303,9 @@ function parseWater(value: unknown): WorldWaterDocument {
   const raw = value && typeof value === 'object' ? value as Partial<WorldWaterDocument> : {};
   return {
     enabled: raw.enabled === true,
-    level: Math.max(-100, Math.min(100, finite(raw.level, DEFAULT_WATER.level))),
+    level: clamp(finite(raw.level, DEFAULT_WATER.level), -100, 100),
     color: color(raw.color, DEFAULT_WATER.color),
-    opacity: Math.max(0.05, Math.min(0.95, finite(raw.opacity, DEFAULT_WATER.opacity))),
+    opacity: clamp(finite(raw.opacity, DEFAULT_WATER.opacity), 0.05, 0.95),
   };
 }
 
@@ -235,11 +325,10 @@ function parseBlockers(value: unknown): WorldBlockerDocument[] {
 function parseCollision(value: unknown): WorldEntityCollisionDocument {
   const raw = value && typeof value === 'object' ? value as Partial<WorldEntityCollisionDocument> : {};
   const mode: EntityCollisionMode = raw.mode === 'auto' || raw.mode === 'radius' ? raw.mode : 'none';
-  if (mode !== 'radius') return { mode };
-  return { mode, radius: Math.max(0.1, Math.min(30, finite(raw.radius, 1))) };
+  return mode === 'radius' ? { mode, radius: clamp(finite(raw.radius, 1), 0.1, 30) } : { mode };
 }
 
-function parseEntities(entries: unknown[], legacy: boolean): WorldEntityDocument[] {
+function parseEntities(entries: unknown[], legacyGrounding: boolean): WorldEntityDocument[] {
   const normalized: WorldEntityDocument[] = entries.map((entry, index) => {
     if (!entry || typeof entry !== 'object') throw new Error(`Entidade inválida no índice ${index}.`);
     const entity = entry as Partial<WorldEntityDocument>;
@@ -252,7 +341,7 @@ function parseEntities(entries: unknown[], legacy: boolean): WorldEntityDocument
       id: text(entity.id, `entity-${index}`), name: text(entity.name, assetName), assetId, assetName,
       position: vector(entity.position, { x: 0, y: 0, z: 0 }), rotation: vector(entity.rotation, { x: 0, y: 0, z: 0 }), scale,
       visible: entity.visible !== false,
-      grounded: legacy ? entity.grounded === true : entity.grounded !== false,
+      grounded: legacyGrounding ? entity.grounded === true : entity.grounded !== false,
       groundOffset: finite(entity.groundOffset, 0),
       collision: parseCollision(entity.collision),
     };
@@ -267,7 +356,7 @@ export function createWorldDocument(name = 'Novo mapa'): WorldDocument {
   return {
     version: WORLD_DOCUMENT_VERSION, id: worldId(), name: name.trim() || 'Novo mapa', description: '',
     spawn: { x: 0, y: 0, z: 0 }, environment: { ...DEFAULT_ENVIRONMENT },
-    terrain: { resolution: 64, heightStamps: [], paintStamps: [], layers: DEFAULT_LAYERS.map((layer) => ({ ...layer })) },
+    terrain: { resolution: 64, heightStamps: [], paintStamps: [], layers: DEFAULT_LAYER_SEEDS.map((_, index) => defaultLayer(index)) },
     water: { ...DEFAULT_WATER }, blockers: [], entities: [], createdAt: now, updatedAt: now,
   };
 }
@@ -299,24 +388,25 @@ export function cloneWorldDocument(document: WorldDocument): WorldDocument {
 export function parseWorldDocument(value: unknown): WorldDocument {
   if (!value || typeof value !== 'object') throw new Error('WorldDocument inválido.');
   const raw = value as Omit<Partial<WorldDocument>, 'version'> & { version?: number; entities?: unknown[] };
-  const legacy = raw.version === 1 || raw.version === 2;
-  if (raw.version !== WORLD_DOCUMENT_VERSION && !legacy) throw new Error(`Versão de WorldDocument não suportada: ${String(raw.version)}.`);
+  const sourceVersion = Math.floor(finite(raw.version, 0));
+  if (![1, 2, 3, WORLD_DOCUMENT_VERSION].includes(sourceVersion)) throw new Error(`Versão de WorldDocument não suportada: ${String(raw.version)}.`);
+  const legacyGrounding = sourceVersion <= 2;
   const name = text(raw.name, 'Ascension World');
   const updatedAt = finite(raw.updatedAt, Date.now()); const createdAt = finite(raw.createdAt, updatedAt);
   const environmentRaw = raw.environment && typeof raw.environment === 'object' ? raw.environment as Partial<WorldEnvironmentDocument> : {};
   const environment = {
-    groundSize: Math.max(10, Math.min(1000, finite(environmentRaw.groundSize, DEFAULT_ENVIRONMENT.groundSize))),
+    groundSize: clamp(finite(environmentRaw.groundSize, DEFAULT_ENVIRONMENT.groundSize), 10, 1000),
     groundColor: color(environmentRaw.groundColor, DEFAULT_ENVIRONMENT.groundColor),
     backgroundColor: color(environmentRaw.backgroundColor, DEFAULT_ENVIRONMENT.backgroundColor),
   };
-  const terrain = parseTerrain(raw.terrain);
-  if (legacy && (!raw.terrain || typeof raw.terrain !== 'object')) terrain.layers[0] = { ...terrain.layers[0]!, fallbackColor: environment.groundColor };
+  const terrain = parseTerrain(raw.terrain, sourceVersion);
+  if (sourceVersion <= 2 && (!raw.terrain || typeof raw.terrain !== 'object')) terrain.layers[0] = { ...terrain.layers[0]!, fallbackColor: environment.groundColor };
   return {
     version: WORLD_DOCUMENT_VERSION,
     id: text(raw.id, legacyWorldId(name, updatedAt)), name, description: typeof raw.description === 'string' ? raw.description.trim() : '',
     spawn: vector(raw.spawn, { x: 0, y: 0, z: 0 }), environment, terrain,
     water: parseWater(raw.water), blockers: parseBlockers(raw.blockers),
-    entities: parseEntities(Array.isArray(raw.entities) ? raw.entities : [], legacy), createdAt, updatedAt,
+    entities: parseEntities(Array.isArray(raw.entities) ? raw.entities : [], legacyGrounding), createdAt, updatedAt,
   };
 }
 
