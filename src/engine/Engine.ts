@@ -24,7 +24,7 @@ export class Engine<TCamera extends EngineCamera = IsometricCamera> {
   private readonly resizeObserver: ResizeObserver;
 
   constructor(readonly canvas: HTMLCanvasElement, camera?: TCamera) {
-    this.camera = camera ?? (new IsometricCamera() as TCamera);
+    this.camera = camera ?? (new IsometricCamera() as unknown as TCamera);
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
