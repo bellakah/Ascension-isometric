@@ -20,12 +20,15 @@ The requested orbit distance is preserved when the mathematical camera point fal
 
 ## Controls
 
-- Mouse wheel: zoom
-- Middle-mouse drag: orbit
+- Right-mouse drag: primary camera orbit
+- Middle-mouse drag: orbit alternative
 - Alt + left-mouse drag: orbit alternative
+- Mouse wheel: zoom
 - WASD: camera-relative movement
+- Left click/J: attack
+- K: block
 
-Existing combat bindings remain available: left click/J attacks and right click/K blocks. Alt + left click is reserved for camera orbit and does not queue an attack.
+Right mouse is reserved for camera orbit so camera and combat never compete for the same held button. The camera captures the pointer when possible and also listens for drag movement/release at window level, which keeps orbit responsive when the cursor crosses overlays or leaves the canvas during a fast drag.
 
 ## Architecture
 

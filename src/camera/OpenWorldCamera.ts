@@ -20,6 +20,10 @@ const LEAD_TIME = 0.13;
 const LEAD_MAX = 1;
 const LEAD_EASE = 4;
 
+export function isOpenWorldOrbitGesture(button: number, altKey: boolean): boolean {
+  return button === 2 || button === 1 || (button === 0 && altKey);
+}
+
 export class OpenWorldCamera {
   readonly camera = new THREE.PerspectiveCamera(OPEN_WORLD_FOV, 1, 0.1, 1000);
 
@@ -54,22 +58,30 @@ export class OpenWorldCamera {
     if (this.canvas === canvas) return;
     this.disconnect();
     this.canvas = canvas;
+    canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', this.onPointerDown);
-    canvas.addEventListener('pointermove', this.onPointerMove);
-    canvas.addEventListener('pointerup', this.onPointerUp);
-    canvas.addEventListener('pointercancel', this.onPointerUp);
     canvas.addEventListener('wheel', this.onWheel, { passive: false });
+    canvas.addEventListener('contextmenu', this.onContextMenu);
+
+    // Pointer capture normally keeps delivering drag events to the canvas, but
+    // listening on window as well makes orbit reliable across overlays and when
+    // the cursor crosses the viewport boundary during a fast drag.
+    window.addEventListener('pointermove', this.onPointerMove, true);
+    window.addEventListener('pointerup', this.onPointerUp, true);
+    window.addEventListener('pointercancel', this.onPointerUp, true);
+    window.addEventListener('blur', this.onWindowBlur);
   }
 
   disconnect(): void {
     if (!this.canvas) return;
     this.canvas.removeEventListener('pointerdown', this.onPointerDown);
-    this.canvas.removeEventListener('pointermove', this.onPointerMove);
-    this.canvas.removeEventListener('pointerup', this.onPointerUp);
-    this.canvas.removeEventListener('pointercancel', this.onPointerUp);
     this.canvas.removeEventListener('wheel', this.onWheel);
-    this.dragging = false;
-    this.dragPointerId = null;
+    this.canvas.removeEventListener('contextmenu', this.onContextMenu);
+    window.removeEventListener('pointermove', this.onPointerMove, true);
+    window.removeEventListener('pointerup', this.onPointerUp, true);
+    window.removeEventListener('pointercancel', this.onPointerUp, true);
+    window.removeEventListener('blur', this.onWindowBlur);
+    this.endDrag();
     this.canvas = null;
   }
 
@@ -100,6 +112,10 @@ export class OpenWorldCamera {
   rotateBy(yawDelta: number, pitchDelta = 0): void {
     this.yaw -= yawDelta;
     this.pitch = clampOpenWorldPitch(this.pitch + pitchDelta);
+  }
+
+  get isDragging(): boolean {
+    return this.dragging;
   }
 
   dispose(): void {
@@ -133,18 +149,24 @@ export class OpenWorldCamera {
   }
 
   private readonly onPointerDown = (event: PointerEvent): void => {
-    const orbitGesture = event.button === 1 || (event.button === 0 && event.altKey);
-    if (!orbitGesture || !this.canvas) return;
+    if (!isOpenWorldOrbitGesture(event.button, event.altKey) || !this.canvas) return;
     event.preventDefault();
+    event.stopPropagation();
     this.dragging = true;
     this.dragPointerId = event.pointerId;
     this.lastPointerX = event.clientX;
     this.lastPointerY = event.clientY;
-    this.canvas.setPointerCapture(event.pointerId);
+    this.canvas.style.cursor = 'grabbing';
+    try {
+      this.canvas.setPointerCapture(event.pointerId);
+    } catch {
+      // Window-level drag listeners below remain a reliable fallback.
+    }
   };
 
   private readonly onPointerMove = (event: PointerEvent): void => {
     if (!this.dragging || event.pointerId !== this.dragPointerId) return;
+    event.preventDefault();
     const dx = event.clientX - this.lastPointerX;
     const dy = event.clientY - this.lastPointerY;
     this.lastPointerX = event.clientX;
@@ -155,13 +177,28 @@ export class OpenWorldCamera {
 
   private readonly onPointerUp = (event: PointerEvent): void => {
     if (event.pointerId !== this.dragPointerId) return;
-    if (this.canvas?.hasPointerCapture(event.pointerId)) this.canvas.releasePointerCapture(event.pointerId);
+    this.endDrag(event.pointerId);
+  };
+
+  private readonly onWindowBlur = (): void => this.endDrag();
+
+  private endDrag(pointerId: number | null = this.dragPointerId): void {
+    if (this.canvas && pointerId !== null) {
+      try {
+        if (this.canvas.hasPointerCapture(pointerId)) this.canvas.releasePointerCapture(pointerId);
+      } catch {
+        // Pointer capture may already have been released by the browser.
+      }
+      this.canvas.style.cursor = '';
+    }
     this.dragging = false;
     this.dragPointerId = null;
-  };
+  }
 
   private readonly onWheel = (event: WheelEvent): void => {
     event.preventDefault();
     this.zoomBy(Math.sign(event.deltaY) * 1.4);
   };
+
+  private readonly onContextMenu = (event: MouseEvent): void => event.preventDefault();
 }

@@ -46,7 +46,7 @@ async function bootstrap(): Promise<void> {
   const shell = createShell(root, {
     mode: 'game', title: playtest ? `Playtest · ${worldDocument.name}` : `Ascension · ${worldDocument.name}`,
     subtitle: activeCharacter ? `Personagem: ${activeCharacter.name} · ${activeCharacter.combat.profile}` : 'Nenhum preset ativo · usando personagem placeholder',
-    help: '<span class="key">WASD</span> move relativo à câmera · <span class="key">Shift</span> corre · <span class="key">MMB/Alt+LMB</span> gira câmera · <span class="key">Wheel</span> zoom · <span class="key">LMB/J</span> ataca · <span class="key">RMB/K</span> defende.',
+    help: '<span class="key">WASD</span> move relativo à câmera · <span class="key">Shift</span> corre · <span class="key">RMB+arrastar</span> gira câmera · <span class="key">Wheel</span> zoom · <span class="key">LMB/J</span> ataca · <span class="key">K</span> defende.',
   });
   const gameCamera = new OpenWorldCamera();
   gameCamera.connect(shell.canvas);
