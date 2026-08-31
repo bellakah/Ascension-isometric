@@ -18,8 +18,9 @@ import { Engine } from '../engine/Engine';
 
 const root = document.querySelector<HTMLElement>('#app');
 if (!root) throw new Error('App root not found.');
+const appRoot: HTMLElement = root;
 
-root.innerHTML = `
+appRoot.innerHTML = `
   <main class="editor-shell">
     <header class="editor-menubar">
       <div class="editor-brand"><div class="brand-mark">A</div><div class="editor-brand-copy"><strong>Ascension World Editor</strong><span>v0.7.1 · Professional Workspace</span></div></div>
@@ -91,7 +92,7 @@ root.innerHTML = `
   </main>`;
 
 function required<T extends Element>(selector: string): T {
-  const element = root.querySelector<T>(selector);
+  const element = appRoot.querySelector<T>(selector);
   if (!element) throw new Error(`Editor element not found: ${selector}`);
   return element;
 }
@@ -123,8 +124,8 @@ const editorWorkspace = new EditorWorkspace({
   leftSplitter: required<HTMLElement>('[data-left-splitter]'),
   rightSplitter: required<HTMLElement>('[data-right-splitter]'),
   toolrail,
-  tabButtons: root.querySelectorAll<HTMLElement>('[data-right-tab]'),
-  tabPanes: root.querySelectorAll<HTMLElement>('[data-right-pane]'),
+  tabButtons: appRoot.querySelectorAll<HTMLElement>('[data-right-tab]'),
+  tabPanes: appRoot.querySelectorAll<HTMLElement>('[data-right-pane]'),
 });
 
 const engine = new Engine(canvas); engine.camera.setTarget(engine.camera.target.set(0, 0, 0));
@@ -141,8 +142,8 @@ function updateActiveToolChip(): void {
   activeToolChip.innerHTML = `<strong>${toolNames[currentTool]}</strong><span>${currentTool === 'select' ? `Transform: ${currentMode}` : terrain ? `Radius ${brush.radius.toFixed(1)} · Strength ${brush.strength.toFixed(1)} · ${brush.falloff}` : 'Use o viewport para editar o mundo.'}</span>`;
 }
 const updateHistoryButtons = (): void => { undoButton.disabled = !worldEditor.canUndo(); redoButton.disabled = !worldEditor.canRedo(); };
-const updateModeButtons = (mode: TransformMode): void => { currentMode = mode; root.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => button.classList.toggle('active', currentTool === 'select' && button.dataset.transformMode === mode)); updateActiveToolChip(); };
-const updateToolButtons = (tool: WorldAuthoringTool): void => { root.querySelectorAll<HTMLElement>('[data-world-tool]').forEach((button) => button.classList.toggle('active', button.dataset.worldTool === tool)); updateActiveToolChip(); };
+const updateModeButtons = (mode: TransformMode): void => { currentMode = mode; appRoot.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => button.classList.toggle('active', currentTool === 'select' && button.dataset.transformMode === mode)); updateActiveToolChip(); };
+const updateToolButtons = (tool: WorldAuthoringTool): void => { appRoot.querySelectorAll<HTMLElement>('[data-world-tool]').forEach((button) => button.classList.toggle('active', button.dataset.worldTool === tool)); updateActiveToolChip(); };
 
 const worldEditor = new WorldEditor(engine, canvas, {
   onDocumentChanged: (document) => {
@@ -162,7 +163,7 @@ authoringPanel = new WorldAuthoringPanel({ terrain: terrainHost, world: worldHos
 const projectDialog = new WorldProjectDialog(worldEditor);
 const characterStudio = new CharacterStudio(setStatus);
 const placement = new EditorAssetPlacement(engine, canvas, (x, y) => worldEditor.surfaceAt(x, y), (asset, position) => worldEditor.placeAsset(asset, position), setStatus);
-const browser = new AssetBrowser({ root: assetDock, dropTarget: root, onPlace: (asset) => { worldEditor.setAuthoringTool('select'); editorWorkspace.toggleAssetDock(false); void placement.activate(asset).catch((error: unknown) => setStatus(`Não foi possível preparar ${asset.name}: ${error instanceof Error ? error.message : String(error)}`, 'error')); }, onStatus: setStatus });
+const browser = new AssetBrowser({ root: assetDock, dropTarget: appRoot, onPlace: (asset) => { worldEditor.setAuthoringTool('select'); editorWorkspace.toggleAssetDock(false); void placement.activate(asset).catch((error: unknown) => setStatus(`Não foi possível preparar ${asset.name}: ${error instanceof Error ? error.message : String(error)}`, 'error')); }, onStatus: setStatus });
 void Promise.all([browser.initialize(), authoringPanel.initialize(), worldEditor.initialize()]).then(() => authoringPanel?.render(currentTool, worldEditor.document)).catch((error: unknown) => setStatus(`Falha ao inicializar editor: ${error instanceof Error ? error.message : String(error)}`, 'error'));
 
 let cameraDragging = false; let lastX = 0; let lastY = 0;
@@ -191,8 +192,8 @@ window.addEventListener('keydown', (event) => {
   if (event.code === 'KeyQ') engine.camera.rotateQuarter(-1); if (event.code === 'KeyE') engine.camera.rotateQuarter(1);
 });
 
-root.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => button.addEventListener('click', () => worldEditor.setMode(button.dataset.transformMode as TransformMode)));
-root.querySelectorAll<HTMLElement>('[data-world-tool]').forEach((button) => button.addEventListener('click', () => worldEditor.setAuthoringTool(button.dataset.worldTool as WorldAuthoringTool)));
+appRoot.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => button.addEventListener('click', () => worldEditor.setMode(button.dataset.transformMode as TransformMode)));
+appRoot.querySelectorAll<HTMLElement>('[data-world-tool]').forEach((button) => button.addEventListener('click', () => worldEditor.setAuthoringTool(button.dataset.worldTool as WorldAuthoringTool)));
 required<HTMLElement>('[data-toolbar-compact]').addEventListener('click', () => editorWorkspace.toggleToolbar());
 required<HTMLElement>('[data-layout-reset]').addEventListener('click', () => editorWorkspace.reset());
 required<HTMLElement>('[data-open-assets]').addEventListener('click', () => editorWorkspace.toggleAssetDock());
