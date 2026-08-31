@@ -14,6 +14,8 @@ import { EditorWorkspace } from './EditorWorkspace';
 import { WorldAuthoringPanel } from './WorldAuthoringPanel';
 import { WorldEditor, type TransformMode, type WorldAuthoringTool } from './WorldEditor';
 import { WorldProjectDialog } from './WorldProjectDialog';
+import { EditorPerspectiveCamera } from '../camera/EditorPerspectiveCamera';
+import type { IsometricCamera } from '../camera/IsometricCamera';
 import { Engine } from '../engine/Engine';
 
 const root = document.querySelector<HTMLElement>('#app');
@@ -23,7 +25,7 @@ const appRoot: HTMLElement = root;
 appRoot.innerHTML = `
   <main class="editor-shell">
     <header class="editor-menubar">
-      <div class="editor-brand"><div class="brand-mark">A</div><div class="editor-brand-copy"><strong>Ascension World Editor</strong><span>v0.7.1 · Professional Workspace</span></div></div>
+      <div class="editor-brand"><div class="brand-mark">A</div><div class="editor-brand-copy"><strong>Ascension World Editor</strong><span>v0.7.4 · Game Perspective Editing</span></div></div>
       <div class="editor-menubar-center">
         <span class="current-map-badge" data-current-map>Mapa</span>
         <span class="editor-status" data-tone="normal">Editor pronto.</span>
@@ -36,6 +38,7 @@ appRoot.innerHTML = `
         <button class="editor-button compact" type="button" data-undo title="Desfazer (Ctrl+Z)">↶</button>
         <button class="editor-button compact" type="button" data-redo title="Refazer (Ctrl+Y)">↷</button>
         <span class="editor-action-separator"></span>
+        <button class="editor-button compact" type="button" data-game-camera title="Restaurar câmera do jogo: FOV 60°, pitch e distância padrão">Game Cam</button>
         <button class="editor-button compact" type="button" data-layout-reset title="Restaurar layout padrão">Layout</button>
         <button class="editor-button playtest" type="button" data-playtest>▶ Playtest</button>
       </div>
@@ -69,7 +72,7 @@ appRoot.innerHTML = `
           <button class="tool-button toolrail-collapse" type="button" data-toolbar-compact><span class="tool-icon">«</span><span class="tool-name">Recolher barra</span></button>
         </aside>
         <div class="active-tool-chip" data-active-tool><strong>Selecionar</strong><span>Clique em um objeto para editar.</span></div>
-        <div class="editor-hint"><strong>V</strong> selecionar · <strong>G/R/S</strong> transform · <strong>LMB</strong> ferramenta · <strong>RMB</strong> câmera · <strong>Ctrl+Z/Y</strong> undo/redo · <strong>Q/E</strong> gira câmera</div>
+        <div class="editor-hint"><strong>RMB</strong> orbita · <strong>MMB/Shift+RMB</strong> pan · <strong>Wheel</strong> zoom · <strong>F</strong> foca seleção · <strong>G/R/S</strong> transform · <strong>Ctrl+Z/Y</strong> undo/redo</div>
       </section>
       <div class="editor-splitter" data-right-splitter title="Arraste para redimensionar painel"></div>
       <aside class="editor-side-panel" aria-label="Painel de propriedades">
@@ -128,7 +131,13 @@ const editorWorkspace = new EditorWorkspace({
   tabPanes: appRoot.querySelectorAll<HTMLElement>('[data-right-pane]'),
 });
 
-const engine = new Engine(canvas); engine.camera.setTarget(engine.camera.target.set(0, 0, 0));
+const editorCamera = new EditorPerspectiveCamera();
+// WorldEditor still accepts the legacy editor-camera surface. EditorPerspectiveCamera
+// intentionally implements the same navigation methods while rendering through a
+// PerspectiveCamera. Keeping the cast here isolates that compatibility boundary.
+const engine = new Engine(canvas, editorCamera as unknown as IsometricCamera);
+editorCamera.setTarget(editorCamera.target.set(0, 1.8, 0));
+
 let hierarchyPanel: HierarchyPanel | null = null;
 let inspectorPanel: InspectorPanel | null = null;
 let authoringPanel: WorldAuthoringPanel | null = null;
@@ -156,6 +165,14 @@ const worldEditor = new WorldEditor(engine, canvas, {
   onStatus: setStatus,
 });
 
+function resetGameCameraToSpawn(): void {
+  const spawn = worldEditor.document.spawn;
+  const y = worldEditor.terrainHeightAt(spawn.x, spawn.z) + 1.8;
+  editorCamera.setTarget(editorCamera.target.set(spawn.x, y, spawn.z));
+  editorCamera.resetGameView();
+  setStatus('Câmera restaurada para a composição padrão do gameplay.', 'success');
+}
+
 hierarchyPanel = new HierarchyPanel({ root: hierarchyHost, onSelect: (id) => { worldEditor.setAuthoringTool('select'); editorWorkspace.setRightTab('inspector'); worldEditor.select(id); }, onDuplicate: () => void worldEditor.duplicateSelected(), onDelete: () => worldEditor.deleteSelected(), onFocus: () => worldEditor.focusSelected() });
 inspectorPanel = new InspectorPanel({ root: inspectorHost, onRename: (name) => worldEditor.renameSelected(name), onTransform: (transform) => worldEditor.updateSelectedTransform(transform), onVisible: (visible) => worldEditor.setSelectedVisible(visible), onGrounding: (grounded, offset) => worldEditor.setSelectedGrounding(grounded, offset), onSnapGround: () => worldEditor.snapSelectedToGround(), onCollision: (mode, radius) => worldEditor.setSelectedCollision(mode, radius), onDuplicate: () => void worldEditor.duplicateSelected(), onDelete: () => worldEditor.deleteSelected(), onFocus: () => worldEditor.focusSelected() });
 authoringPanel = new WorldAuthoringPanel({ terrain: terrainHost, world: worldHost, layers: layersHost }, worldEditor, setStatus);
@@ -164,20 +181,59 @@ const projectDialog = new WorldProjectDialog(worldEditor);
 const characterStudio = new CharacterStudio(setStatus);
 const placement = new EditorAssetPlacement(engine, canvas, (x, y) => worldEditor.surfaceAt(x, y), (asset, position) => worldEditor.placeAsset(asset, position), setStatus);
 const browser = new AssetBrowser({ root: assetDock, dropTarget: appRoot, onPlace: (asset) => { worldEditor.setAuthoringTool('select'); editorWorkspace.toggleAssetDock(false); void placement.activate(asset).catch((error: unknown) => setStatus(`Não foi possível preparar ${asset.name}: ${error instanceof Error ? error.message : String(error)}`, 'error')); }, onStatus: setStatus });
-void Promise.all([browser.initialize(), authoringPanel.initialize(), worldEditor.initialize()]).then(() => authoringPanel?.render(currentTool, worldEditor.document)).catch((error: unknown) => setStatus(`Falha ao inicializar editor: ${error instanceof Error ? error.message : String(error)}`, 'error'));
+void Promise.all([browser.initialize(), authoringPanel.initialize(), worldEditor.initialize()]).then(() => { authoringPanel?.render(currentTool, worldEditor.document); resetGameCameraToSpawn(); }).catch((error: unknown) => setStatus(`Falha ao inicializar editor: ${error instanceof Error ? error.message : String(error)}`, 'error'));
 
-let cameraDragging = false; let lastX = 0; let lastY = 0;
+type CameraDragMode = 'orbit' | 'pan';
+let cameraDragMode: CameraDragMode | null = null;
+let cameraPointerId: number | null = null;
+let lastX = 0;
+let lastY = 0;
+
+function endCameraDrag(pointerId: number | null = cameraPointerId): void {
+  if (pointerId !== null) {
+    try { if (canvas.hasPointerCapture(pointerId)) canvas.releasePointerCapture(pointerId); } catch { /* capture may already be released */ }
+  }
+  cameraDragMode = null;
+  cameraPointerId = null;
+  canvas.style.cursor = '';
+}
+
 canvas.addEventListener('contextmenu', (event) => event.preventDefault());
 canvas.addEventListener('pointerdown', (event) => {
   if (placement.isActive && event.button === 0) return;
   if (worldEditor.handleAuthoringPointerDown(event)) { canvas.setPointerCapture(event.pointerId); return; }
   if (event.button === 0 && !worldEditor.isTransformInteracting) worldEditor.selectFromPointer(event);
-  if (event.button !== 2 || worldEditor.isTransformInteracting) return;
-  cameraDragging = true; lastX = event.clientX; lastY = event.clientY; canvas.setPointerCapture(event.pointerId);
+  if (worldEditor.isTransformInteracting) return;
+
+  const pan = event.button === 1 || (event.button === 2 && event.shiftKey);
+  const orbit = event.button === 2 && !event.shiftKey;
+  if (!pan && !orbit) return;
+  event.preventDefault();
+  cameraDragMode = pan ? 'pan' : 'orbit';
+  cameraPointerId = event.pointerId;
+  lastX = event.clientX;
+  lastY = event.clientY;
+  canvas.style.cursor = cameraDragMode === 'orbit' ? 'grabbing' : 'move';
+  try { canvas.setPointerCapture(event.pointerId); } catch { /* pointer capture fallback is pointer bounds */ }
 });
-canvas.addEventListener('pointermove', (event) => { worldEditor.handleAuthoringPointerMove(event); if (!cameraDragging) return; const dx = event.clientX - lastX; const dy = event.clientY - lastY; lastX = event.clientX; lastY = event.clientY; engine.camera.panScreen(dx, dy); });
-canvas.addEventListener('pointerup', (event) => { worldEditor.handleAuthoringPointerUp(event); if (event.button === 2) cameraDragging = false; if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId); });
-canvas.addEventListener('wheel', (event) => { event.preventDefault(); engine.camera.zoomByWheel(event.deltaY); }, { passive: false });
+canvas.addEventListener('pointermove', (event) => {
+  worldEditor.handleAuthoringPointerMove(event);
+  if (!cameraDragMode || event.pointerId !== cameraPointerId) return;
+  const dx = event.clientX - lastX;
+  const dy = event.clientY - lastY;
+  lastX = event.clientX;
+  lastY = event.clientY;
+  if (cameraDragMode === 'orbit') editorCamera.orbitScreen(dx, dy);
+  else editorCamera.panScreen(dx, dy);
+});
+canvas.addEventListener('pointerup', (event) => {
+  worldEditor.handleAuthoringPointerUp(event);
+  if (event.pointerId === cameraPointerId) endCameraDrag(event.pointerId);
+  else if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+});
+canvas.addEventListener('pointercancel', (event) => { if (event.pointerId === cameraPointerId) endCameraDrag(event.pointerId); });
+canvas.addEventListener('wheel', (event) => { event.preventDefault(); editorCamera.zoomByWheel(event.deltaY); }, { passive: false });
+window.addEventListener('blur', () => endCameraDrag());
 
 window.addEventListener('keydown', (event) => {
   const target = event.target; if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
@@ -189,13 +245,14 @@ window.addEventListener('keydown', (event) => {
   if (event.code === 'KeyV') worldEditor.setAuthoringTool('select');
   if (event.code === 'KeyG') worldEditor.setMode('translate'); if (event.code === 'KeyR') worldEditor.setMode('rotate'); if (event.code === 'KeyS') worldEditor.setMode('scale');
   if (event.code === 'KeyF' && currentTool === 'select') worldEditor.focusSelected(); if (event.code === 'Delete' && currentTool === 'select') worldEditor.deleteSelected(); if (event.code === 'Escape' && !placement.isActive) worldEditor.setAuthoringTool('select');
-  if (event.code === 'KeyQ') engine.camera.rotateQuarter(-1); if (event.code === 'KeyE') engine.camera.rotateQuarter(1);
+  if (event.code === 'KeyQ') editorCamera.rotateQuarter(-1); if (event.code === 'KeyE') editorCamera.rotateQuarter(1);
 });
 
 appRoot.querySelectorAll<HTMLElement>('[data-transform-mode]').forEach((button) => button.addEventListener('click', () => worldEditor.setMode(button.dataset.transformMode as TransformMode)));
 appRoot.querySelectorAll<HTMLElement>('[data-world-tool]').forEach((button) => button.addEventListener('click', () => worldEditor.setAuthoringTool(button.dataset.worldTool as WorldAuthoringTool)));
 required<HTMLElement>('[data-toolbar-compact]').addEventListener('click', () => editorWorkspace.toggleToolbar());
 required<HTMLElement>('[data-layout-reset]').addEventListener('click', () => editorWorkspace.reset());
+required<HTMLElement>('[data-game-camera]').addEventListener('click', resetGameCameraToSpawn);
 required<HTMLElement>('[data-open-assets]').addEventListener('click', () => editorWorkspace.toggleAssetDock());
 required<HTMLElement>('[data-open-character]').addEventListener('click', () => void characterStudio.open());
 required<HTMLButtonElement>('[data-character-studio]').addEventListener('click', () => void characterStudio.open());
