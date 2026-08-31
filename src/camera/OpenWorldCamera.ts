@@ -61,7 +61,10 @@ export class OpenWorldCamera {
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', this.onPointerDown);
     canvas.addEventListener('wheel', this.onWheel, { passive: false });
-    canvas.addEventListener('contextmenu', this.onContextMenu);
+
+    // Capture at document level so the native browser menu cannot escape when
+    // the pointer is over a transparent HUD/overlay above the WebGL canvas.
+    document.addEventListener('contextmenu', this.onContextMenu, true);
 
     // Pointer capture normally keeps delivering drag events to the canvas, but
     // listening on window as well makes orbit reliable across overlays and when
@@ -76,7 +79,7 @@ export class OpenWorldCamera {
     if (!this.canvas) return;
     this.canvas.removeEventListener('pointerdown', this.onPointerDown);
     this.canvas.removeEventListener('wheel', this.onWheel);
-    this.canvas.removeEventListener('contextmenu', this.onContextMenu);
+    document.removeEventListener('contextmenu', this.onContextMenu, true);
     window.removeEventListener('pointermove', this.onPointerMove, true);
     window.removeEventListener('pointerup', this.onPointerUp, true);
     window.removeEventListener('pointercancel', this.onPointerUp, true);
@@ -200,5 +203,8 @@ export class OpenWorldCamera {
     this.zoomBy(Math.sign(event.deltaY) * 1.4);
   };
 
-  private readonly onContextMenu = (event: MouseEvent): void => event.preventDefault();
+  private readonly onContextMenu = (event: MouseEvent): void => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
 }
