@@ -15,7 +15,9 @@ export class PlayerController {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     window.addEventListener('mousedown', this.onMouseDown);
-    window.addEventListener('contextmenu', this.onContextMenu);
+    window.addEventListener('blur', this.onWindowBlur);
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
+    document.addEventListener('contextmenu', this.onContextMenu, true);
   }
 
   update(delta: number, movementMultiplier = 1, cameraYaw = Math.PI): PlayerMotionState {
@@ -42,7 +44,10 @@ export class PlayerController {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('mousedown', this.onMouseDown);
-    window.removeEventListener('contextmenu', this.onContextMenu);
+    window.removeEventListener('blur', this.onWindowBlur);
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    document.removeEventListener('contextmenu', this.onContextMenu, true);
+    this.resetInputState();
   }
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
@@ -60,5 +65,20 @@ export class PlayerController {
     if (event.button === 0 && !event.altKey) this.attackQueued = true;
   };
 
-  private readonly onContextMenu = (event: MouseEvent): void => event.preventDefault();
+  private readonly onWindowBlur = (): void => this.resetInputState();
+
+  private readonly onVisibilityChange = (): void => {
+    if (document.visibilityState !== 'visible') this.resetInputState();
+  };
+
+  private readonly onContextMenu = (event: MouseEvent): void => {
+    event.preventDefault();
+    this.resetInputState();
+  };
+
+  private resetInputState(): void {
+    this.pressed.clear();
+    this.blockHeld = false;
+    this.attackQueued = false;
+  }
 }
