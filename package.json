@@ -1,6 +1,6 @@
 {
   "name": "ascension-isometric",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "type": "module",
   "description": "Browser-first isometric RPG/MMO foundation built with TypeScript and Three.js.",
@@ -15,8 +15,8 @@
   },
   "dependencies": { "fflate": "0.8.2", "three": "0.185.1" },
   "devDependencies": {
-    "@types/three": "0.185.4",
     "@types/node": "26.1.1",
+    "@types/three": "0.185.4",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.0.16",
     "vitest": "4.1.10"
