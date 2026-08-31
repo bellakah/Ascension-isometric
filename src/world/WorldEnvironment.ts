@@ -5,6 +5,8 @@ import { sampleTerrainHeight, type TerrainRegion } from './TerrainMath';
 import type { WorldDocument } from './WorldDocument';
 
 export type EditorWorldLayer = 'terrain' | 'objects' | 'water' | 'spawn' | 'collision' | 'grid';
+export interface RegionOverlayBounds { minX: number; minZ: number; maxX: number; maxZ: number; }
+export interface ScatterOverlayPoint { x: number; z: number; scale: number; }
 
 export class WorldEnvironment {
   private readonly group = new THREE.Group();
@@ -15,8 +17,10 @@ export class WorldEnvironment {
   private spawnMarker: THREE.Group | null = null;
   private readonly blockersGroup = new THREE.Group();
   private readonly collisionGroup = new THREE.Group();
+  private readonly scatterPreviewGroup = new THREE.Group();
   private brushRing: THREE.Mesh | null = null;
   private blockerPreview: THREE.Mesh | null = null;
+  private regionPreview: THREE.Group | null = null;
   private currentDocument: WorldDocument;
   private readonly visibility: Record<EditorWorldLayer, boolean> = { terrain: true, objects: true, water: true, spawn: true, collision: false, grid: true };
 
@@ -24,8 +28,8 @@ export class WorldEnvironment {
     this.currentDocument = document;
     this.group.name = 'World Environment'; this.group.userData.editorHelper = true;
     this.overlayGroup.name = 'World Editor Overlays'; this.overlayGroup.userData.editorHelper = true;
-    this.blockersGroup.userData.editorHelper = true; this.collisionGroup.userData.editorHelper = true;
-    this.terrain = new TerrainSurface(document); this.group.add(this.terrain.mesh); this.overlayGroup.add(this.blockersGroup, this.collisionGroup); this.scene.add(this.group, this.overlayGroup); this.update(document);
+    this.blockersGroup.userData.editorHelper = true; this.collisionGroup.userData.editorHelper = true; this.scatterPreviewGroup.userData.editorHelper = true;
+    this.terrain = new TerrainSurface(document); this.group.add(this.terrain.mesh); this.overlayGroup.add(this.blockersGroup, this.collisionGroup, this.scatterPreviewGroup); this.scene.add(this.group, this.overlayGroup); this.update(document);
   }
 
   update(document: WorldDocument): void {
@@ -71,10 +75,41 @@ export class WorldEnvironment {
     this.blockerPreview = this.createBlockerMesh(start.x, start.z, end.x, end.z, 0x73d7ff, 0.65); this.overlayGroup.add(this.blockerPreview); this.applyVisibility();
   }
 
+  setRegionPreview(bounds: RegionOverlayBounds | null): void {
+    if (this.regionPreview) { this.overlayGroup.remove(this.regionPreview); this.disposeGroup(this.regionPreview); this.regionPreview = null; }
+    if (!this.showEditorHelpers || !bounds) return;
+    const width = Math.max(0.05, bounds.maxX - bounds.minX); const depth = Math.max(0.05, bounds.maxZ - bounds.minZ);
+    const centerX = (bounds.minX + bounds.maxX) * 0.5; const centerZ = (bounds.minZ + bounds.maxZ) * 0.5;
+    const y = this.terrainHeight(centerX, centerZ) + 0.07;
+    const group = new THREE.Group(); group.name = 'Region Selection'; group.userData.editorHelper = true;
+    const fill = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), new THREE.MeshBasicMaterial({ color: 0x51b9e8, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false }));
+    fill.rotation.x = -Math.PI / 2; fill.position.set(centerX, y, centerZ);
+    const points = [
+      new THREE.Vector3(bounds.minX, this.terrainHeight(bounds.minX, bounds.minZ) + 0.09, bounds.minZ),
+      new THREE.Vector3(bounds.maxX, this.terrainHeight(bounds.maxX, bounds.minZ) + 0.09, bounds.minZ),
+      new THREE.Vector3(bounds.maxX, this.terrainHeight(bounds.maxX, bounds.maxZ) + 0.09, bounds.maxZ),
+      new THREE.Vector3(bounds.minX, this.terrainHeight(bounds.minX, bounds.maxZ) + 0.09, bounds.maxZ),
+    ];
+    const outlineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    const outline = new THREE.LineLoop(outlineGeometry, new THREE.LineBasicMaterial({ color: 0x67d3ff, transparent: true, opacity: 0.95, depthTest: false }));
+    outline.renderOrder = 50; group.add(fill, outline); this.regionPreview = group; this.overlayGroup.add(group);
+  }
+
+  setScatterPreview(points: readonly ScatterOverlayPoint[] | null): void {
+    for (const child of [...this.scatterPreviewGroup.children]) { this.scatterPreviewGroup.remove(child); if (child instanceof THREE.Mesh) this.disposeMesh(child); }
+    if (!this.showEditorHelpers || !points) return;
+    for (const point of points.slice(0, 500)) {
+      const radius = Math.max(0.12, Math.min(0.6, 0.22 * point.scale));
+      const ring = new THREE.Mesh(new THREE.RingGeometry(radius * 0.68, radius, 18), new THREE.MeshBasicMaterial({ color: 0x65e7b1, transparent: true, opacity: 0.75, side: THREE.DoubleSide, depthWrite: false }));
+      ring.rotation.x = -Math.PI / 2; ring.position.set(point.x, this.terrainHeight(point.x, point.z) + 0.075, point.z); ring.userData.editorHelper = true; this.scatterPreviewGroup.add(ring);
+    }
+  }
+
   dispose(): void {
     this.scene.remove(this.group, this.overlayGroup); this.terrain.dispose();
     this.group.traverse((object) => { if (object instanceof THREE.Mesh && object !== this.terrain.mesh) this.disposeMesh(object); });
-    this.overlayGroup.traverse((object) => { if (object instanceof THREE.Mesh) this.disposeMesh(object); }); this.group.clear(); this.overlayGroup.clear();
+    this.overlayGroup.traverse((object) => { if (object instanceof THREE.Mesh) this.disposeMesh(object); else if (object instanceof THREE.Line) { object.geometry.dispose(); if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose()); else object.material.dispose(); } });
+    this.group.clear(); this.overlayGroup.clear();
   }
 
   private rebuildLights(): void {
@@ -98,7 +133,7 @@ export class WorldEnvironment {
   }
 
   private rebuildSpawn(): void {
-    if (this.spawnMarker) { this.overlayGroup.remove(this.spawnMarker); this.spawnMarker.traverse((object) => { if (object instanceof THREE.Mesh) this.disposeMesh(object); }); this.spawnMarker = null; }
+    if (this.spawnMarker) { this.overlayGroup.remove(this.spawnMarker); this.disposeGroup(this.spawnMarker); this.spawnMarker = null; }
     if (!this.showEditorHelpers) return;
     const group = new THREE.Group(); const ring = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.85, 40), new THREE.MeshBasicMaterial({ color: 0x57d7ff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false })); ring.rotation.x = -Math.PI / 2;
     const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.55, 8), new THREE.MeshBasicMaterial({ color: 0x57d7ff })); arrow.position.y = 0.5; group.add(ring, arrow); group.name = 'Player Spawn'; group.userData.editorHelper = true;
@@ -118,6 +153,13 @@ export class WorldEnvironment {
   private applyVisibility(): void {
     this.terrain.mesh.visible = this.visibility.terrain; if (this.grid) this.grid.visible = this.showEditorHelpers && this.visibility.grid; if (this.water) this.water.visible = this.visibility.water; if (this.spawnMarker) this.spawnMarker.visible = this.visibility.spawn;
     this.blockersGroup.visible = this.visibility.collision; this.collisionGroup.visible = this.visibility.collision; if (this.blockerPreview) this.blockerPreview.visible = this.visibility.collision;
+  }
+
+  private disposeGroup(group: THREE.Group): void {
+    group.traverse((object) => {
+      if (object instanceof THREE.Mesh) this.disposeMesh(object);
+      else if (object instanceof THREE.Line) { object.geometry.dispose(); if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose()); else object.material.dispose(); }
+    });
   }
 
   private disposeMesh(mesh: THREE.Mesh): void { mesh.geometry.dispose(); if (Array.isArray(mesh.material)) mesh.material.forEach((material) => material.dispose()); else mesh.material.dispose(); }
