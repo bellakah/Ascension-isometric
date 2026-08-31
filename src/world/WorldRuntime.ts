@@ -20,6 +20,18 @@ export function syncEntityTransform(entity: WorldEntityDocument, object: THREE.O
   entity.visible = object.visible;
 }
 
+export function syncEntityWorldTransform(entity: WorldEntityDocument, object: THREE.Object3D): void {
+  object.updateMatrixWorld(true);
+  const position = object.getWorldPosition(new THREE.Vector3());
+  const quaternion = object.getWorldQuaternion(new THREE.Quaternion());
+  const scale = object.getWorldScale(new THREE.Vector3());
+  const rotation = new THREE.Euler().setFromQuaternion(quaternion, object.rotation.order);
+  entity.position = { x: position.x, y: position.y, z: position.z };
+  entity.rotation = { x: rotation.x, y: rotation.y, z: rotation.z };
+  entity.scale = { x: Math.max(0.001, Math.abs(scale.x)), y: Math.max(0.001, Math.abs(scale.y)), z: Math.max(0.001, Math.abs(scale.z)) };
+  entity.visible = object.visible;
+}
+
 function alignModelToRoot(model: THREE.Object3D): void {
   model.updateMatrixWorld(true);
   const bounds = new THREE.Box3().setFromObject(model);
