@@ -27,11 +27,31 @@ export class HierarchyPanel {
   private renderCurrent(): void {
     const document = this.document;
     const entities = document?.entities.filter((entity) => !this.search || `${entity.name} ${entity.assetName}`.toLowerCase().includes(this.search)) ?? [];
+    const blockerCount = document?.blockers.length ?? 0;
+    const terrainEdits = document?.terrain.heightStamps.length ?? 0;
+    const paintEdits = document?.terrain.paintStamps.length ?? 0;
     this.options.root.innerHTML = `
-      <div class="panel-heading"><div><strong>Hierarchy</strong><span>${document?.entities.length ?? 0} entidades</span></div><div class="panel-actions"><button type="button" title="Duplicar selecionado" data-hierarchy-duplicate>⧉</button><button type="button" title="Focar selecionado" data-hierarchy-focus>◎</button><button type="button" title="Excluir selecionado" data-hierarchy-delete>⌫</button></div></div>
-      <div class="hierarchy-search-wrap"><input type="search" data-hierarchy-search placeholder="Buscar no mapa..." value="${escapeHtml(this.search)}"></div>
-      <div class="hierarchy-list">${entities.length === 0 ? '<p class="panel-empty">Nenhuma entidade colocada no mapa.</p>' : entities.map((entity) => `
-        <button type="button" class="hierarchy-row${entity.id === this.selectedId ? ' selected' : ''}" data-entity-id="${escapeHtml(entity.id)}"><span class="hierarchy-icon">◇</span><span class="hierarchy-copy"><strong>${escapeHtml(entity.name)}</strong><small>${escapeHtml(entity.assetName)}</small></span><span class="hierarchy-visibility">${entity.visible ? '●' : '○'}</span></button>`).join('')}</div>`;
+      <div class="panel-heading"><div><strong>Hierarchy</strong><span>${document?.entities.length ?? 0} objetos · ${blockerCount} blockers</span></div><div class="panel-actions"><button type="button" title="Duplicar selecionado" data-hierarchy-duplicate>⧉</button><button type="button" title="Focar selecionado" data-hierarchy-focus>◎</button><button type="button" title="Excluir selecionado" data-hierarchy-delete>⌫</button></div></div>
+      <div class="hierarchy-search-wrap"><input type="search" data-hierarchy-search placeholder="Buscar na cena..." value="${escapeHtml(this.search)}"></div>
+      <div class="hierarchy-list">
+        <details class="hierarchy-section" open>
+          <summary>Environment <span>3 itens</span></summary>
+          <div class="hierarchy-virtual-row"><span>▱</span><b>Terrain</b><span>${terrainEdits + paintEdits} edits</span></div>
+          <div class="hierarchy-virtual-row"><span>≈</span><b>Water</b><span>${document?.water.enabled ? 'on' : 'off'}</span></div>
+          <div class="hierarchy-virtual-row"><span>✦</span><b>Spawn</b><span>${document ? `${document.spawn.x.toFixed(0)}, ${document.spawn.z.toFixed(0)}` : '-'}</span></div>
+        </details>
+        <details class="hierarchy-section" open>
+          <summary>Objects <span>${entities.length}/${document?.entities.length ?? 0}</span></summary>
+          ${entities.length === 0 ? '<p class="panel-empty">Nenhum objeto corresponde à busca.</p>' : entities.map((entity) => `
+            <button type="button" class="hierarchy-row${entity.id === this.selectedId ? ' selected' : ''}" data-entity-id="${escapeHtml(entity.id)}"><span class="hierarchy-icon">◇</span><span class="hierarchy-copy"><strong>${escapeHtml(entity.name)}</strong><small>${escapeHtml(entity.assetName)}</small></span><span class="hierarchy-visibility">${entity.visible ? '●' : '○'}</span></button>`).join('')}
+        </details>
+        <details class="hierarchy-section" open>
+          <summary>Gameplay <span>${blockerCount + 1} itens</span></summary>
+          <div class="hierarchy-virtual-row"><span>✦</span><b>Player Spawn</b><span>1</span></div>
+          <div class="hierarchy-virtual-row"><span>▰</span><b>Blockers</b><span>${blockerCount}</span></div>
+        </details>
+        <details class="hierarchy-section"><summary>Characters <span>futuro</span></summary><p class="panel-empty">NPCs e monstros serão organizados aqui quando entrarem no WorldDocument.</p></details>
+      </div>`;
     this.options.root.querySelectorAll<HTMLElement>('[data-entity-id]').forEach((row) => { row.addEventListener('click', () => this.options.onSelect(row.dataset.entityId ?? '')); row.addEventListener('dblclick', () => this.options.onFocus()); });
     this.options.root.querySelector<HTMLElement>('[data-hierarchy-duplicate]')?.addEventListener('click', () => this.options.onDuplicate());
     this.options.root.querySelector<HTMLElement>('[data-hierarchy-focus]')?.addEventListener('click', () => this.options.onFocus());
@@ -61,12 +81,12 @@ export class InspectorPanel {
   render(entity: WorldEntityDocument | null): void {
     this.entity = entity;
     if (!entity) {
-      this.options.root.innerHTML = `<div class="panel-heading"><div><strong>Inspector</strong><span>Nenhuma seleção</span></div></div><div class="inspector-empty"><strong>Selecione um objeto</strong><span>Clique no viewport ou na Hierarchy para editar transform, grounding e colisão.</span></div>`;
+      this.options.root.innerHTML = `<div class="panel-heading"><div><strong>Object Inspector</strong><span>Nenhuma seleção</span></div></div><div class="inspector-empty"><strong>Selecione um objeto</strong><span>Clique no viewport ou em Objects na Hierarchy. Terrain, World e Layers continuam disponíveis nas abas acima.</span></div>`;
       return;
     }
     const rotation = { x: THREE.MathUtils.radToDeg(entity.rotation.x), y: THREE.MathUtils.radToDeg(entity.rotation.y), z: THREE.MathUtils.radToDeg(entity.rotation.z) };
     this.options.root.innerHTML = `
-      <div class="panel-heading"><div><strong>Inspector</strong><span>${escapeHtml(entity.assetName)}</span></div></div>
+      <div class="panel-heading"><div><strong>${escapeHtml(entity.name)}</strong><span>${escapeHtml(entity.assetName)}</span></div></div>
       <div class="inspector-scroll">
         <label class="inspector-field"><span>Nome</span><input type="text" data-name value="${escapeHtml(entity.name)}"></label>
         <div class="inspector-readonly"><span>Asset</span><code title="${escapeHtml(entity.assetId)}">${escapeHtml(entity.assetName)}</code></div>
@@ -101,10 +121,6 @@ export class InspectorPanel {
   private emitTransform(): void {
     const entity = this.entity; if (!entity) return;
     const read = (group: string, axis: keyof SerializedVector3, fallback: number): number => numberValue(this.options.root.querySelector<HTMLInputElement>(`[data-vector="${group}"][data-axis="${axis}"]`)?.value ?? '', fallback);
-    this.options.onTransform({
-      position: { x: read('position', 'x', entity.position.x), y: read('position', 'y', entity.position.y), z: read('position', 'z', entity.position.z) },
-      rotationDegrees: { x: read('rotation', 'x', THREE.MathUtils.radToDeg(entity.rotation.x)), y: read('rotation', 'y', THREE.MathUtils.radToDeg(entity.rotation.y)), z: read('rotation', 'z', THREE.MathUtils.radToDeg(entity.rotation.z)) },
-      scale: { x: read('scale', 'x', entity.scale.x), y: read('scale', 'y', entity.scale.y), z: read('scale', 'z', entity.scale.z) },
-    });
+    this.options.onTransform({ position: { x: read('position', 'x', entity.position.x), y: read('position', 'y', entity.position.y), z: read('position', 'z', entity.position.z) }, rotationDegrees: { x: read('rotation', 'x', THREE.MathUtils.radToDeg(entity.rotation.x)), y: read('rotation', 'y', THREE.MathUtils.radToDeg(entity.rotation.y)), z: read('rotation', 'z', THREE.MathUtils.radToDeg(entity.rotation.z)) }, scale: { x: read('scale', 'x', entity.scale.x), y: read('scale', 'y', entity.scale.y), z: read('scale', 'z', entity.scale.z) } });
   }
 }
