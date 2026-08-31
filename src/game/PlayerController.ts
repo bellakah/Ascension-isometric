@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { resolveHorizontalMove } from '../world/WorldCollision';
 import type { WorldDocument } from '../world/WorldDocument';
-import { normalizeMovementInput } from './movement';
+import { cameraRelativeMovement } from './movement';
 
 export interface PlayerMotionState { moved: boolean; sprinting: boolean; }
 export interface PlayerNavigation { document: WorldDocument; heightAt(x: number, z: number): number; playerRadius?: number; }
@@ -15,10 +15,10 @@ export class PlayerController {
     window.addEventListener('keydown', this.onKeyDown); window.addEventListener('keyup', this.onKeyUp); window.addEventListener('mousedown', this.onMouseDown); window.addEventListener('mouseup', this.onMouseUp); window.addEventListener('contextmenu', this.onContextMenu);
   }
 
-  update(delta: number, movementMultiplier = 1): PlayerMotionState {
-    const x = (this.pressed.has('KeyD') ? 1 : 0) - (this.pressed.has('KeyA') ? 1 : 0);
-    const z = (this.pressed.has('KeyS') ? 1 : 0) - (this.pressed.has('KeyW') ? 1 : 0);
-    const move = normalizeMovementInput(x, z); const wantsMove = move.x !== 0 || move.z !== 0;
+  update(delta: number, movementMultiplier = 1, cameraYaw = Math.PI): PlayerMotionState {
+    const strafe = (this.pressed.has('KeyD') ? 1 : 0) - (this.pressed.has('KeyA') ? 1 : 0);
+    const forward = (this.pressed.has('KeyW') ? 1 : 0) - (this.pressed.has('KeyS') ? 1 : 0);
+    const move = cameraRelativeMovement(strafe, forward, cameraYaw); const wantsMove = move.x !== 0 || move.z !== 0;
     const sprinting = wantsMove && (this.pressed.has('ShiftLeft') || this.pressed.has('ShiftRight'));
     if (!wantsMove) { if (this.navigation) this.player.position.y = this.navigation.heightAt(this.player.position.x, this.player.position.z); return { moved: false, sprinting: false }; }
     const speed = (sprinting ? 8.5 : 5.2) * Math.max(0, movementMultiplier);
@@ -41,7 +41,7 @@ export class PlayerController {
 
   private readonly onKeyDown = (event: KeyboardEvent): void => { this.pressed.add(event.code); if (event.code === 'KeyJ' && !event.repeat) this.attackQueued = true; if (event.code === 'KeyK') this.blockHeld = true; };
   private readonly onKeyUp = (event: KeyboardEvent): void => { this.pressed.delete(event.code); if (event.code === 'KeyK') this.blockHeld = false; };
-  private readonly onMouseDown = (event: MouseEvent): void => { if (event.button === 0) this.attackQueued = true; if (event.button === 2) this.blockHeld = true; };
+  private readonly onMouseDown = (event: MouseEvent): void => { if (event.button === 0 && !event.altKey) this.attackQueued = true; if (event.button === 2) this.blockHeld = true; };
   private readonly onMouseUp = (event: MouseEvent): void => { if (event.button === 2) this.blockHeld = false; };
   private readonly onContextMenu = (event: MouseEvent): void => event.preventDefault();
 }
