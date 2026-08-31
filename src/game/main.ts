@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import '../styles.css';
 import './combat.css';
+import { OpenWorldCamera } from '../camera/OpenWorldCamera';
 import { CharacterActor } from '../character/CharacterActor';
 import { CombatStateMachine, type CombatAttackDurations, type CombatState } from '../character/CombatStateMachine';
 import { CharacterDatabase } from '../character/CharacterDatabase';
@@ -45,10 +46,13 @@ async function bootstrap(): Promise<void> {
   const shell = createShell(root, {
     mode: 'game', title: playtest ? `Playtest · ${worldDocument.name}` : `Ascension · ${worldDocument.name}`,
     subtitle: activeCharacter ? `Personagem: ${activeCharacter.name} · ${activeCharacter.combat.profile}` : 'Nenhum preset ativo · usando personagem placeholder',
-    help: '<span class="key">WASD</span> move · <span class="key">Shift</span> corre · <span class="key">LMB/J</span> ataca · <span class="key">RMB/K</span> defende · terreno e colisões vêm do World Editor.',
+    help: '<span class="key">WASD</span> move relativo à câmera · <span class="key">Shift</span> corre · <span class="key">MMB/Alt+LMB</span> gira câmera · <span class="key">Wheel</span> zoom · <span class="key">LMB/J</span> ataca · <span class="key">RMB/K</span> defende.',
   });
-  const engine = new Engine(shell.canvas);
+  const gameCamera = new OpenWorldCamera();
+  gameCamera.connect(shell.canvas);
+  const engine = new Engine(shell.canvas, gameCamera);
   const environment = new WorldEnvironment(engine.scene, worldDocument, false);
+  gameCamera.setTerrainHeightResolver((x, z) => environment.terrainHeight(x, z));
   const runtime = new WorldRuntime(engine.scene, { onAssetError: (message) => console.warn(message), heightAt: (x, z) => environment.terrainHeight(x, z) });
   await runtime.build(worldDocument);
 
@@ -57,18 +61,18 @@ async function bootstrap(): Promise<void> {
   else { fallbackPlayer = createFallbackPlayer(); player = fallbackPlayer; }
   const spawnY = environment.terrainHeight(worldDocument.spawn.x, worldDocument.spawn.z);
   player.position.set(worldDocument.spawn.x, spawnY, worldDocument.spawn.z); engine.scene.add(player);
+  gameCamera.update(player.position, 0);
   const playerController = new PlayerController(player, { document: worldDocument, heightAt: (x, z) => environment.terrainHeight(x, z) });
   const combat = new CombatStateMachine(); const combatHud = document.createElement('div'); combatHud.className = 'combat-hud'; root.append(combatHud);
-  engine.camera.setTarget(player.position); shell.canvas.addEventListener('wheel', (event) => { event.preventDefault(); engine.camera.zoomByWheel(event.deltaY); }, { passive: false });
 
   const durations: CombatAttackDurations = activeCharacter && characterActor ? {
     attack1: characterActor.clipDuration(activeCharacter.combat.clips.attack1), attack2: characterActor.clipDuration(activeCharacter.combat.clips.attack2), attack3: characterActor.clipDuration(activeCharacter.combat.clips.attack3),
   } : { attack1: 0, attack2: 0, attack3: 0 };
 
   engine.start(({ delta, elapsed }) => {
-    const motion = playerController.update(delta, combat.movementMultiplier);
+    const motion = playerController.update(delta, combat.movementMultiplier, gameCamera.yaw);
     const frame = combat.update(delta, { attackPressed: playerController.consumeAttackPressed(), blockHeld: playerController.isBlockHeld, moved: motion.moved, sprinting: motion.sprinting }, durations);
-    if (motion.moved) engine.camera.setTarget(player.position);
+    gameCamera.update(player.position, delta);
     if (characterActor && activeCharacter) {
       if (frame.changed) {
         const attackClip = attackClipForState(activeCharacter, frame.state);
@@ -81,7 +85,7 @@ async function bootstrap(): Promise<void> {
     const profile = activeCharacter?.combat.profile ?? 'placeholder'; combatHud.innerHTML = `<strong>${stateLabel(frame.state)}</strong><span>${profile} · movimento ${Math.round(frame.movementMultiplier * 100)}%</span>`; combatHud.dataset.state = frame.state;
   });
 
-  window.addEventListener('beforeunload', () => { playerController.dispose(); characterActor?.dispose(); runtime.dispose(); environment.dispose(); combatHud.remove(); engine.dispose(); shell.dispose(); });
+  window.addEventListener('beforeunload', () => { playerController.dispose(); gameCamera.dispose(); characterActor?.dispose(); runtime.dispose(); environment.dispose(); combatHud.remove(); engine.dispose(); shell.dispose(); });
 }
 
 void bootstrap().catch((error: unknown) => {
