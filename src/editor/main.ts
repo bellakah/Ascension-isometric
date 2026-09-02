@@ -25,7 +25,7 @@ const appRoot: HTMLElement = root;
 appRoot.innerHTML = `
   <main class="editor-shell">
     <header class="editor-menubar">
-      <div class="editor-brand"><div class="brand-mark">A</div><div class="editor-brand-copy"><strong>Ascension World Editor</strong><span>v0.7.5 · Game Perspective · Regions · Scatter</span></div></div>
+      <div class="editor-brand"><div class="brand-mark">A</div><div class="editor-brand-copy"><strong>Ascension World Editor</strong><span>v0.8.0 · Game Perspective · Regions · Safe Editing</span></div></div>
       <div class="editor-menubar-center">
         <span class="current-map-badge" data-current-map>Mapa</span>
         <span class="editor-status" data-tone="normal">Editor pronto.</span>

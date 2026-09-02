@@ -1,6 +1,10 @@
 export const WORLD_DOCUMENT_VERSION = 4 as const;
 export const LEGACY_WORLD_DOCUMENT_VERSIONS = [1, 2, 3] as const;
 export const MAX_TERRAIN_LAYERS = 16;
+export const MAX_TERRAIN_HEIGHT_STAMPS = 4000;
+export const MAX_TERRAIN_PAINT_STAMPS = 12000;
+export const MAX_WORLD_BLOCKERS = 256;
+export const MAX_WORLD_ENTITIES = 4000;
 
 export interface SerializedVector3 { x: number; y: number; z: number; }
 export type TerrainFalloff = 'smooth' | 'flat';
@@ -107,10 +111,6 @@ export interface WorldDocument {
   createdAt: number;
   updatedAt: number;
 }
-
-const MAX_TERRAIN_STAMPS = 4000;
-const MAX_PAINT_STAMPS = 12000;
-const MAX_BLOCKERS = 256;
 
 const DEFAULT_ENVIRONMENT: WorldEnvironmentDocument = {
   groundSize: 100,
@@ -253,7 +253,7 @@ function parseTerrain(value: unknown, sourceVersion: number): TerrainDocument {
 
   const heightStamps: TerrainHeightStamp[] = [];
   if (Array.isArray(raw.heightStamps)) {
-    for (const entry of raw.heightStamps.slice(0, MAX_TERRAIN_STAMPS)) {
+    for (const entry of raw.heightStamps.slice(0, MAX_TERRAIN_HEIGHT_STAMPS)) {
       if (!entry || typeof entry !== 'object') continue;
       const stamp = entry as Partial<TerrainHeightStamp>;
       heightStamps.push({
@@ -270,7 +270,7 @@ function parseTerrain(value: unknown, sourceVersion: number): TerrainDocument {
 
   const paintStamps: TerrainPaintStamp[] = [];
   if (Array.isArray(raw.paintStamps)) {
-    for (const entry of raw.paintStamps.slice(0, MAX_PAINT_STAMPS)) {
+    for (const entry of raw.paintStamps.slice(0, MAX_TERRAIN_PAINT_STAMPS)) {
       if (!entry || typeof entry !== 'object') continue;
       const stamp = entry as Partial<TerrainPaintStamp> & { layer?: number };
       let layerId = typeof stamp.layerId === 'string' ? stamp.layerId : '';
@@ -312,7 +312,7 @@ function parseWater(value: unknown): WorldWaterDocument {
 function parseBlockers(value: unknown): WorldBlockerDocument[] {
   if (!Array.isArray(value)) return [];
   const blockers: WorldBlockerDocument[] = [];
-  for (const entry of value.slice(0, MAX_BLOCKERS)) {
+  for (const entry of value.slice(0, MAX_WORLD_BLOCKERS)) {
     if (!entry || typeof entry !== 'object') continue;
     const raw = entry as Partial<WorldBlockerDocument>;
     const x1 = finite(raw.x1, 0); const z1 = finite(raw.z1, 0); const x2 = finite(raw.x2, x1); const z2 = finite(raw.z2, z1);
@@ -406,7 +406,7 @@ export function parseWorldDocument(value: unknown): WorldDocument {
     id: text(raw.id, legacyWorldId(name, updatedAt)), name, description: typeof raw.description === 'string' ? raw.description.trim() : '',
     spawn: vector(raw.spawn, { x: 0, y: 0, z: 0 }), environment, terrain,
     water: parseWater(raw.water), blockers: parseBlockers(raw.blockers),
-    entities: parseEntities(Array.isArray(raw.entities) ? raw.entities : [], legacyGrounding), createdAt, updatedAt,
+    entities: parseEntities(Array.isArray(raw.entities) ? raw.entities.slice(0, MAX_WORLD_ENTITIES) : [], legacyGrounding), createdAt, updatedAt,
   };
 }
 

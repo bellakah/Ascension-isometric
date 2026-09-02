@@ -2,6 +2,9 @@
 
 Browser-first 3D isometric RPG/MMO foundation built with **TypeScript + Three.js + Vite**. The game and editor share the same WorldDocument runtime. Quaternius is the primary stylized low-poly art direction; KayKit remains supported as a secondary library.
 
+The staged adaptation of World of Claudecraft systems is tracked in
+[`docs/WOC_PORTING_ROADMAP.md`](docs/WOC_PORTING_ROADMAP.md).
+
 ## Run
 
 - Node.js 22.12+.
