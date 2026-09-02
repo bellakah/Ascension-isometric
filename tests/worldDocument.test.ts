@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cloneWorldDocument, createHeightStamp, createTerrainLayer, createWorldDocument, createWorldEntity, duplicateWorldDocument, parseWorldDocument } from '../src/world/WorldDocument';
+import { MAX_TERRAIN_HEIGHT_STAMPS, MAX_WORLD_ENTITIES, cloneWorldDocument, createHeightStamp, createTerrainLayer, createWorldDocument, createWorldEntity, duplicateWorldDocument, parseWorldDocument } from '../src/world/WorldDocument';
 
 describe('WorldDocument v4', () => {
   it('creates dynamic terrain layers, water and grounded entity defaults', () => {
@@ -37,5 +37,13 @@ describe('WorldDocument v4', () => {
 
   it('rejects duplicate entity ids', () => {
     expect(() => parseWorldDocument({ version: 4, id: 'broken', name: 'Broken', entities: [{ id: 'same', assetId: 'a', assetName: 'A' }, { id: 'same', assetId: 'b', assetName: 'B' }] })).toThrow(/duplicado/i);
+  });
+
+  it('bounds imported documents to the same limits enforced by live editing', () => {
+    const entities = Array.from({ length: MAX_WORLD_ENTITIES + 1 }, (_, index) => ({ id: `entity-${index}`, assetId: 'tree', assetName: 'Tree' }));
+    const heightStamps = Array.from({ length: MAX_TERRAIN_HEIGHT_STAMPS + 1 }, (_, index) => ({ id: `height-${index}`, x: index, z: 0, radius: 2, delta: 1, falloff: 'smooth', mode: 'add' }));
+    const parsed = parseWorldDocument({ version: 4, id: 'bounded', name: 'Bounded', entities, terrain: { heightStamps } });
+    expect(parsed.entities).toHaveLength(MAX_WORLD_ENTITIES);
+    expect(parsed.terrain.heightStamps).toHaveLength(MAX_TERRAIN_HEIGHT_STAMPS);
   });
 });

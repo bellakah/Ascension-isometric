@@ -17,7 +17,11 @@ import {
   type TerrainRegion,
 } from '../world/TerrainMath';
 import {
+  MAX_TERRAIN_HEIGHT_STAMPS,
   MAX_TERRAIN_LAYERS,
+  MAX_TERRAIN_PAINT_STAMPS,
+  MAX_WORLD_BLOCKERS,
+  MAX_WORLD_ENTITIES,
   cloneWorldDocument,
   createBlocker,
   createHeightStamp,
@@ -37,11 +41,11 @@ import {
   type WorldDocument,
   type WorldEntityDocument,
 } from '../world/WorldDocument';
+import { clampToCapacity } from './EditCapacity';
 import { pointInRegion, regionBounds, regionCenter, regionSize, scatterCandidates, type RegionBounds, type ScatterCandidate, type ScatterSettings } from './RegionTools';
 
 const LEGACY_STORAGE_KEY = 'ascension-isometric-world-document-v1';
 const HISTORY_LIMIT = 80;
-const MAX_STAMPS = 12000;
 
 export type TransformMode = 'translate' | 'rotate' | 'scale';
 export type WorldAuthoringTool = 'select' | 'raise' | 'lower' | 'smooth' | 'flatten' | 'paint' | 'erase' | 'water' | 'spawn' | 'blocker' | 'region';
@@ -441,14 +445,18 @@ export class WorldEditor {
     const ids = [...new Set(this.scatterPreview.map((candidate) => candidate.assetId))];
     const records = new Map<string, AssetRecord>();
     for (const id of ids) { const record = await this.assets.get(id); if (record) records.set(id, record); }
-    const created: string[] = [];
+    const pending: WorldEntityDocument[] = [];
     for (const candidate of this.scatterPreview) {
       const asset = records.get(candidate.assetId); if (!asset) continue;
       const entity = createWorldEntity({ assetId: asset.id, assetName: asset.name, position: { x: candidate.x, y: this.terrainHeightAt(candidate.x, candidate.z), z: candidate.z } });
       entity.rotation.y = candidate.rotationY; entity.scale = { x: candidate.scale, y: candidate.scale, z: candidate.scale }; entity.grounded = true; entity.groundOffset = 0;
-      this.documentState.entities.push(entity); created.push(entity.id);
+      pending.push(entity);
     }
+    const batch = clampToCapacity(pending, this.documentState.entities.length, MAX_WORLD_ENTITIES);
+    const created = batch.accepted.map((entity) => entity.id);
+    this.documentState.entities.push(...batch.accepted);
     this.clearScatterPreview(); await this.rebuildAfterBatch(); this.selectMany(created); this.recordHistory(); this.events.onStatus(`${created.length} objeto(s) do Scatter aplicados.`, 'success');
+    if (batch.truncated) this.events.onStatus(`Scatter limitado a ${MAX_WORLD_ENTITIES} objetos por mapa.`, 'error');
   }
 
   surfaceAt(clientX: number, clientY: number): THREE.Vector3 | null { return this.environment.surfaceAt(this.engine.camera.camera, this.canvas, clientX, clientY); }
@@ -495,7 +503,11 @@ export class WorldEditor {
     }
     if (this.blockerStart) {
       const end = this.surfaceAt(event.clientX, event.clientY); const start = this.blockerStart; this.blockerStart = null; this.environment.setBlockerPreview(null, null);
-      if (end && Math.hypot(end.x - start.x, end.z - start.z) >= 0.5) { this.documentState.blockers.push(createBlocker({ x1: start.x, z1: start.z, x2: end.x, z2: end.z })); this.environment.update(this.documentState); this.touchDocument(); this.recordHistory(); this.events.onStatus('Blocker adicionado.', 'success'); }
+      if (end && Math.hypot(end.x - start.x, end.z - start.z) >= 0.5) {
+        const batch = clampToCapacity([createBlocker({ x1: start.x, z1: start.z, x2: end.x, z2: end.z })], this.documentState.blockers.length, MAX_WORLD_BLOCKERS);
+        if (batch.accepted[0]) { this.documentState.blockers.push(batch.accepted[0]); this.environment.update(this.documentState); this.touchDocument(); this.recordHistory(); this.events.onStatus('Blocker adicionado.', 'success'); }
+        else this.events.onStatus(`Limite de ${MAX_WORLD_BLOCKERS} blockers atingido.`, 'error');
+      }
       return true;
     }
     if (this.strokeActive) { this.strokeActive = false; this.strokePaintErase = false; this.lastStrokePoint = null; this.schedulePersist(); this.recordHistory(); return true; }
@@ -531,18 +543,23 @@ export class WorldEditor {
 
   async placeAsset(asset: AssetRecord, position: SerializedVector3): Promise<void> {
     const entity = createWorldEntity({ assetId: asset.id, assetName: asset.name, position: { ...position, y: this.terrainHeightAt(position.x, position.z) } });
+    const batch = clampToCapacity([entity], this.documentState.entities.length, MAX_WORLD_ENTITIES);
+    if (!batch.accepted[0]) { this.events.onStatus(`Limite de ${MAX_WORLD_ENTITIES} objetos atingido.`, 'error'); return; }
     this.documentState.entities.push(entity); await this.runtime.add(entity, asset); this.touchDocument(); this.recordHistory(); this.select(entity.id); this.events.onStatus(`${entity.name} colocado no mapa.`, 'success');
   }
 
   async duplicateSelected(): Promise<void> {
     const sources = [...this.selectedIds].map((id) => this.getEntity(id)).filter((entity): entity is WorldEntityDocument => Boolean(entity)); if (!sources.length) return;
+    const batch = clampToCapacity(sources, this.documentState.entities.length, MAX_WORLD_ENTITIES);
+    if (!batch.accepted.length) { this.events.onStatus(`Limite de ${MAX_WORLD_ENTITIES} objetos atingido.`, 'error'); return; }
     this.releaseSelectionPivot(true); this.clearSelectionVisuals(false); const created: string[] = [];
-    for (const source of sources) {
+    for (const source of batch.accepted) {
       const copy = createWorldEntity({ assetId: source.assetId, assetName: source.assetName, name: `${source.name} Copy`, position: { x: source.position.x + 0.75, y: source.position.y, z: source.position.z + 0.75 } });
       copy.rotation = { ...source.rotation }; copy.scale = { ...source.scale }; copy.visible = source.visible; copy.grounded = source.grounded; copy.groundOffset = source.groundOffset; copy.collision = { ...source.collision };
       if (copy.grounded) copy.position.y = this.terrainHeightAt(copy.position.x, copy.position.z) + copy.groundOffset; this.documentState.entities.push(copy); await this.runtime.add(copy); created.push(copy.id);
     }
     this.selectMany(created); this.touchDocument(); this.recordHistory();
+    if (batch.truncated) this.events.onStatus(`Duplicação limitada a ${MAX_WORLD_ENTITIES} objetos por mapa.`, 'error');
   }
 
   deleteSelected(): void {
@@ -592,18 +609,28 @@ export class WorldEditor {
   private async pasteRegionAt(centerX: number, centerZ: number): Promise<void> {
     const clipboard = this.regionClipboard; if (!clipboard) return;
     this.releaseSelectionPivot(true); this.clearSelectionVisuals(false); this.selectedIds.clear(); this.selectedId = null;
-    const created: string[] = [];
+    const pendingEntities: WorldEntityDocument[] = [];
     for (const relative of clipboard.entities) {
       const source = relative.entity; const x = centerX + relative.dx; const z = centerZ + relative.dz;
       const copy = createWorldEntity({ assetId: source.assetId, assetName: source.assetName, name: source.name, position: { x, y: source.position.y, z } });
       copy.rotation = { ...source.rotation }; copy.scale = { ...source.scale }; copy.visible = source.visible; copy.grounded = source.grounded; copy.groundOffset = source.groundOffset; copy.collision = { ...source.collision }; if (copy.grounded) copy.position.y = this.terrainHeightAt(x, z) + copy.groundOffset;
-      this.documentState.entities.push(copy); created.push(copy.id);
+      pendingEntities.push(copy);
     }
-    for (const relative of clipboard.heights) this.documentState.terrain.heightStamps.push(createHeightStamp({ ...relative.stamp, x: centerX + relative.dx, z: centerZ + relative.dz }));
-    for (const relative of clipboard.paints) if (this.layerById(relative.stamp.layerId)) this.documentState.terrain.paintStamps.push(createPaintStamp({ ...relative.stamp, x: centerX + relative.dx, z: centerZ + relative.dz }));
-    for (const relative of clipboard.blockers) this.documentState.blockers.push(createBlocker({ x1: centerX + relative.dx1, z1: centerZ + relative.dz1, x2: centerX + relative.dx2, z2: centerZ + relative.dz2 }));
+    const pendingHeights = clipboard.heights.map((relative) => createHeightStamp({ ...relative.stamp, x: centerX + relative.dx, z: centerZ + relative.dz }));
+    const pendingPaints = clipboard.paints.filter((relative) => this.layerById(relative.stamp.layerId)).map((relative) => createPaintStamp({ ...relative.stamp, x: centerX + relative.dx, z: centerZ + relative.dz }));
+    const pendingBlockers = clipboard.blockers.map((relative) => createBlocker({ x1: centerX + relative.dx1, z1: centerZ + relative.dz1, x2: centerX + relative.dx2, z2: centerZ + relative.dz2 }));
+    const entityBatch = clampToCapacity(pendingEntities, this.documentState.entities.length, MAX_WORLD_ENTITIES);
+    const heightBatch = clampToCapacity(pendingHeights, this.documentState.terrain.heightStamps.length, MAX_TERRAIN_HEIGHT_STAMPS);
+    const paintBatch = clampToCapacity(pendingPaints, this.documentState.terrain.paintStamps.length, MAX_TERRAIN_PAINT_STAMPS);
+    const blockerBatch = clampToCapacity(pendingBlockers, this.documentState.blockers.length, MAX_WORLD_BLOCKERS);
+    this.documentState.entities.push(...entityBatch.accepted);
+    this.documentState.terrain.heightStamps.push(...heightBatch.accepted);
+    this.documentState.terrain.paintStamps.push(...paintBatch.accepted);
+    this.documentState.blockers.push(...blockerBatch.accepted);
+    const created = entityBatch.accepted.map((entity) => entity.id);
     this.regionState = { minX: centerX - clipboard.width * 0.5, maxX: centerX + clipboard.width * 0.5, minZ: centerZ - clipboard.depth * 0.5, maxZ: centerZ + clipboard.depth * 0.5 }; this.environment.setRegionPreview(this.regionState);
     await this.rebuildAfterBatch(); this.selectMany(created); this.recordHistory(); this.events.onStatus(`Região colada com ${created.length} objeto(s).`, 'success');
+    if (entityBatch.truncated || heightBatch.truncated || paintBatch.truncated || blockerBatch.truncated) this.events.onStatus('Parte da região não coube nos limites seguros do mapa.', 'error');
   }
 
   private slopeAt(x: number, z: number): number {
@@ -614,7 +641,7 @@ export class WorldEditor {
     if (this.lastStrokePoint && point.distanceTo(this.lastStrokePoint) < Math.max(0.18, this.brush.radius * 0.2)) return;
     this.lastStrokePoint = point.clone(); let region: TerrainRegion | null = null;
     if (this.toolState === 'paint') {
-      if (this.documentState.terrain.paintStamps.length >= MAX_STAMPS) { this.events.onStatus('Limite de pintura do terreno atingido.', 'error'); return; }
+      if (this.documentState.terrain.paintStamps.length >= MAX_TERRAIN_PAINT_STAMPS) { this.events.onStatus('Limite de pintura do terreno atingido.', 'error'); return; }
       const layer = this.layerById(this.brush.paintLayerId); if (!layer || layer.locked) return;
       const stamp = createPaintStamp({ x: point.x, z: point.z, radius: this.brush.radius, layerId: layer.id, strength: Math.min(1, this.brush.strength / 10), mode: this.strokePaintErase ? 'erase' : 'paint' }); this.documentState.terrain.paintStamps.push(stamp); region = stampRegion(stamp);
     } else if (this.toolState === 'erase') {
@@ -622,7 +649,7 @@ export class WorldEditor {
       if (paintIndex >= 0) { const [removed] = this.documentState.terrain.paintStamps.splice(paintIndex, 1); if (removed) region = stampRegion(removed); }
       else if (heightIndex >= 0) { const [removed] = this.documentState.terrain.heightStamps.splice(heightIndex, 1); if (removed) region = stampRegion(removed); }
     } else {
-      if (this.documentState.terrain.heightStamps.length >= MAX_STAMPS) { this.events.onStatus('Limite de escultura do terreno atingido.', 'error'); return; }
+      if (this.documentState.terrain.heightStamps.length >= MAX_TERRAIN_HEIGHT_STAMPS) { this.events.onStatus('Limite de escultura do terreno atingido.', 'error'); return; }
       let delta = this.brush.strength * 0.11; let mode: 'add' | 'level' = 'add';
       if (this.toolState === 'lower') delta *= -1;
       if (this.toolState === 'smooth') { const current = this.terrainHeightAt(point.x, point.z); const average = averageTerrainHeight(this.documentState, point.x, point.z, this.brush.radius); delta = current + (average - current) * Math.min(0.9, 0.12 + this.brush.strength / 38); mode = 'level'; }
