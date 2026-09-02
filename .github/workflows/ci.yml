@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 20613)
-Total output lines: 1465
-
 name: CI
 
 on:
@@ -702,7 +699,42 @@ jobs:
       # toolchain state per scope (measured 2026-08-06), written once when
       # the key is new and never refreshed within that state, so the hit rate
       # decays as sources drift until the next rotation (start there if the
-      # speedup fades). The bind…613 tokens truncated…, once per job, BY
+      # speedup fades). The binding budget is GitHub's 10 GB per-repo cache
+      # quota with LRU eviction: about 0.5 GB per toolchain state per scope
+      # (8 entries at 57-73 MB; no single scope holds both matrices: on the
+      # one event both jobs now see, a release-to-main PR, pr-gate's copy of
+      # this step is gated off by the step gate above, so release-gate's
+      # matrix is the only producer on that ref; the separation lives in the
+      # STEP gate, not in the job routing), roughly 1 GB across the two
+      # long-lived producer scopes (main
+      # plus the release branch) beside the pnpm store, Playwright, and tsc
+      # caches. If hot-entry eviction is ever observed, the lever is
+      # restricting this step's save to push events, never restore-keys
+      # (though note the long-sims lane leans on PR-scope saves, so that
+      # lever costs the lane most of its benefit). Scope arithmetic after
+      # the lane copies landed: a pr-gate-tier producer scope (main, dev-*)
+      # holds 10 entries (8 shard + 2 lane halves); the release scope stays
+      # at 8 (release-gate is deliberately not lane-split).
+      # Producers beyond release-gate: pr-gate's own main and dev-* push runs
+      # seed those branches' scopes the same way.
+      # Per-shard keys: in full mode each shard transforms
+      # its own pack's import closure; in selective mode the collected set is
+      # smaller and only partially resembles the full-mode store it restores,
+      # which still hits on the shared source closure that dominates the
+      # store. release-gate carries the same step with the same key: its
+      # release/** push runs are what save the store into the base-branch
+      # scope PR runs can restore from (pr-gate never runs on release pushes,
+      # and a PR-scoped save is invisible to every other PR). Both selective
+      # legs and the full replay read the same store: every leg is vitest
+      # under the same config.
+      - name: Cache vitest transform cache
+        if: (github.event_name != 'pull_request' || github.base_ref != 'main' || !startsWith(github.head_ref, 'release/')) && needs.changes.outputs.code != 'false'
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.experimental-vitest-cache
+          key: vitest-fsmodule-${{ runner.os }}-shard${{ matrix.shard }}-${{ hashFiles('pnpm-lock.yaml', 'vite.config.ts', '.npmrc', 'package.json') }}
+
+      # The shard entry regenerates the artifacts itself, once per job, BY
       # DESIGN (the S3 guard, guide freshness, and the git-subprocess suites
       # need the generated artifacts no matter which shard they hash into; the
       # merged selective leg is a bare vitest-related invocation with no npm
