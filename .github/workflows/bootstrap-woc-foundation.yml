@@ -61,8 +61,20 @@ jobs:
           set -euo pipefail
           source_dir="$RUNNER_TEMP/world-of-claudecraft"
           fork_notice="$RUNNER_TEMP/ASCENSION_FORK.md"
+          workflow_hold="$RUNNER_TEMP/ascension-workflows"
+          mkdir -p "$workflow_hold"
           cp "$GITHUB_WORKSPACE/ASCENSION_FORK.md" "$fork_notice"
-          rsync -a --delete --exclude='.git/' "$source_dir/" "$GITHUB_WORKSPACE/"
+          cp "$GITHUB_WORKSPACE/.github/workflows/bootstrap-woc-foundation.yml" "$workflow_hold/"
+
+          # A GitHub Actions token cannot add or replace workflow files. Keep only
+          # this bootstrap workflow for the import; the pinned upstream workflows
+          # are restored afterward through the repository API.
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/workflows/***' \
+            "$source_dir/" "$GITHUB_WORKSPACE/"
+          mkdir -p "$GITHUB_WORKSPACE/.github/workflows"
+          rsync -a --delete "$workflow_hold/" "$GITHUB_WORKSPACE/.github/workflows/"
           cp "$fork_notice" "$GITHUB_WORKSPACE/ASCENSION_FORK.md"
 
       - name: Commit imported foundation in bounded batches
@@ -101,7 +113,7 @@ jobs:
           # Keep each network pack bounded. The first commit contains the complete
           # application, server, editor, tests, notices, and configuration, while
           # public assets are sent one top-level group at a time.
-          commit_batch "feat(foundation): import World of Claudecraft application" . ':(exclude)public/**'
+          commit_batch "feat(foundation): import World of Claudecraft application" . ':(exclude)public/**' ':(exclude).github/workflows/**'
 
           while IFS= read -r -d '' entry; do
             name="${entry#public/}"
@@ -118,3 +130,4 @@ jobs:
           test -d src
           test -d server
           test -d public
+          test -f .github/workflows/bootstrap-woc-foundation.yml
