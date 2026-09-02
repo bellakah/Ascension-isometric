@@ -19,7 +19,7 @@ jobs:
   import:
     name: Import pinned upstream snapshot
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       SOURCE_REPOSITORY: https://github.com/levy-street/world-of-claudecraft.git
       SOURCE_COMMIT: ce662ac6eedcd92768b9eb4f06f158d976f0e939
@@ -65,12 +65,56 @@ jobs:
           rsync -a --delete --exclude='.git/' "$source_dir/" "$GITHUB_WORKSPACE/"
           cp "$fork_notice" "$GITHUB_WORKSPACE/ASCENSION_FORK.md"
 
-      - name: Commit imported foundation
+      - name: Commit imported foundation in bounded batches
         shell: bash
         run: |
           set -euo pipefail
+
           git config user.name "Ascension Migration"
           git config user.email "actions@users.noreply.github.com"
-          git add -A
-          git commit -m "feat(foundation): import World of Claudecraft v0.41.2" -m "Use the pinned upstream game as Ascension's complete technical base. Preserve the current prototype on its archive branch and retain the upstream license, credits, server, editor, client, systems, tests, and assets."
-          git push origin "HEAD:$TARGET_BRANCH"
+          git config http.version HTTP/1.1
+          git config http.postBuffer 524288000
+
+          push_with_retry() {
+            local attempt
+            for attempt in 1 2 3 4; do
+              if git push origin "HEAD:$TARGET_BRANCH"; then
+                return 0
+              fi
+              echo "Push attempt $attempt failed; retrying a transient GitHub transport error."
+              sleep $((attempt * 5))
+            done
+            return 1
+          }
+
+          commit_batch() {
+            local message="$1"
+            shift
+            git add -A -- "$@"
+            if git diff --cached --quiet; then
+              return 0
+            fi
+            git commit -m "$message"
+            push_with_retry
+          }
+
+          # Keep each network pack bounded. The first commit contains the complete
+          # application, server, editor, tests, notices, and configuration, while
+          # public assets are sent one top-level group at a time.
+          commit_batch "feat(foundation): import World of Claudecraft application" . ':(exclude)public/**'
+
+          while IFS= read -r -d '' entry; do
+            name="${entry#public/}"
+            commit_batch "feat(foundation): import public asset group ${name}" "$entry"
+          done < <(find public -mindepth 1 -maxdepth 1 -print0 | sort -z)
+
+          commit_batch "feat(foundation): finalize World of Claudecraft v0.41.2 snapshot" .
+
+          test -z "$(git status --porcelain)"
+          test -f LICENSE
+          test -f THIRD_PARTY_NOTICES.md
+          test -f CREDITS.md
+          test -f ASCENSION_FORK.md
+          test -d src
+          test -d server
+          test -d public
