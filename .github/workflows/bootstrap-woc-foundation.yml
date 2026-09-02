@@ -1,0 +1,76 @@
+name: Bootstrap World of Claudecraft foundation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - foundation/world-of-claudecraft
+    paths:
+      - .github/workflows/bootstrap-woc-foundation.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bootstrap-world-of-claudecraft
+  cancel-in-progress: false
+
+jobs:
+  import:
+    name: Import pinned upstream snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SOURCE_REPOSITORY: https://github.com/levy-street/world-of-claudecraft.git
+      SOURCE_COMMIT: ce662ac6eedcd92768b9eb4f06f158d976f0e939
+      TARGET_REPOSITORY: bellakah/Ascension-isometric
+      TARGET_BRANCH: foundation/world-of-claudecraft
+
+    steps:
+      - name: Check out Ascension foundation branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate protected migration targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "$TARGET_REPOSITORY"
+          test "$GITHUB_REF_NAME" = "$TARGET_BRANCH"
+          test -f ASCENSION_FORK.md
+
+      - name: Fetch pinned World of Claudecraft snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/world-of-claudecraft"
+          git init "$source_dir"
+          git -C "$source_dir" remote add origin "$SOURCE_REPOSITORY"
+          git -C "$source_dir" fetch --depth=1 origin "$SOURCE_COMMIT"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test -f "$source_dir/package.json"
+          test -d "$source_dir/src"
+          test -d "$source_dir/server"
+          test -f "$source_dir/editor.html"
+
+      - name: Replace foundation with upstream snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/world-of-claudecraft"
+          fork_notice="$RUNNER_TEMP/ASCENSION_FORK.md"
+          cp "$GITHUB_WORKSPACE/ASCENSION_FORK.md" "$fork_notice"
+          rsync -a --delete --exclude='.git/' "$source_dir/" "$GITHUB_WORKSPACE/"
+          cp "$fork_notice" "$GITHUB_WORKSPACE/ASCENSION_FORK.md"
+
+      - name: Commit imported foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Ascension Migration"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(foundation): import World of Claudecraft v0.41.2" -m "Use the pinned upstream game as Ascension's complete technical base. Preserve the current prototype on its archive branch and retain the upstream license, credits, server, editor, client, systems, tests, and assets."
+          git push origin "HEAD:$TARGET_BRANCH"
