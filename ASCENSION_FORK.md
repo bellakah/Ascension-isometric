@@ -1,6 +1,6 @@
 # Ascension Foundation
 
-Ascension uses World of Claudecraft as its complete technical foundation.
+Ascension uses World of ClaudeCraft as its complete technical foundation.
 
 ## Upstream baseline
 
@@ -19,6 +19,25 @@ Ascension replaces the product identity, characters, animations, models,
 textures, audio, maps, interface art, lore, progression, and authored content.
 New work must configure or extend an existing upstream system before creating
 a parallel replacement.
+
+## Working boundaries
+
+To keep upstream code maintainable while Ascension is being authored:
+
+- Treat existing imported World of ClaudeCraft code and assets as the
+  `upstream foundation` until a deliberate replacement is approved.
+- Put new Ascension-owned runtime assets under `public/ascension/`.
+- Put Ascension-specific integration code under `src/ascension/` when code is
+  actually required; do not duplicate an existing upstream subsystem there.
+- Keep authored Ascension data separate from generic engine/runtime code.
+- Replace upstream identity and content incrementally, with tests between
+  steps. Do not mass-rename paths that are still referenced at runtime.
+- Keep upstream copyright, license, credits, and third-party notices available
+  for every retained upstream component.
+
+The detailed asset layout is documented in
+`docs/ascension/CONTENT_LAYOUT.md`. Known product-identity replacement points
+are tracked in `docs/ascension/IDENTITY_AUDIT.md`.
 
 ## Repository history
 
