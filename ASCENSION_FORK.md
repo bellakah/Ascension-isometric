@@ -20,6 +20,26 @@ textures, audio, maps, interface art, lore, progression, and authored content.
 New work must configure or extend an existing upstream system before creating
 a parallel replacement.
 
+## Identity transition
+
+Public product identity is migrated independently from upstream compatibility
+identifiers. Player-facing titles, application metadata, PWA labels, and other
+public product-name strings may use `Ascension`, while technical identifiers
+remain unchanged until a dedicated compatibility migration proves they can move
+safely.
+
+The following upstream identifiers are intentionally retained for now where they
+are part of runtime compatibility or persisted state: package/application ids,
+protocol names, local/session storage keys such as the `woc_*` editor/session
+keys, updater/release channels, API/database identifiers, asset ids, class ids,
+and other internal wire or persistence keys.
+
+No final Ascension logo or icon set has been approved yet. Existing World of
+ClaudeCraft favicons, PWA icons, loading/promotional imagery, and other upstream
+visual assets therefore remain as functional fallbacks until approved Ascension
+replacements are supplied. Keeping those assets does not transfer or remove the
+upstream copyright, license, credit, or third-party notice obligations.
+
 ## Repository history
 
 The pre-transplant Ascension prototype is preserved on
