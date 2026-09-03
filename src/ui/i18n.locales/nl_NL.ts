@@ -1336,7 +1336,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.metrics.waitingHitch': 'haperingstoewijzing: geactiveerd bij wereldbetreding',
   'hudChrome.perf.diagnostics.metrics.waitingRenderer': 'renderer: wachtend',
   'hudChrome.perf.diagnostics.metrics.waitingValue': 'wachtend',
-  'hudChrome.perf.diagnostics.panelAria': 'World of ClaudeCraft prestatiediagnostiek',
+  'hudChrome.perf.diagnostics.panelAria': 'Ascension prestatiediagnostiek',
   'hudChrome.perf.diagnostics.report.capturedLine': 'Vastgelegd: {captured}',
   'hudChrome.perf.diagnostics.report.findingHeading': '{index}. {title}',
   'hudChrome.perf.diagnostics.report.findingMeta': 'Ernst: {severity}. Betrouwbaarheid: {confidence}.',
@@ -1352,7 +1352,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.report.status.needsAttention': 'vraagt aandacht',
   'hudChrome.perf.diagnostics.report.statusLine': 'Status: {status} ({score}/100)',
   'hudChrome.perf.diagnostics.report.summaryLine': 'Samenvatting: {summary}',
-  'hudChrome.perf.diagnostics.report.title': 'World of ClaudeCraft prestatiediagnose',
+  'hudChrome.perf.diagnostics.report.title': 'Ascension prestatiediagnose',
   'hudChrome.perf.diagnostics.report.topFindingLine': 'Belangrijkste bevinding: {finding}',
   'hudChrome.perf.diagnostics.scoreHeadline': '{score}/100: {headline}',
   'hudChrome.perf.diagnostics.sections.codeFix': 'Codeoplossing',
@@ -1396,7 +1396,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'hudChrome.talents.gearRestored': '{n} uitrustingsstukken van deze build hersteld.',
   'hudChrome.talents.gearTakenByOtherSlot': '{n} opgeslagen stukken hebben een andere kopie nodig die je niet hebt.',
   'hudChrome.talents.newBuildWithGear': 'Nieuwe Build (bewaar ook uitrusting)',
-  'hudChrome.wiki.confirmBody': 'Dit opent de World of ClaudeCraft-wiki in je browser. Het spel blijft ondertussen draaien.',
+  'hudChrome.wiki.confirmBody': 'Dit opent de Ascension-wiki in je browser. Het spel blijft ondertussen draaien.',
   'hudChrome.wiki.confirmCancel': 'Annuleren',
   'hudChrome.wiki.confirmOpen': 'Wiki Openen',
   'hudChrome.wiki.confirmTitle': 'Wiki openen?',
@@ -2948,7 +2948,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'wallet.bagConnect': 'Portemonnee koppelen',
   'wallet.bagLink': 'Portemonnee verifiëren',
   'wallet.bagReconnect': 'Portemonnee opnieuw verbinden',
-  'wallet.browser.completeBody': 'Je kunt terugkeren naar de World of ClaudeCraft desktop-app.',
+  'wallet.browser.completeBody': 'Je kunt terugkeren naar de Ascension desktop-app.',
   'wallet.browser.completeTitle': 'Portemonnee-autorisatie voltooid',
   'wallet.browser.continueWith': 'Doorgaan met {wallet}',
   'wallet.browser.extensionHelp':
@@ -2964,12 +2964,12 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'wallet.browser.returnButton': 'Terug naar desktop-app',
   'wallet.browser.reviewBody': 'Volg de aanwijzing van {wallet}. Houd deze browserpagina open.',
   'wallet.browser.reviewTitle': 'Bekijken in je portemonnee',
-  'wallet.browser.safety': 'World of ClaudeCraft vraagt nooit naar je herstelzin of privésleutel.',
+  'wallet.browser.safety': 'Ascension vraagt nooit naar je herstelzin of privésleutel.',
   'wallet.browser.title': 'Een Solana-portemonnee verbinden',
   'wallet.manualReturnBrowserHelp':
     'Keer na goedkeuring terug naar dit speltabblad. Als iOS een andere browser opent, sluit die dan en keer handmatig terug naar de oorspronkelijke browser.',
   'wallet.manualReturnStandaloneHelp':
-    'Keer na goedkeuring terug naar World of ClaudeCraft via je beginscherm. Als iOS een browser opent, sluit die dan en open de beginscherm-app handmatig opnieuw.',
+    'Keer na goedkeuring terug naar Ascension via je beginscherm. Als iOS een browser opent, sluit die dan en open de beginscherm-app handmatig opnieuw.',
   'wallet.mobileAppHelp':
     'Kies Phantom of Solflare. Je portemonnee-app vraagt om goedkeuring. Houd dit spel open en keer ernaar terug wanneer je klaar bent.',
   'wallet.openAppButton': 'Open {wallet}',
@@ -2978,7 +2978,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'wallet.openAppTitle': 'Doorgaan in {wallet}',
   'wallet.preparingAppButton': '{wallet} voorbereiden...',
   'wallet.standaloneAppHelp':
-    'Portemonneeverbindingen zijn nog niet beschikbaar in de beginscherm-app. Open World of ClaudeCraft in Safari of Chrome om Phantom of Solflare te gebruiken.',
+    'Portemonneeverbindingen zijn nog niet beschikbaar in de beginscherm-app. Open Ascension in Safari of Chrome om Phantom of Solflare te gebruiken.',
   'wallet.walletAppUnavailable':
     '{wallet} kon niet worden voorbereid. Sluit dit venster en probeer het opnieuw.',
   'entities.abilities.primal_reflexes.description':
@@ -3793,7 +3793,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'editor.confirm.discardBody': 'Je hebt niet-opgeslagen wijzigingen in "{name}". Deze verwerpen?',
   'editor.confirm.discardTitle': 'Wijzigingen verwerpen?',
   'editor.confirm.ok': 'OK',
-  'editor.docTitle': 'Kaarteditor - World of ClaudeCraft',
+  'editor.docTitle': 'Kaarteditor - Ascension',
   'editor.eraseTool.blockerHint':
     'Klikken bij een blokkademuur verwijdert in plaats daarvan die muur.',
   'editor.eraseTool.hint':
@@ -4464,9 +4464,9 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'hudChrome.statInfo.sources.header': 'Opgebouwd uit:',
   'hudChrome.statInfo.sources.talents': 'Talenten en effecten: {value}',
   'a11y.characterActions': 'Personageacties',
-  'a11y.discordCommunity': 'Word lid van de World of ClaudeCraft Discord-community',
-  'a11y.donateProject': 'Doneer om World of ClaudeCraft te steunen',
-  'a11y.githubProject': 'Open het World of ClaudeCraft GitHub-project',
+  'a11y.discordCommunity': 'Word lid van de Ascension Discord-community',
+  'a11y.donateProject': 'Doneer om Ascension te steunen',
+  'a11y.githubProject': 'Open het Ascension GitHub-project',
   'a11y.goHome': 'Ga naar de startpagina',
   'a11y.languageSelection': 'Taalkeuze',
   'a11y.mainNavigation': 'Hoofdnavigatie',
@@ -6508,7 +6508,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'fiesta.word.shutdown': 'AFGESLACHT!',
   'fiesta.word.spree': '{n}× REEKS!',
   'fiesta.word.wave': 'AUGMENTS!',
-  'footer.copyright': '2026 World of ClaudeCraft',
+  'footer.copyright': '2026 Ascension',
   'footer.discordLabel': 'Word lid van de Discord',
   'footer.githubLabel': 'Opensourceproject',
   'footer.githubLink': 'https://github.com/levy-street/world-of-claudecraft',
@@ -6771,7 +6771,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'guide.bestiary.levelsSame': 'Niveau {min}',
   'guide.bestiary.notedLabel': 'Opmerkelijk',
   'guide.bestiary.rare': 'Zeldzaam',
-  'guide.brand': 'World of ClaudeCraft',
+  'guide.brand': 'Ascension',
   'guide.brandShort': 'ClaudeCraft',
   'guide.breadcrumb.home': 'Gids',
   'guide.breadcrumb.label': 'Kruimelpad',
@@ -7026,7 +7026,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'guide.footer.discord': 'Word lid van de Discord',
   'guide.footer.github': 'Broncode op GitHub',
   'guide.footer.playNow': 'Speel nu',
-  'guide.footer.rights': 'World of ClaudeCraft',
+  'guide.footer.rights': 'Ascension',
   'guide.gear.consumablesElixirs': 'Elixers verlenen een tijdelijke versterking terwijl je op avontuur bent, een klein voordeel dat helpt wanneer je nog wat verder wilt doorduwen. Ze delen de afkoeltijd van drankjes niet, dus je kunt er een drinken en toch een genezingsdrankje in reserve houden. Twee elixers voor dezelfde waarde stapelen niet, en het laatste dat je drinkt is het elixer dat blijft.',
   'guide.gear.consumablesFood':
     'Eten en drinken herstellen je terwijl je zit en rust tussen gevechten. Eten herstelt levenskracht, drinken herstelt mana, en zo rusten is gratis. Ga na een zwaar gevecht een paar seconden zitten in plaats van half geheeld het volgende in te rennen.',
@@ -7182,7 +7182,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
     'De wereld is solo te spelen, maar de beste buit wacht achter een goede groep.',
   'guide.home.subtitle':
     'Quest, sluit je aaneen en verken een handgebouwde wereld, gratis in je browser.',
-  'guide.home.title': 'World of ClaudeCraft',
+  'guide.home.title': 'Ascension',
   'guide.home.what.heading': 'Een klassieke MMO, gemaakt om zo op te pakken',
   'guide.home.what.pillarClassesBody':
     'Tanken, genezen of de schade uitdelen. Elke klasse speelt zoals zijn archetype hoort, met talenten om hem van jou te maken.',
@@ -7584,7 +7584,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'guide.worldPage.gladeTitle': 'Een rustig hoekje: Brightwood Glade',
   'guide.worldPage.heading': 'De wereld',
   'guide.worldPage.hub': 'Thuisbasis',
-  'guide.worldPage.intro': 'World of ClaudeCraft is één aaneengesloten land dat je te voet doorkruist. De oude weg loopt van zuid naar noord door de begindal, het moeras en de pieken, en hij blijft daarna doorklimmen naar de holte erachter en het sneeuwland boven aan de kaart. Een kolom hogere rijken opent zich vanaf die weg naar het westen en een andere naar het oosten, en voor de oostkust van de Vallei ligt een eiland. Er is geen snelreizen, er zijn geen vluchtroutes en geen koetsen: elke reis wordt gelopen of gereden, dus er komen hoort bij het avontuur.\n\nHet land houdt ook de tijd bij. Een dag-en-nachtcyclus loopt op een echte klok die iedereen op jouw wereld deelt, zodat de hemel voor jullie allemaal tegelijk van dageraad via middag naar schemer en donker verloopt, de maan komt en gaat door haar fasen, en het licht op de grond met haar meeverandert. De wijzerplaat rond je minikaart is waar je het uur afleest.',
+  'guide.worldPage.intro': 'Ascension is één aaneengesloten land dat je te voet doorkruist. De oude weg loopt van zuid naar noord door de begindal, het moeras en de pieken, en hij blijft daarna doorklimmen naar de holte erachter en het sneeuwland boven aan de kaart. Een kolom hogere rijken opent zich vanaf die weg naar het westen en een andere naar het oosten, en voor de oostkust van de Vallei ligt een eiland. Er is geen snelreizen, er zijn geen vluchtroutes en geen koetsen: elke reis wordt gelopen of gereden, dus er komen hoort bij het avontuur.\n\nHet land houdt ook de tijd bij. Een dag-en-nachtcyclus loopt op een echte klok die iedereen op jouw wereld deelt, zodat de hemel voor jullie allemaal tegelijk van dageraad via middag naar schemer en donker verloopt, de maan komt en gaat door haar fasen, en het licht op de grond met haar meeverandert. De wijzerplaat rond je minikaart is waar je het uur afleest.',
   'guide.worldPage.mapHeading': 'De weg en de rijken daarachter',
   'guide.worldPage.mapSub': 'Het opdrachtenspoor loopt van zuid naar noord door het midden van de kaart: dal, moeras, pieken, en daaraan voorbij de holte en de sneeuw in. De andere rijken openen zich langs die weg in plaats van erna, door poorten ten oosten en ten westen van de moerasweg, terwijl het eiland Farshore vanaf de oostkust van de Vallei bereikt wordt. Wat je uit de verre rijken houdt zijn hun niveaubanden, niet de wandeling: vijf ervan delen de hoogste band, dus zodra je klaar bent kun je ze in elke volgorde aanpakken. Farshore is de uitzondering, laagniveauland dat je vroeg kunt bezoeken.',
   'guide.worldPage.marshBlurb':
@@ -9021,7 +9021,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
     'Voor volledig scherm op Android moet je deze pagina eerst installeren of aan je beginscherm toevoegen.',
   'mobilePreflight.androidInstallStep':
     'Tik in Chrome op het menu en daarna op App installeren of Toevoegen aan beginscherm.',
-  'mobilePreflight.androidOpenStep': 'Open World of ClaudeCraft vanaf het nieuwe pictogram.',
+  'mobilePreflight.androidOpenStep': 'Open Ascension vanaf het nieuwe pictogram.',
   'mobilePreflight.androidStandaloneDetail':
     'Je bent in de volledig-scherm-appmodus. Houd het apparaat in liggende stand.',
   'mobilePreflight.baseLandscape':
@@ -9032,7 +9032,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'mobilePreflight.iosInstallDetail':
     'Voor echt volledig scherm op iPhone of iPad moet je deze pagina eerst aan je beginscherm toevoegen.',
   'mobilePreflight.iosOpenStep':
-    'Open World of ClaudeCraft vanaf het nieuwe pictogram op het beginscherm.',
+    'Open Ascension vanaf het nieuwe pictogram op het beginscherm.',
   'mobilePreflight.iosShareStep': 'Tik in Safari op Deel en daarna op Zet op beginscherm.',
   'mobilePreflight.iosStandaloneDetail':
     'Je bent in de volledig-scherm-modus vanaf het beginscherm. Houd het apparaat in liggende stand.',
@@ -9055,7 +9055,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
     'Log in op de wereld. Je personages leven op de server en je deelt de wereld met iedereen die online is.',
   'mode.onlineTitle': 'Online Spelen',
   'mode.play': 'Spelen',
-  'mode.playAria': 'Speel World of ClaudeCraft',
+  'mode.playAria': 'Speel Ascension',
   'mode.serverAria': 'Kies wereld: Online of Offline',
   'mode.serverLabel': 'Kies je wereld',
   'mode.serverOffline': 'Offline',
@@ -9090,14 +9090,14 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'playerCard.arenaStat': 'Arena',
   'playerCard.brandWordmark': 'WORLD OF CLAUDECRAFT',
   'playerCard.close': 'Spelerskaart sluiten',
-  'playerCard.defaultRealm': 'World of ClaudeCraft',
+  'playerCard.defaultRealm': 'Ascension',
   'playerCard.fileNameFallback': 'speler',
   'playerCard.footerCta': 'Smeed je legende: {siteUrl}',
   'playerCard.footerHandle': '@{handle}',
   'playerCard.footerHandleWithRecruits': '@{handle} - {recruited}',
   'playerCard.levelClass': 'Niveau {level} - {className}',
   'playerCard.loading': 'Je kaart wordt gesmeed...',
-  'playerCard.nativeShareTitle': 'World of ClaudeCraft',
+  'playerCard.nativeShareTitle': 'Ascension',
   'playerCard.poseBattle': 'Strijd',
   'playerCard.poseGroup': 'Pose',
   'playerCard.poseHero': 'Held',
@@ -9111,7 +9111,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'playerCard.renderFailedStatus': 'Kaartweergave mislukt.',
   'playerCard.shareButton': 'Spelerskaart Delen',
   'playerCard.shareText':
-    'Ik smeed mijn legende in World of ClaudeCraft: Niveau {level} {className}{tierBit}. Sluit je aan bij mijn wereld:',
+    'Ik smeed mijn legende in Ascension: Niveau {level} {className}{tierBit}. Sluit je aan bij mijn wereld:',
   'playerCard.shareTierBit': ', {tier}-rang $WOC-houder',
   'playerCard.statusDownloaded': 'Kaart gedownload.',
   'playerCard.statusGenericError': 'Er is iets misgegaan.',
@@ -9216,21 +9216,21 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'realmTypes.rpPvp': 'RP-PvP',
   'seo.applicationCategory': 'Spel',
   'seo.description':
-    'Begin aan een episch avontuur in World of ClaudeCraft, een micro-MMO in klassieke stijl die je rechtstreeks in je browser kunt spelen. Sluit je aan bij een blijvende gedeelde wereld, level je klassen op en versla vijanden!',
+    'Begin aan een episch avontuur in Ascension, een micro-MMO in klassieke stijl die je rechtstreeks in je browser kunt spelen. Sluit je aan bij een blijvende gedeelde wereld, level je klassen op en versla vijanden!',
   'seo.genre': 'MMORPG',
   'seo.officialBody':
     'worldofclaudecraft.com is de officiële gratis browser-MMO voor de Claudemoon-wereld. Speel online met een blijvend personage, verken solo offline, lees de wiki en volg geverifieerde communitylinks vanaf deze site.',
-  'seo.officialLabel': 'Officiële website van World of ClaudeCraft',
+  'seo.officialLabel': 'Officiële website van Ascension',
   'seo.operatingSystem': 'Webbrowser',
   'seo.playMode': 'Multiplayer',
-  'seo.title': 'World of ClaudeCraft: Web-MMO in Klassieke Stijl',
+  'seo.title': 'Ascension: Web-MMO in Klassieke Stijl',
   'serverUnavailable.body':
     'We herstarten de gameservice en verwachten dat Claudemoon binnenkort weer terug is. Deze pagina blijft automatisch controleren.',
   'serverUnavailable.eyebrow': 'Wereldonderhoud',
   'serverUnavailable.heading': 'De wereld is tijdelijk niet beschikbaar.',
-  'serverUnavailable.logoAlt': 'World of ClaudeCraft',
+  'serverUnavailable.logoAlt': 'Ascension',
   'serverUnavailable.status': 'Snel terug',
-  'serverUnavailable.title': 'World of ClaudeCraft - Wereld niet beschikbaar',
+  'serverUnavailable.title': 'Ascension - Wereld niet beschikbaar',
   'settings.languageLoadFailed': 'Kon die taal niet laden. Je huidige taal blijft behouden.',
   'settings.languageLoadUnavailable': 'Die taal is niet beschikbaar.',
   'settings.languageLoading': 'Taal laden...',
@@ -9589,7 +9589,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'hudChrome.leaderboard.guildXp': 'Totaal XP',
   'hudChrome.leaderboard.guildEmpty': 'Nog geen gerangschikte gildes.',
   'hudChrome.discord.title': 'Discord',
-  'hudChrome.discord.panelTitle': 'World of ClaudeCraft',
+  'hudChrome.discord.panelTitle': 'Ascension',
   'hudChrome.discord.open': 'Discord',
   'hudChrome.discord.close': 'Sluiten',
   'hudChrome.discord.keybind': 'Discord-paneel',
@@ -9712,10 +9712,10 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'desktop.titlebar.exitGame': 'Spel afsluiten',
   'desktop.crash.body': 'De spelweergave werkt niet meer. Opnieuw laden?',
   'desktop.crash.fatalBody':
-    'World of ClaudeCraft is op een onverwachte fout gestuit en moet worden afgesloten.',
+    'Ascension is op een onverwachte fout gestuit en moet worden afgesloten.',
   'desktop.crash.quit': 'Afsluiten',
   'desktop.crash.reload': 'Opnieuw laden',
-  'desktop.crash.title': 'World of ClaudeCraft',
+  'desktop.crash.title': 'Ascension',
   'desktop.update.downloadingTitle': 'Update {version} wordt gedownload...',
   'desktop.update.later': 'Later',
   'desktop.update.readyTitle': 'Update {version} is klaar',
@@ -9771,9 +9771,9 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
     'WOC-prijzen zijn momenteel niet beschikbaar. Kom binnenkort terug.',
   'hudChrome.dailyRewards.walletValue': 'Portemonneewaarde (WOC)',
   'hudChrome.nativeUpdate.body':
-    'Er is een nieuwe versie van World of ClaudeCraft beschikbaar. Werk nu bij voor de nieuwste oplossingen en verbeteringen.',
+    'Er is een nieuwe versie van Ascension beschikbaar. Werk nu bij voor de nieuwste oplossingen en verbeteringen.',
   'hudChrome.nativeUpdate.bodyWithVersion':
-    'Versie {version} van World of ClaudeCraft is beschikbaar. Werk nu bij voor de nieuwste oplossingen en verbeteringen.',
+    'Versie {version} van Ascension is beschikbaar. Werk nu bij voor de nieuwste oplossingen en verbeteringen.',
   'hudChrome.nativeUpdate.notNow': 'Niet nu',
   'hudChrome.nativeUpdate.title': 'Update beschikbaar',
   'hudChrome.nativeUpdate.update': 'Bijwerken',
@@ -13838,7 +13838,7 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
   'hudChrome.options.forceHighPerfGpuNote': 'Standaard aan: de desktop-app vraagt deze computer om zijn toegewijde game-GPU. Zet dit uit als het spel niet opstart of met een zwart scherm opent, of als het laptopscherm leeg blijft. Wordt toegepast bij de volgende start van het spel.',
   'desktop.notify.partyInviteBody': '{name} heeft je uitgenodigd voor een groep.',
   'desktop.notify.partyInviteTitle': 'Groepsuitnodiging',
-  'desktop.notify.updateReadyBody': 'Herstart World of ClaudeCraft om de update toe te passen.',
+  'desktop.notify.updateReadyBody': 'Herstart Ascension om de update toe te passen.',
   'desktop.notify.updateReadyTitle': 'Update {version} is klaar',
   'desktop.notify.updateReadyTitleNoVersion': 'Update is klaar',
   'desktop.update.whatsNew': 'Bekijk wat er is veranderd in je browser',
@@ -13904,12 +13904,12 @@ export const nl_NL: Partial<Record<TranslationKey, string>> = {
     'Er zijn nog {count} verbeteringen actief, maar die zijn verborgen in deze grafische preset',
   'hudChrome.steam.wishlist': 'Op verlanglijst zetten op Steam',
   'hudChrome.steam.wishlistAria':
-    'Op verlanglijst zetten op Steam: open de winkelpagina van World of ClaudeCraft',
+    'Op verlanglijst zetten op Steam: open de winkelpagina van Ascension',
   'hudChrome.steam.wishlistShort': 'Verlanglijst',
   'hudChrome.unitFrame.buffOverflowLabel': '+{n}',
   'hudChrome.wocMarket.browserOnlyConfirmTitle': 'De $WOC-beurs in je browser openen?',
   'hudChrome.wocMarket.browserOnlyConfirmBody':
-    'De $WOC-beurs werkt alleen in de browserversie van World of ClaudeCraft. Hiermee wordt World of ClaudeCraft in je browser geopend, waar je kunt inloggen en de beurs kunt openen; het spel blijft hier doorgaan.',
+    'De $WOC-beurs werkt alleen in de browserversie van Ascension. Hiermee wordt Ascension in je browser geopend, waar je kunt inloggen en de beurs kunt openen; het spel blijft hier doorgaan.',
   'hudChrome.wocMarket.browserOnlyConfirmOpen': 'Openen in browser',
   'hudChrome.wocMarket.browserOnlyConfirmCancel': 'Annuleren',
   // nl_NL release i18n fill (autoFillable batch).

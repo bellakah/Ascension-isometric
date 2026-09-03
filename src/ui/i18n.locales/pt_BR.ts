@@ -1348,7 +1348,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.metrics.waitingHitch': 'atribuição de travamento: armada ao entrar no mundo',
   'hudChrome.perf.diagnostics.metrics.waitingRenderer': 'renderizador: aguardando',
   'hudChrome.perf.diagnostics.metrics.waitingValue': 'aguardando',
-  'hudChrome.perf.diagnostics.panelAria': 'Diagnóstico de desempenho do World of ClaudeCraft',
+  'hudChrome.perf.diagnostics.panelAria': 'Diagnóstico de desempenho do Ascension',
   'hudChrome.perf.diagnostics.report.capturedLine': 'Capturado: {captured}',
   'hudChrome.perf.diagnostics.report.findingHeading': '{index}. {title}',
   'hudChrome.perf.diagnostics.report.findingMeta': 'Gravidade: {severity}. Confiança: {confidence}.',
@@ -1364,7 +1364,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.report.status.needsAttention': 'precisa de atenção',
   'hudChrome.perf.diagnostics.report.statusLine': 'Status: {status} ({score}/100)',
   'hudChrome.perf.diagnostics.report.summaryLine': 'Resumo: {summary}',
-  'hudChrome.perf.diagnostics.report.title': 'Diagnóstico de desempenho do World of ClaudeCraft',
+  'hudChrome.perf.diagnostics.report.title': 'Diagnóstico de desempenho do Ascension',
   'hudChrome.perf.diagnostics.report.topFindingLine': 'Principal descoberta: {finding}',
   'hudChrome.perf.diagnostics.scoreHeadline': '{score}/100: {headline}',
   'hudChrome.perf.diagnostics.sections.codeFix': 'Correção no código',
@@ -1408,7 +1408,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.talents.gearRestored': 'Restauradas {n} peças de equipamento desta build.',
   'hudChrome.talents.gearTakenByOtherSlot': '{n} peças salvas precisam de outra cópia que você não possui.',
   'hudChrome.talents.newBuildWithGear': 'Nova build (salvar equipamento também)',
-  'hudChrome.wiki.confirmBody': 'Isso abre a wiki do World of ClaudeCraft no seu navegador. O jogo continua em execução.',
+  'hudChrome.wiki.confirmBody': 'Isso abre a wiki do Ascension no seu navegador. O jogo continua em execução.',
   'hudChrome.wiki.confirmCancel': 'Cancelar',
   'hudChrome.wiki.confirmOpen': 'Abrir Wiki',
   'hudChrome.wiki.confirmTitle': 'Abrir a Wiki?',
@@ -2953,7 +2953,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'wallet.bagLink': 'Verificar carteira',
   'wallet.bagReconnect': 'Reconectar carteira',
   'wallet.browser.completeBody':
-    'Você pode retornar ao aplicativo para desktop do World of ClaudeCraft.',
+    'Você pode retornar ao aplicativo para desktop do Ascension.',
   'wallet.browser.completeTitle': 'Autorização de carteira concluída',
   'wallet.browser.continueWith': 'Continuar com {wallet}',
   'wallet.browser.extensionHelp':
@@ -2971,12 +2971,12 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
     'Siga o prompt de {wallet}. Mantenha esta página do navegador aberta.',
   'wallet.browser.reviewTitle': 'Revisar na sua carteira',
   'wallet.browser.safety':
-    'O World of ClaudeCraft nunca pede sua frase de recuperação nem sua chave privada.',
+    'O Ascension nunca pede sua frase de recuperação nem sua chave privada.',
   'wallet.browser.title': 'Conectar uma Carteira Solana',
   'wallet.manualReturnBrowserHelp':
     'Após a aprovação, retorne a esta aba do jogo. Se o iOS abrir outro navegador, feche-o e retorne ao navegador original manualmente.',
   'wallet.manualReturnStandaloneHelp':
-    'Após a aprovação, retorne ao World of ClaudeCraft pela sua Tela Inicial. Se o iOS abrir um navegador, feche-o e reabra o aplicativo da Tela Inicial manualmente.',
+    'Após a aprovação, retorne ao Ascension pela sua Tela Inicial. Se o iOS abrir um navegador, feche-o e reabra o aplicativo da Tela Inicial manualmente.',
   'wallet.mobileAppHelp':
     'Escolha Phantom ou Solflare. Seu app de carteira pedirá aprovação. Mantenha o jogo aberto e retorne a ele quando terminar.',
   'wallet.openAppButton': 'Abrir {wallet}',
@@ -2985,7 +2985,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'wallet.openAppTitle': 'Continuar em {wallet}',
   'wallet.preparingAppButton': 'Preparando {wallet}...',
   'wallet.standaloneAppHelp':
-    'As conexões de carteira ainda não estão disponíveis no aplicativo da Tela Inicial. Abra o World of ClaudeCraft no Safari ou Chrome para usar Phantom ou Solflare.',
+    'As conexões de carteira ainda não estão disponíveis no aplicativo da Tela Inicial. Abra o Ascension no Safari ou Chrome para usar Phantom ou Solflare.',
   'wallet.walletAppUnavailable':
     '{wallet} não pôde ser preparado. Feche esta janela e tente novamente.',
   'entities.abilities.primal_reflexes.description':
@@ -3649,7 +3649,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'editor.confirm.discardBody': 'Você tem alterações não salvas em "{name}". Descartá-las?',
   'editor.confirm.discardTitle': 'Descartar alterações?',
   'editor.confirm.ok': 'OK',
-  'editor.docTitle': 'Editor de Mapas - World of ClaudeCraft',
+  'editor.docTitle': 'Editor de Mapas - Ascension',
   'editor.eraseTool.blockerHint':
     'Clicar perto de uma parede de bloqueio remove essa parede em vez disso.',
   'editor.eraseTool.hint':
@@ -4416,7 +4416,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.unitFrame.petLabel': 'Seu mascote',
   'hudChrome.unitFrame.targetAnnounce': 'Alvo: {name}',
   'hudChrome.unitFrame.targetLabel': 'Seu alvo',
-  'seo.officialLabel': 'Site oficial de World of ClaudeCraft',
+  'seo.officialLabel': 'Site oficial de Ascension',
   'seo.officialBody':
     'worldofclaudecraft.com é o MMO de navegador gratuito oficial do mundo Claudemoon. Jogue online com um personagem persistente, explore solo offline, leia a wiki e siga os links verificados da comunidade a partir deste site.',
   'hudChrome.questShare.notShareable': 'Esta missão não pode ser compartilhada.',
@@ -4775,7 +4775,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'stats.charactersCreated': 'Personagens criados',
   'stats.playersOnline': 'Jogadores online',
   'stats.realmName': 'Nome do mundo',
-  'footer.copyright': '2026 World of ClaudeCraft',
+  'footer.copyright': '2026 Ascension',
   'footer.githubLink': 'https://github.com/levy-street/world-of-claudecraft',
   'footer.githubLabel': 'Projeto de código aberto',
   'footer.whitepaper': 'Whitepaper',
@@ -4975,7 +4975,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'playerCard.arenaStat': 'Arena',
   'playerCard.shareTierBit': ', titular de $WOC de nível {tier}',
   'playerCard.shareText':
-    'Estou forjando minha lenda em World of ClaudeCraft: nível {level} {className}{tierBit}. Entre no meu mundo:',
+    'Estou forjando minha lenda em Ascension: nível {level} {className}{tierBit}. Entre no meu mundo:',
   'playerCard.nativeShareTitle': 'Mundo de ClaudeCraft',
   'playerCard.fileNameFallback': 'jogador',
   'playerCard.actionShareX': 'Compartilhar no X',
@@ -5037,9 +5037,9 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'controls.emoteWheel': 'Segurar roda de emotes',
   'controls.friends': 'Amigos e guilda',
   'controls.chat': 'Abrir chat',
-  'seo.title': 'World of ClaudeCraft: MMO web em estilo clássico',
+  'seo.title': 'Ascension: MMO web em estilo clássico',
   'seo.description':
-    'Embarque em uma aventura épica em World of ClaudeCraft, um micro-MMO de estilo clássico jogável diretamente no navegador. Entre em um mundo compartilhado persistente, evolua classes e derrote inimigos!',
+    'Embarque em uma aventura épica em Ascension, um micro-MMO de estilo clássico jogável diretamente no navegador. Entre em um mundo compartilhado persistente, evolua classes e derrote inimigos!',
   'seo.genre': 'MMORPG',
   'seo.playMode': 'Multijogador',
   'seo.applicationCategory': 'Jogo',
@@ -5049,9 +5049,9 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'a11y.mainNavigation': 'Navegação principal',
   'a11y.languageSelection': 'Seleção de idioma',
   'a11y.characterActions': 'Ações de personagem',
-  'a11y.githubProject': 'Abrir o projeto World of ClaudeCraft no GitHub',
-  'a11y.discordCommunity': 'Entrar na comunidade World of ClaudeCraft no Discord',
-  'a11y.donateProject': 'Doar para apoiar World of ClaudeCraft',
+  'a11y.githubProject': 'Abrir o projeto Ascension no GitHub',
+  'a11y.discordCommunity': 'Entrar na comunidade Ascension no Discord',
+  'a11y.donateProject': 'Doar para apoiar Ascension',
   'loading.world': 'Carregando mundo...',
   'loading.worldProgress': 'Carregando mundo... {done}/{total}',
   'loading.enteringWorld': 'Entrando no mundo...',
@@ -5195,19 +5195,19 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
     'Para tela cheia real no iPhone ou iPad, adicione esta página à tela inicial primeiro.',
   'mobilePreflight.iosShareStep':
     'No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início.',
-  'mobilePreflight.iosOpenStep': 'Abra World of ClaudeCraft pelo novo ícone na tela inicial.',
+  'mobilePreflight.iosOpenStep': 'Abra Ascension pelo novo ícone na tela inicial.',
   'mobilePreflight.androidStandaloneDetail':
     'Você está no modo de app em tela cheia. Mantenha o dispositivo na horizontal.',
   'mobilePreflight.androidInstallDetail':
     'Para tela cheia no Android, instale esta página ou adicione-a à tela inicial primeiro.',
   'mobilePreflight.androidInstallStep':
     'No Chrome, toque no menu e depois em Instalar app ou Adicionar à tela inicial.',
-  'mobilePreflight.androidOpenStep': 'Abra World of ClaudeCraft pelo novo ícone.',
+  'mobilePreflight.androidOpenStep': 'Abra Ascension pelo novo ícone.',
   'mobilePreflight.otherStandaloneDetail': 'Mantenha o dispositivo em tela cheia horizontal.',
   'mobilePreflight.otherInstallDetail':
     'Instale ou adicione esta página à tela inicial para a melhor experiência móvel em tela cheia.',
-  'serverUnavailable.title': 'World of ClaudeCraft - Mundo indisponível',
-  'serverUnavailable.logoAlt': 'World of ClaudeCraft',
+  'serverUnavailable.title': 'Ascension - Mundo indisponível',
+  'serverUnavailable.logoAlt': 'Ascension',
   'serverUnavailable.eyebrow': 'Manutenção do mundo',
   'serverUnavailable.heading': 'O mundo está temporariamente indisponível.',
   'serverUnavailable.body':
@@ -7469,7 +7469,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'mode.caNote':
     'WOC é o token da nossa comunidade. Não é necessário para jogar. Entre no Discord para discutir a utilidade e o flywheel do WOC.',
   'mode.play': 'Jogar',
-  'mode.playAria': 'Jogar World of ClaudeCraft',
+  'mode.playAria': 'Jogar Ascension',
   'mode.serverAria': 'Escolher mundo: Online ou Offline',
   'mode.serverLabel': 'Escolha seu mundo',
   'mode.serverOffline': 'Offline',
@@ -7991,7 +7991,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'guide.bestiary.levels': 'Níveis {min} a {max}',
   'guide.bestiary.levelsSame': 'Nível {min}',
   'guide.bestiary.rare': 'Raro',
-  'guide.brand': 'World of ClaudeCraft',
+  'guide.brand': 'Ascension',
   'guide.brandShort': 'ClaudeCraft',
   'guide.classHook.druid':
     'Um metamorfo que protege como um urso, dilacera inimigos como um felino ou cura no auge da refrega.',
@@ -8174,7 +8174,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'guide.footer.discord': 'Entre no Discord',
   'guide.footer.github': 'Código no GitHub',
   'guide.footer.playNow': 'Jogar Agora',
-  'guide.footer.rights': 'World of ClaudeCraft',
+  'guide.footer.rights': 'Ascension',
   'guide.glossary.aggroDef':
     'A atenção de um inimigo. O jogador que gera a maior ameaça mantém a aggro e é atacado.',
   'guide.glossary.aggroTerm': 'Aggro',
@@ -8249,7 +8249,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
     'O mundo é jogável sozinho, mas o melhor saque aguarda atrás de um bom grupo.',
   'guide.home.subtitle':
     'Cumpra missões, forme grupo e explore um mundo feito à mão, de graça no seu navegador.',
-  'guide.home.title': 'World of ClaudeCraft',
+  'guide.home.title': 'Ascension',
   'guide.home.what.heading': 'Um MMO clássico, feito para ser pego e jogado',
   'guide.home.what.pillarClassesBody':
     'Proteja, cure ou cause o dano. Cada classe joga como seu arquétipo deveria, com talentos para torná-la sua.',
@@ -8383,7 +8383,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'guide.tagline': 'Um MMO estilo clássico que você joga de graça no seu navegador.',
   'guide.worldPage.heading': 'O mundo',
   'guide.worldPage.hub': 'Base de operações',
-  'guide.worldPage.intro': 'World of ClaudeCraft é uma terra contínua que você atravessa a pé. A velha estrada corre de sul a norte pelo vale inicial, pelo pântano e pelos picos, e segue subindo além deles até a depressão adiante e a terra de neve no alto do mapa. Uma coluna de reinos mais elevados se abre a partir dessa estrada a oeste e outra a leste, e uma ilha fica ao largo da costa leste do Vale. Não há viagem rápida, nem rotas de voo, nem diligências: cada jornada é caminhada ou cavalgada, então chegar faz parte da aventura.\n\nA terra também marca o tempo. Um ciclo de dia e noite corre num relógio real compartilhado por todos no seu mundo, então o céu passa da alvorada ao meio-dia e daí ao crepúsculo e à escuridão para todos vocês ao mesmo tempo, a lua vai e vem por suas fases, e a luz sobre o chão muda com ela. O mostrador em volta do seu minimapa é onde você lê a hora.',
+  'guide.worldPage.intro': 'Ascension é uma terra contínua que você atravessa a pé. A velha estrada corre de sul a norte pelo vale inicial, pelo pântano e pelos picos, e segue subindo além deles até a depressão adiante e a terra de neve no alto do mapa. Uma coluna de reinos mais elevados se abre a partir dessa estrada a oeste e outra a leste, e uma ilha fica ao largo da costa leste do Vale. Não há viagem rápida, nem rotas de voo, nem diligências: cada jornada é caminhada ou cavalgada, então chegar faz parte da aventura.\n\nA terra também marca o tempo. Um ciclo de dia e noite corre num relógio real compartilhado por todos no seu mundo, então o céu passa da alvorada ao meio-dia e daí ao crepúsculo e à escuridão para todos vocês ao mesmo tempo, a lua vai e vem por suas fases, e a luz sobre o chão muda com ela. O mostrador em volta do seu minimapa é onde você lê a hora.',
   'guide.worldPage.marshBlurb':
     'Um país afogado de névoa e ruínas. Mudfins enxameiam as águas rasas e algo mais antigo se agita sob a água, vigiado a partir da cidade-ponte de Fenbridge.',
   'guide.worldPage.peaksBlurb': 'Cristas varridas pelo vento e velhas obras de mineração subindo rumo aos perigos mais duros da estrada inicial, mantidas pelo posto avançado de Highwatch.',
@@ -9570,7 +9570,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.leaderboard.guildXp': 'XP total',
   'hudChrome.leaderboard.guildEmpty': 'Nenhuma guilda classificada ainda.',
   'hudChrome.discord.title': 'Discord',
-  'hudChrome.discord.panelTitle': 'World of ClaudeCraft',
+  'hudChrome.discord.panelTitle': 'Ascension',
   'hudChrome.discord.open': 'Discord',
   'hudChrome.discord.close': 'Fechar',
   'hudChrome.discord.keybind': 'Painel do Discord',
@@ -9695,10 +9695,10 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'desktop.titlebar.exitGame': 'Sair do jogo',
   'desktop.crash.body': 'A visualização do jogo parou de funcionar. Recarregar?',
   'desktop.crash.fatalBody':
-    'O World of ClaudeCraft encontrou um erro inesperado e precisa fechar.',
+    'O Ascension encontrou um erro inesperado e precisa fechar.',
   'desktop.crash.quit': 'Sair',
   'desktop.crash.reload': 'Recarregar',
-  'desktop.crash.title': 'World of ClaudeCraft',
+  'desktop.crash.title': 'Ascension',
   'desktop.update.downloadingTitle': 'Baixando atualização {version}...',
   'desktop.update.later': 'Depois',
   'desktop.update.readyTitle': 'A atualização {version} está pronta',
@@ -9753,9 +9753,9 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
     'O preço do WOC está indisponível no momento. Volte em instantes.',
   'hudChrome.dailyRewards.walletValue': 'Valor da carteira (WOC)',
   'hudChrome.nativeUpdate.body':
-    'Uma nova versão do World of ClaudeCraft está disponível. Atualize agora para receber as últimas correções e melhorias.',
+    'Uma nova versão do Ascension está disponível. Atualize agora para receber as últimas correções e melhorias.',
   'hudChrome.nativeUpdate.bodyWithVersion':
-    'A versão {version} do World of ClaudeCraft está disponível. Atualize agora para receber as últimas correções e melhorias.',
+    'A versão {version} do Ascension está disponível. Atualize agora para receber as últimas correções e melhorias.',
   'hudChrome.nativeUpdate.notNow': 'Agora não',
   'hudChrome.nativeUpdate.title': 'Atualização disponível',
   'hudChrome.nativeUpdate.update': 'Atualizar',
@@ -13842,7 +13842,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.options.forceHighPerfGpuNote': 'Ativado por padrão: o aplicativo para computador pede a este computador sua GPU dedicada para jogos. Desative se o jogo não iniciar, abrir em uma tela preta, ou se a tela do laptop ficar em branco. Tem efeito na próxima vez que o jogo iniciar.',
   'desktop.notify.partyInviteBody': '{name} convidou você para um grupo.',
   'desktop.notify.partyInviteTitle': 'Convite de grupo',
-  'desktop.notify.updateReadyBody': 'Reinicie o World of ClaudeCraft para aplicar a atualização.',
+  'desktop.notify.updateReadyBody': 'Reinicie o Ascension para aplicar a atualização.',
   'desktop.notify.updateReadyTitle': 'A atualização {version} está pronta',
   'desktop.notify.updateReadyTitleNoVersion': 'A atualização está pronta',
   'desktop.update.whatsNew': 'Ver o que mudou no navegador',
@@ -13908,12 +13908,12 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
     'Mais {count} bônus estão ativos, mas ocultos nesta predefinição gráfica',
   'hudChrome.steam.wishlist': 'Adicionar à lista de desejos no Steam',
   'hudChrome.steam.wishlistAria':
-    'Adicionar à lista de desejos no Steam: abrir a página de World of ClaudeCraft na loja',
+    'Adicionar à lista de desejos no Steam: abrir a página de Ascension na loja',
   'hudChrome.steam.wishlistShort': 'Lista de desejos',
   'hudChrome.unitFrame.buffOverflowLabel': '+{n}',
   'hudChrome.wocMarket.browserOnlyConfirmTitle': 'Abrir a Bolsa $WOC no navegador?',
   'hudChrome.wocMarket.browserOnlyConfirmBody':
-    'A Bolsa $WOC funciona apenas na versão de navegador de World of ClaudeCraft. Isto abre World of ClaudeCraft no seu navegador, onde você pode entrar e abrir a Bolsa; o jogo continua rodando aqui.',
+    'A Bolsa $WOC funciona apenas na versão de navegador de Ascension. Isto abre Ascension no seu navegador, onde você pode entrar e abrir a Bolsa; o jogo continua rodando aqui.',
   'hudChrome.wocMarket.browserOnlyConfirmOpen': 'Abrir no navegador',
   'hudChrome.wocMarket.browserOnlyConfirmCancel': 'Cancelar',
   'hud.core.mapMarkerLabels.bossAggressiveEnemy': 'Chefe atacando você: {name}',

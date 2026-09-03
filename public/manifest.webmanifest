@@ -1,7 +1,7 @@
 {
-  "name": "World of ClaudeCraft",
-  "short_name": "ClaudeCraft",
-  "description": "World of ClaudeCraft mobile realm",
+  "name": "Ascension",
+  "short_name": "Ascension",
+  "description": "Ascension is a browser-based isometric online RPG.",
   "start_url": "/",
   "scope": "/",
   "display": "fullscreen",

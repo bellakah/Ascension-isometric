@@ -1332,7 +1332,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.metrics.waitingHitch': 'atribusi tersendat: aktif saat masuk dunia',
   'hudChrome.perf.diagnostics.metrics.waitingRenderer': 'renderer: menunggu',
   'hudChrome.perf.diagnostics.metrics.waitingValue': 'menunggu',
-  'hudChrome.perf.diagnostics.panelAria': 'Diagnostik performa World of ClaudeCraft',
+  'hudChrome.perf.diagnostics.panelAria': 'Diagnostik performa Ascension',
   'hudChrome.perf.diagnostics.report.capturedLine': 'Tertangkap: {captured}',
   'hudChrome.perf.diagnostics.report.findingHeading': '{index}. {title}',
   'hudChrome.perf.diagnostics.report.findingMeta': 'Tingkat keparahan: {severity}. Keyakinan: {confidence}.',
@@ -1348,7 +1348,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.report.status.needsAttention': 'perlu perhatian',
   'hudChrome.perf.diagnostics.report.statusLine': 'Status: {status} ({score}/100)',
   'hudChrome.perf.diagnostics.report.summaryLine': 'Ringkasan: {summary}',
-  'hudChrome.perf.diagnostics.report.title': 'Diagnosis performa World of ClaudeCraft',
+  'hudChrome.perf.diagnostics.report.title': 'Diagnosis performa Ascension',
   'hudChrome.perf.diagnostics.report.topFindingLine': 'Temuan teratas: {finding}',
   'hudChrome.perf.diagnostics.scoreHeadline': '{score}/100: {headline}',
   'hudChrome.perf.diagnostics.sections.codeFix': 'Perbaikan kode',
@@ -1392,7 +1392,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'hudChrome.talents.gearRestored': 'Memulihkan {n} potongan perlengkapan dari bangun ini.',
   'hudChrome.talents.gearTakenByOtherSlot': '{n} potongan tersimpan membutuhkan salinan lain yang tidak kamu miliki.',
   'hudChrome.talents.newBuildWithGear': 'Bangun Baru (simpan perlengkapan juga)',
-  'hudChrome.wiki.confirmBody': 'Ini akan membuka wiki World of ClaudeCraft di perambanmu. Permainan tetap berjalan.',
+  'hudChrome.wiki.confirmBody': 'Ini akan membuka wiki Ascension di perambanmu. Permainan tetap berjalan.',
   'hudChrome.wiki.confirmCancel': 'Batal',
   'hudChrome.wiki.confirmOpen': 'Buka Wiki',
   'hudChrome.wiki.confirmTitle': 'Buka Wiki?',
@@ -2846,7 +2846,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'wallet.bagConnect': 'Tautkan dompet',
   'wallet.bagLink': 'Verifikasi dompet',
   'wallet.bagReconnect': 'Hubungkan ulang dompet',
-  'wallet.browser.completeBody': 'Kamu dapat kembali ke aplikasi desktop World of ClaudeCraft.',
+  'wallet.browser.completeBody': 'Kamu dapat kembali ke aplikasi desktop Ascension.',
   'wallet.browser.completeTitle': 'Otorisasi dompet selesai',
   'wallet.browser.continueWith': 'Lanjutkan dengan {wallet}',
   'wallet.browser.extensionHelp':
@@ -2864,12 +2864,12 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
     'Ikuti perintah dari {wallet}. Jaga halaman browser ini tetap terbuka.',
   'wallet.browser.reviewTitle': 'Tinjau di dompetmu',
   'wallet.browser.safety':
-    'World of ClaudeCraft tidak pernah meminta frasa pemulihan atau kunci privatmu.',
+    'Ascension tidak pernah meminta frasa pemulihan atau kunci privatmu.',
   'wallet.browser.title': 'Hubungkan Dompet Solana',
   'wallet.manualReturnBrowserHelp':
     'Setelah persetujuan, kembali ke tab permainan ini. Jika iOS membuka browser lain, tutup dan kembali ke browser asli secara manual.',
   'wallet.manualReturnStandaloneHelp':
-    'Setelah persetujuan, kembali ke World of ClaudeCraft dari Layar Utamamu. Jika iOS membuka browser, tutup dan buka kembali aplikasi Layar Utama secara manual.',
+    'Setelah persetujuan, kembali ke Ascension dari Layar Utamamu. Jika iOS membuka browser, tutup dan buka kembali aplikasi Layar Utama secara manual.',
   'wallet.mobileAppHelp':
     'Pilih Phantom atau Solflare. Aplikasi dompetmu akan meminta persetujuan. Jaga permainan ini tetap terbuka dan kembali ke sana saat selesai.',
   'wallet.openAppButton': 'Buka {wallet}',
@@ -2878,7 +2878,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'wallet.openAppTitle': 'Lanjutkan di {wallet}',
   'wallet.preparingAppButton': 'Mempersiapkan {wallet}...',
   'wallet.standaloneAppHelp':
-    'Koneksi dompet belum tersedia di aplikasi Layar Utama. Buka World of ClaudeCraft di Safari atau Chrome untuk menggunakan Phantom atau Solflare.',
+    'Koneksi dompet belum tersedia di aplikasi Layar Utama. Buka Ascension di Safari atau Chrome untuk menggunakan Phantom atau Solflare.',
   'wallet.walletAppUnavailable':
     '{wallet} tidak dapat dipersiapkan. Tutup jendela ini dan coba lagi.',
   'entities.abilities.primal_reflexes.description':
@@ -3669,7 +3669,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
     'Kamu punya perubahan belum tersimpan pada "{name}". Buang perubahan itu?',
   'editor.confirm.discardTitle': 'Buang perubahan?',
   'editor.confirm.ok': 'OK',
-  'editor.docTitle': 'Editor Peta - World of ClaudeCraft',
+  'editor.docTitle': 'Editor Peta - Ascension',
   'editor.eraseTool.blockerHint':
     'Mengeklik di dekat dinding penghalang akan menghapus dinding itu.',
   'editor.eraseTool.hint':
@@ -4356,9 +4356,9 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'hudChrome.statInfo.sources.header': 'Terdiri dari:',
   'hudChrome.statInfo.sources.talents': 'Talenta dan efek: {value}',
   'a11y.characterActions': 'Aksi karakter',
-  'a11y.discordCommunity': 'Gabung komunitas Discord World of ClaudeCraft',
-  'a11y.donateProject': 'Berdonasi untuk mendukung World of ClaudeCraft',
-  'a11y.githubProject': 'Buka proyek GitHub World of ClaudeCraft',
+  'a11y.discordCommunity': 'Gabung komunitas Discord Ascension',
+  'a11y.donateProject': 'Berdonasi untuk mendukung Ascension',
+  'a11y.githubProject': 'Buka proyek GitHub Ascension',
   'a11y.goHome': 'Ke halaman utama',
   'a11y.languageSelection': 'Pemilihan bahasa',
   'a11y.mainNavigation': 'Navigasi utama',
@@ -7174,7 +7174,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'fiesta.word.shutdown': 'DIBUNGKAM!',
   'fiesta.word.spree': '{n}× BERUNTUN!',
   'fiesta.word.wave': 'AUGMEN!',
-  'footer.copyright': '2026 World of ClaudeCraft',
+  'footer.copyright': '2026 Ascension',
   'footer.discordLabel': 'Gabung Discord',
   'footer.githubLabel': 'Proyek Sumber Terbuka',
   'footer.githubLink': 'https://github.com/levy-street/world-of-claudecraft',
@@ -7434,7 +7434,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'guide.bestiary.levelsSame': 'Level {min}',
   'guide.bestiary.notedLabel': 'Catatan penting',
   'guide.bestiary.rare': 'Langka',
-  'guide.brand': 'World of ClaudeCraft',
+  'guide.brand': 'Ascension',
   'guide.brandShort': 'ClaudeCraft',
   'guide.breadcrumb.home': 'Panduan',
   'guide.breadcrumb.label': 'Remah jejak',
@@ -7691,7 +7691,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'guide.footer.discord': 'Gabung Discord',
   'guide.footer.github': 'Sumber di GitHub',
   'guide.footer.playNow': 'Main Sekarang',
-  'guide.footer.rights': 'World of ClaudeCraft',
+  'guide.footer.rights': 'Ascension',
   'guide.gear.consumablesElixirs': 'Eliksir memberi penguatan sementara selagi kamu bertualang, sedikit keunggulan yang membantu ketika kamu ingin mendorong sedikit lebih jauh. Eliksir tidak berbagi waktu jeda ramuan, jadi kamu bisa meminum satu dan tetap menyimpan ramuan penyembuh sebagai cadangan. Dua eliksir untuk atribut yang sama tidak menumpuk, dan yang terakhir kamu minum itulah yang bertahan.',
   'guide.gear.consumablesFood':
     'Makanan dan minuman memulihkanmu saat kamu duduk dan beristirahat di sela pertarungan. Makan memulihkan nyawa, minum memulihkan mana, dan beristirahat dengan cara ini gratis. Duduklah selama beberapa detik setelah pertarungan berat alih-alih berlari ke pertarungan berikutnya dengan nyawa separuh pulih.',
@@ -7851,7 +7851,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
     'Dunia ini bisa ditempuh sendiri, tetapi jarahan terbaik menanti di balik party yang baik.',
   'guide.home.subtitle':
     'Berpetualang, bersatu, dan jelajahi dunia rakitan tangan, gratis di browser-mu.',
-  'guide.home.title': 'World of ClaudeCraft',
+  'guide.home.title': 'Ascension',
   'guide.home.what.heading': 'MMO klasik, dibuat agar mudah dimainkan',
   'guide.home.what.pillarClassesBody':
     'Jadi tank, sembuhkan, atau lancarkan damage. Setiap kelas dimainkan sesuai arketipenya, dengan talent untuk menjadikannya milikmu.',
@@ -8253,7 +8253,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'guide.worldPage.gladeTitle': 'Sebuah sudut yang tenang: Brightwood Glade',
   'guide.worldPage.heading': 'Dunia',
   'guide.worldPage.hub': 'Markas utama',
-  'guide.worldPage.intro': 'World of ClaudeCraft adalah satu daratan bersambung yang kamu seberangi dengan berjalan kaki. Jalan tua membentang dari selatan ke utara melewati lembah awal, rawa, dan puncak, dan terus mendaki melampauinya ke cekungan di baliknya serta negeri salju di puncak peta. Sederet alam yang lebih tinggi terbuka dari jalan itu ke barat dan sederet lagi ke timur, dan sebuah pulau terletak di lepas pantai timur Lembah. Tidak ada perjalanan cepat, tidak ada jalur terbang, dan tidak ada kereta: setiap perjalanan ditempuh dengan berjalan atau berkuda, jadi tibanya adalah bagian dari petualangan.\n\nDaratan itu juga menghitung waktu. Siklus siang dan malam berjalan di atas jam sungguhan yang dibagi semua orang di duniamu, sehingga langit beranjak dari fajar ke tengah hari lalu ke senja dan gelap untuk kalian semua sekaligus, bulan datang dan pergi melalui fase-fasenya, dan cahaya di tanah berubah bersamanya. Piringan di sekeliling peta kecilmu adalah tempat kamu membaca jam.',
+  'guide.worldPage.intro': 'Ascension adalah satu daratan bersambung yang kamu seberangi dengan berjalan kaki. Jalan tua membentang dari selatan ke utara melewati lembah awal, rawa, dan puncak, dan terus mendaki melampauinya ke cekungan di baliknya serta negeri salju di puncak peta. Sederet alam yang lebih tinggi terbuka dari jalan itu ke barat dan sederet lagi ke timur, dan sebuah pulau terletak di lepas pantai timur Lembah. Tidak ada perjalanan cepat, tidak ada jalur terbang, dan tidak ada kereta: setiap perjalanan ditempuh dengan berjalan atau berkuda, jadi tibanya adalah bagian dari petualangan.\n\nDaratan itu juga menghitung waktu. Siklus siang dan malam berjalan di atas jam sungguhan yang dibagi semua orang di duniamu, sehingga langit beranjak dari fajar ke tengah hari lalu ke senja dan gelap untuk kalian semua sekaligus, bulan datang dan pergi melalui fase-fasenya, dan cahaya di tanah berubah bersamanya. Piringan di sekeliling peta kecilmu adalah tempat kamu membaca jam.',
   'guide.worldPage.mapHeading': 'Jalan dan alam-alam di baliknya',
   'guide.worldPage.mapSub': 'Jejak misi membentang dari selatan ke utara di tengah peta: lembah, rawa, puncak, dan terus melampauinya ke cekungan serta salju. Alam-alam lain terbuka di sepanjang jalan itu, bukan sesudahnya, lewat gerbang di timur dan barat jalan rawa, sementara pulau Farshore dicapai dari pantai timur Lembah. Yang menahanmu dari alam-alam jauh adalah pita levelnya, bukan perjalanannya: lima di antaranya berbagi pita tertinggi, jadi begitu kamu siap kamu bisa mengambilnya dalam urutan apa pun. Farshore adalah pengecualian, negeri berlevel rendah yang bisa kamu kunjungi sejak awal.',
   'guide.worldPage.marshBlurb':
@@ -9632,7 +9632,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
     'Untuk layar penuh di Android, pasang halaman ini atau tambahkan ke layar Beranda terlebih dahulu.',
   'mobilePreflight.androidInstallStep':
     'Di Chrome, ketuk menu, lalu Pasang aplikasi atau Tambahkan ke layar Beranda.',
-  'mobilePreflight.androidOpenStep': 'Buka World of ClaudeCraft dari ikon baru.',
+  'mobilePreflight.androidOpenStep': 'Buka Ascension dari ikon baru.',
   'mobilePreflight.androidStandaloneDetail':
     'Kamu berada dalam mode aplikasi layar penuh. Pertahankan perangkat dalam posisi lanskap.',
   'mobilePreflight.baseLandscape': 'Putar perangkatmu ke posisi lanskap sebelum memasuki dunia.',
@@ -9641,7 +9641,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'mobilePreflight.continue': 'Lanjut ke Gim',
   'mobilePreflight.iosInstallDetail':
     'Untuk layar penuh sejati di iPhone atau iPad, pasang halaman ini ke Layar Beranda terlebih dahulu.',
-  'mobilePreflight.iosOpenStep': 'Buka World of ClaudeCraft dari ikon Layar Beranda yang baru.',
+  'mobilePreflight.iosOpenStep': 'Buka Ascension dari ikon Layar Beranda yang baru.',
   'mobilePreflight.iosShareStep': 'Di Safari, ketuk Bagikan, lalu Tambahkan ke Layar Beranda.',
   'mobilePreflight.iosStandaloneDetail':
     'Kamu berada dalam mode layar penuh layar-beranda. Pertahankan perangkat dalam posisi lanskap.',
@@ -9666,7 +9666,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
     'Masuk ke dunia. Karaktermu hidup di server dan kamu berbagi dunia dengan semua orang yang sedang daring.',
   'mode.onlineTitle': 'Main Daring',
   'mode.play': 'Main',
-  'mode.playAria': 'Mainkan World of ClaudeCraft',
+  'mode.playAria': 'Mainkan Ascension',
   'mode.serverAria': 'Pilih dunia: Online atau Offline',
   'mode.serverLabel': 'Pilih dunia Anda',
   'mode.serverOffline': 'Offline',
@@ -9701,14 +9701,14 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'playerCard.arenaStat': 'Arena',
   'playerCard.brandWordmark': 'WORLD OF CLAUDECRAFT',
   'playerCard.close': 'Tutup kartu pemain',
-  'playerCard.defaultRealm': 'World of ClaudeCraft',
+  'playerCard.defaultRealm': 'Ascension',
   'playerCard.fileNameFallback': 'pemain',
   'playerCard.footerCta': 'Tempa legendamu: {siteUrl}',
   'playerCard.footerHandle': '@{handle}',
   'playerCard.footerHandleWithRecruits': '@{handle} - {recruited}',
   'playerCard.levelClass': 'Level {level} - {className}',
   'playerCard.loading': 'Menempa kartumu...',
-  'playerCard.nativeShareTitle': 'World of ClaudeCraft',
+  'playerCard.nativeShareTitle': 'Ascension',
   'playerCard.poseBattle': 'Pertempuran',
   'playerCard.poseGroup': 'Pose',
   'playerCard.poseHero': 'Pahlawan',
@@ -9722,7 +9722,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'playerCard.renderFailedStatus': 'Render kartu gagal.',
   'playerCard.shareButton': 'Bagikan Kartu Pemain',
   'playerCard.shareText':
-    'Aku sedang menempa legendaku di World of ClaudeCraft: Level {level} {className}{tierBit}. Bergabunglah dengan duniaku:',
+    'Aku sedang menempa legendaku di Ascension: Level {level} {className}{tierBit}. Bergabunglah dengan duniaku:',
   'playerCard.shareTierBit': ', pemegang $WOC peringkat {tier}',
   'playerCard.statusDownloaded': 'Kartu terunduh.',
   'playerCard.statusGenericError': 'Ada yang tidak beres.',
@@ -9827,21 +9827,21 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'realmTypes.rpPvp': 'RP-PvP',
   'seo.applicationCategory': 'Permainan',
   'seo.description':
-    'Mulailah petualangan epik di World of ClaudeCraft, micro-MMO bergaya klasik yang dapat dimainkan langsung di peramban. Bergabunglah dengan dunia bersama yang persisten, naikkan level kelas, dan kalahkan musuh!',
+    'Mulailah petualangan epik di Ascension, micro-MMO bergaya klasik yang dapat dimainkan langsung di peramban. Bergabunglah dengan dunia bersama yang persisten, naikkan level kelas, dan kalahkan musuh!',
   'seo.genre': 'MMORPG',
   'seo.officialBody':
     'worldofclaudecraft.com adalah MMO peramban gratis resmi untuk dunia Claudemoon. Bermain daring dengan karakter yang persisten, jelajahi solo secara luring, baca wiki, dan ikuti tautan komunitas terverifikasi dari situs ini.',
-  'seo.officialLabel': 'Situs resmi World of ClaudeCraft',
+  'seo.officialLabel': 'Situs resmi Ascension',
   'seo.operatingSystem': 'Peramban web',
   'seo.playMode': 'Multipemain',
-  'seo.title': 'World of ClaudeCraft: MMO Web Bergaya Klasik',
+  'seo.title': 'Ascension: MMO Web Bergaya Klasik',
   'serverUnavailable.body':
     'Kami sedang memulai ulang layanan game dan memperkirakan Claudemoon akan kembali sebentar lagi. Halaman ini akan terus memeriksa secara otomatis.',
   'serverUnavailable.eyebrow': 'Pemeliharaan dunia',
   'serverUnavailable.heading': 'Dunia sementara tidak tersedia.',
-  'serverUnavailable.logoAlt': 'World of ClaudeCraft',
+  'serverUnavailable.logoAlt': 'Ascension',
   'serverUnavailable.status': 'Segera kembali',
-  'serverUnavailable.title': 'World of ClaudeCraft - Dunia Tidak Tersedia',
+  'serverUnavailable.title': 'Ascension - Dunia Tidak Tersedia',
   'settings.languageLoadFailed':
     'Tidak dapat memuat bahasa itu. Tetap menggunakan bahasamu saat ini.',
   'settings.languageLoadUnavailable': 'Bahasa itu tidak tersedia.',
@@ -10205,7 +10205,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'hudChrome.leaderboard.guildXp': 'Total XP',
   'hudChrome.leaderboard.guildEmpty': 'Belum ada guild berperingkat.',
   'hudChrome.discord.title': 'Discord',
-  'hudChrome.discord.panelTitle': 'World of ClaudeCraft',
+  'hudChrome.discord.panelTitle': 'Ascension',
   'hudChrome.discord.open': 'Discord',
   'hudChrome.discord.close': 'Tutup',
   'hudChrome.discord.keybind': 'Panel Discord',
@@ -10328,10 +10328,10 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'desktop.titlebar.exitGame': 'Keluar dari Gim',
   'desktop.crash.body': 'Tampilan gim berhenti bekerja. Muat ulang?',
   'desktop.crash.fatalBody':
-    'World of ClaudeCraft mengalami kesalahan tak terduga dan perlu ditutup.',
+    'Ascension mengalami kesalahan tak terduga dan perlu ditutup.',
   'desktop.crash.quit': 'Keluar',
   'desktop.crash.reload': 'Muat Ulang',
-  'desktop.crash.title': 'World of ClaudeCraft',
+  'desktop.crash.title': 'Ascension',
   'desktop.update.downloadingTitle': 'Mengunduh pembaruan {version}...',
   'desktop.update.later': 'Nanti',
   'desktop.update.readyTitle': 'Pembaruan {version} siap',
@@ -10386,9 +10386,9 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
     'Harga WOC tidak tersedia saat ini. Silakan cek kembali sebentar lagi.',
   'hudChrome.dailyRewards.walletValue': 'Nilai Dompet (WOC)',
   'hudChrome.nativeUpdate.body':
-    'Versi baru World of ClaudeCraft tersedia. Perbarui sekarang untuk perbaikan dan peningkatan terbaru.',
+    'Versi baru Ascension tersedia. Perbarui sekarang untuk perbaikan dan peningkatan terbaru.',
   'hudChrome.nativeUpdate.bodyWithVersion':
-    'Versi {version} World of ClaudeCraft tersedia. Perbarui sekarang untuk perbaikan dan peningkatan terbaru.',
+    'Versi {version} Ascension tersedia. Perbarui sekarang untuk perbaikan dan peningkatan terbaru.',
   'hudChrome.nativeUpdate.notNow': 'Jangan sekarang',
   'hudChrome.nativeUpdate.title': 'Pembaruan Tersedia',
   'hudChrome.nativeUpdate.update': 'Perbarui',
@@ -13826,7 +13826,7 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
   'hudChrome.options.forceHighPerfGpuNote': 'Aktif secara bawaan: aplikasi desktop meminta GPU gaming diskret dari komputer ini. Nonaktifkan ini jika permainan tidak mau dimulai, terbuka dengan layar hitam, atau layar laptop menjadi kosong. Berlaku mulai lain kali kamu membuka permainan.',
   'desktop.notify.partyInviteBody': '{name} telah mengundangmu ke kelompoknya.',
   'desktop.notify.partyInviteTitle': 'Undangan Kelompok',
-  'desktop.notify.updateReadyBody': 'Mulai ulang World of ClaudeCraft untuk menerapkan pembaruan.',
+  'desktop.notify.updateReadyBody': 'Mulai ulang Ascension untuk menerapkan pembaruan.',
   'desktop.notify.updateReadyTitle': 'Pembaruan {version} siap',
   'desktop.notify.updateReadyTitleNoVersion': 'Pembaruan siap',
   'desktop.update.whatsNew': 'Lihat apa yang berubah di browsermu',
@@ -13892,12 +13892,12 @@ export const id_ID: Partial<Record<TranslationKey, string>> = {
     '{count} buff lagi aktif tetapi tersembunyi pada preset grafis ini',
   'hudChrome.steam.wishlist': 'Masukkan ke wishlist di Steam',
   'hudChrome.steam.wishlistAria':
-    'Masukkan ke wishlist di Steam: buka halaman toko World of ClaudeCraft',
+    'Masukkan ke wishlist di Steam: buka halaman toko Ascension',
   'hudChrome.steam.wishlistShort': 'Wishlist',
   'hudChrome.unitFrame.buffOverflowLabel': '+{n}',
   'hudChrome.wocMarket.browserOnlyConfirmTitle': 'Buka Bursa $WOC di browser?',
   'hudChrome.wocMarket.browserOnlyConfirmBody':
-    'Bursa $WOC hanya berjalan di versi browser World of ClaudeCraft. Ini membuka World of ClaudeCraft di browser, tempat kamu dapat masuk dan membuka Bursa; game tetap berjalan di sini.',
+    'Bursa $WOC hanya berjalan di versi browser Ascension. Ini membuka Ascension di browser, tempat kamu dapat masuk dan membuka Bursa; game tetap berjalan di sini.',
   'hudChrome.wocMarket.browserOnlyConfirmOpen': 'Buka di Browser',
   'hudChrome.wocMarket.browserOnlyConfirmCancel': 'Batal',
 

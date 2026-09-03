@@ -968,7 +968,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'hudChrome.unitFrame.petLabel': 'あなたのペット',
   'hudChrome.unitFrame.targetAnnounce': 'ターゲット：{name}',
   'hudChrome.unitFrame.targetLabel': 'あなたのターゲット',
-  'seo.officialLabel': 'World of ClaudeCraft 公式サイト',
+  'seo.officialLabel': 'Ascension 公式サイト',
   'seo.officialBody':
     'worldofclaudecraft.com は Claudemoon ワールドの公式無料ブラウザMMOです。永続キャラクターでオンラインプレイし、オフラインでソロ探索し、wikiを読み、このサイトから確認済みのコミュニティリンクをたどれます。',
   'hudChrome.questShare.notShareable': 'このクエストは共有できません。',
@@ -1705,7 +1705,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'stats.charactersCreated': '作成済みキャラクター',
   'stats.playersOnline': 'オンラインプレイヤー数',
   'stats.realmName': 'ワールド名',
-  'footer.copyright': '2026 World of ClaudeCraft',
+  'footer.copyright': '2026 Ascension',
   'footer.githubLink': 'https://github.com/levy-street/world-of-claudecraft',
   'footer.githubLabel': 'オープンソースプロジェクト',
   'footer.whitepaper': 'ホワイトペーパー',
@@ -1853,7 +1853,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'wallet.seekerAppHelp':
     'Seed Vault Walletで続行します。Seed Vaultで接続と認証のリクエストを確認し、完了したらゲームに戻ってください。',
   'wallet.standaloneAppHelp':
-    'ホーム画面アプリでは、まだウォレットに接続できません。Phantom または Solflare を使用するには、Safari か Chrome で World of ClaudeCraft を開いてください。',
+    'ホーム画面アプリでは、まだウォレットに接続できません。Phantom または Solflare を使用するには、Safari か Chrome で Ascension を開いてください。',
   'wallet.openAppTitle': '{wallet} で続行',
   'wallet.openAppHelp':
     '{wallet} を開いてこのリクエストを確認してください。ウォレットアプリの使用中も、このゲームタブを開いたままにしてください。',
@@ -1861,7 +1861,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'wallet.manualReturnBrowserHelp':
     '承認後、このゲームタブに戻ってください。iOS で別のブラウザが開いた場合は閉じ、元のブラウザに手動で戻ってください。',
   'wallet.manualReturnStandaloneHelp':
-    '承認後、ホーム画面から World of ClaudeCraft に戻ってください。iOS でブラウザが開いた場合は閉じ、ホーム画面のアプリをもう一度開いてください。',
+    '承認後、ホーム画面から Ascension に戻ってください。iOS でブラウザが開いた場合は閉じ、ホーム画面のアプリをもう一度開いてください。',
   'wallet.preparingAppButton': '{wallet} を準備中...',
   'wallet.walletAppUnavailable':
     '{wallet} を準備できませんでした。このウィンドウを閉じて、もう一度お試しください。',
@@ -1882,13 +1882,13 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'wallet.browser.extensionHelp':
     '対応するウォレット拡張機能が見つかりません。Phantom、Solflare、または別のSolanaブラウザウォレットをインストールまたはロック解除して、再試行してください。',
   'wallet.browser.safety':
-    'World of ClaudeCraftがリカバリーフレーズや秘密鍵を求めることはありません。',
+    'Ascensionがリカバリーフレーズや秘密鍵を求めることはありません。',
   'wallet.browser.continueWith': '{wallet}で続行',
   'wallet.browser.reviewTitle': 'ウォレットで確認',
   'wallet.browser.reviewBody':
     '{wallet}の指示に従ってください。このブラウザページは開いたままにしてください。',
   'wallet.browser.completeTitle': 'ウォレット認証が完了しました',
-  'wallet.browser.completeBody': 'World of ClaudeCraftデスクトップアプリに戻れます。',
+  'wallet.browser.completeBody': 'Ascensionデスクトップアプリに戻れます。',
   'wallet.browser.returnButton': 'デスクトップアプリに戻る',
   'wallet.browser.failed':
     'ウォレット認証に失敗したか期限切れです。デスクトップアプリに戻って再試行してください。',
@@ -1957,7 +1957,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'playerCard.arenaStat': 'アリーナ',
   'playerCard.shareTierBit': ', {tier}ランクの$WOCホルダー',
   'playerCard.shareText':
-    'World of ClaudeCraftで伝説を鍛えています: レベル{level} {className}{tierBit}。私のワールドに参加してください:',
+    'Ascensionで伝説を鍛えています: レベル{level} {className}{tierBit}。私のワールドに参加してください:',
   'playerCard.nativeShareTitle': 'ClaudeCraftの世界',
   'playerCard.fileNameFallback': 'プレイヤー',
   'playerCard.actionShareX': 'Xで共有',
@@ -2019,9 +2019,9 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'controls.emoteWheel': 'エモートホイールを長押し',
   'controls.friends': 'フレンド & ギルド',
   'controls.chat': 'チャットを開く',
-  'seo.title': 'World of ClaudeCraft: クラシック風Web MMO',
+  'seo.title': 'Ascension: クラシック風Web MMO',
   'seo.description':
-    'ブラウザで直接遊べるクラシック風マイクロMMO、World of ClaudeCraft で壮大な冒険に出ましょう。永続的な共有ワールドに参加し、クラスを育て、敵を倒してください。',
+    'ブラウザで直接遊べるクラシック風マイクロMMO、Ascension で壮大な冒険に出ましょう。永続的な共有ワールドに参加し、クラスを育て、敵を倒してください。',
   'seo.genre': 'MMORPG',
   'seo.playMode': 'マルチプレイヤー',
   'seo.applicationCategory': 'ゲーム',
@@ -2031,9 +2031,9 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'a11y.mainNavigation': 'メインナビゲーション',
   'a11y.languageSelection': '言語選択',
   'a11y.characterActions': 'キャラクター操作',
-  'a11y.githubProject': 'GitHubでWorld of ClaudeCraftプロジェクトを開く',
-  'a11y.discordCommunity': 'World of ClaudeCraftのDiscordコミュニティに参加',
-  'a11y.donateProject': 'World of ClaudeCraftを支援するために寄付',
+  'a11y.githubProject': 'GitHubでAscensionプロジェクトを開く',
+  'a11y.discordCommunity': 'AscensionのDiscordコミュニティに参加',
+  'a11y.donateProject': 'Ascensionを支援するために寄付',
   'entryGuard.body':
     'ワールドへの入場中にゲームが予期せず終了したため、グラフィックは{preset}に設定されました。下のグラフィック選択またはゲーム内のオプションから変更できます。',
   'entryGuard.dismiss': '閉じる',
@@ -2211,19 +2211,19 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'mobilePreflight.iosInstallDetail':
     'iPhoneまたはiPadで本当の全画面を使うには、先にこのページをホーム画面に追加してください。',
   'mobilePreflight.iosShareStep': 'Safariで共有をタップし、ホーム画面に追加を選びます。',
-  'mobilePreflight.iosOpenStep': '新しいホーム画面アイコンからWorld of ClaudeCraftを開きます。',
+  'mobilePreflight.iosOpenStep': '新しいホーム画面アイコンからAscensionを開きます。',
   'mobilePreflight.androidStandaloneDetail':
     '全画面アプリモードです。端末を横向きに保ってください。',
   'mobilePreflight.androidInstallDetail':
     'Androidで全画面にするには、このページをインストールするかホーム画面に追加してください。',
   'mobilePreflight.androidInstallStep':
     'Chromeでメニューを開き、アプリをインストールまたはホーム画面に追加を選びます。',
-  'mobilePreflight.androidOpenStep': '新しいアイコンからWorld of ClaudeCraftを開きます。',
+  'mobilePreflight.androidOpenStep': '新しいアイコンからAscensionを開きます。',
   'mobilePreflight.otherStandaloneDetail': '端末を横向き全画面に保ってください。',
   'mobilePreflight.otherInstallDetail':
     '最高のモバイル全画面体験のため、このページをインストールするかホーム画面に追加してください。',
-  'serverUnavailable.title': 'World of ClaudeCraft - ワールド利用不可',
-  'serverUnavailable.logoAlt': 'World of ClaudeCraft',
+  'serverUnavailable.title': 'Ascension - ワールド利用不可',
+  'serverUnavailable.logoAlt': 'Ascension',
   'serverUnavailable.eyebrow': 'ワールドメンテナンス',
   'serverUnavailable.heading': 'ワールドは一時的に利用できません。',
   'serverUnavailable.body':
@@ -5642,7 +5642,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'mode.caNote':
     'WOCはコミュニティトークンです。プレイには必要ありません。Discordに参加して、WOCのユーティリティとフライホイールについて語り合いましょう。',
   'mode.play': 'プレイ',
-  'mode.playAria': 'World of ClaudeCraftをプレイ',
+  'mode.playAria': 'Ascensionをプレイ',
   'mode.serverAria': 'ワールドを選択：オンラインまたはオフライン',
   'mode.serverLabel': 'ワールドを選択',
   'mode.serverOffline': 'オフライン',
@@ -6257,7 +6257,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'hudChrome.bags.poolGeneral': '一般: {total}個中{used}個',
   'hudChrome.bags.poolMaterials': '素材: {total}個中{used}個',
   'hudChrome.bags.capacityPoolsAria': '使用中のバッグスロット: {total}個中{used}個。一般アイテム: {generalTotal}個中{generalUsed}個。素材: {materialsTotal}個中{materialsUsed}個。',
-  'guide.brand': 'World of ClaudeCraft',
+  'guide.brand': 'Ascension',
   'guide.brandShort': 'ClaudeCraft',
   'guide.tagline': 'ブラウザで無料で遊べる、クラシックスタイルのMMO。',
   'guide.skipToContent': 'メインコンテンツへスキップ',
@@ -6386,11 +6386,11 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'guide.footer.github': 'GitHubのソース',
   'guide.footer.discord': 'Discordに参加',
   'guide.footer.communityWiki': 'コミュニティWiki',
-  'guide.footer.rights': 'World of ClaudeCraft',
+  'guide.footer.rights': 'Ascension',
   'guide.language.label': '言語',
   'guide.language.select': '言語を選択',
   'guide.home.eyebrow': 'クラシックスタイルのブラウザMMO',
-  'guide.home.title': 'World of ClaudeCraft',
+  'guide.home.title': 'Ascension',
   'guide.home.subtitle':
     'クエストをこなし、仲間と組み、手作りのワールドを冒険しよう。ブラウザで無料。',
   'guide.home.ctaPlay': '今すぐプレイ',
@@ -6736,7 +6736,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'guide.family.reptile.desc':
     '独特の威嚇音と鋭い一撃を持つ、冷血のハンターたち。温血の獣たちとは一線を画します。',
   'guide.worldPage.heading': '世界',
-  'guide.worldPage.intro': 'World of ClaudeCraftは、徒歩で渡っていく、ひと続きの大地です。古い街道は南から北へ、始まりの谷、湿地、山嶺を貫き、その先の窪地と地図の北端の雪国へと登り続けます。その街道からは西へ高位の領邦がひと連なり、東にもうひと連なり開けており、ヴェイルの東岸沖には島が浮かんでいます。高速移動はなく、飛行路も馬車もありません。どの道のりも歩くか騎乗するかで進むので、たどり着くことそのものが冒険の一部です。\n\n大地は時も刻みます。昼夜の周期は、あなたのワールドにいる全員が共有する実際の時計で進むので、空は皆にとって同時に夜明けから正午、そして黄昏と闇へと移り変わり、月は満ち欠けを巡り、地上の光もそれにつれて変わります。ミニマップを囲む文字盤が、時刻を読み取る場所です。',
+  'guide.worldPage.intro': 'Ascensionは、徒歩で渡っていく、ひと続きの大地です。古い街道は南から北へ、始まりの谷、湿地、山嶺を貫き、その先の窪地と地図の北端の雪国へと登り続けます。その街道からは西へ高位の領邦がひと連なり、東にもうひと連なり開けており、ヴェイルの東岸沖には島が浮かんでいます。高速移動はなく、飛行路も馬車もありません。どの道のりも歩くか騎乗するかで進むので、たどり着くことそのものが冒険の一部です。\n\n大地は時も刻みます。昼夜の周期は、あなたのワールドにいる全員が共有する実際の時計で進むので、空は皆にとって同時に夜明けから正午、そして黄昏と闇へと移り変わり、月は満ち欠けを巡り、地上の光もそれにつれて変わります。ミニマップを囲む文字盤が、時刻を読み取る場所です。',
   'guide.worldPage.hub': '拠点',
   'guide.worldPage.valeBlurb':
     '緑あふれる始まりの谷。新たな英雄たちが、イーストブルックの町の周りでオオカミや盗賊を相手に腕を磨く場所です。',
@@ -8349,7 +8349,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'hudChrome.discord.relay.event.hint': 'レイドや集会、イベントを告知する',
   'hudChrome.discord.relay.help.hint': 'コミュニティに助けを求める',
   'hudChrome.discord.title': 'Discord',
-  'hudChrome.discord.panelTitle': 'World of ClaudeCraft',
+  'hudChrome.discord.panelTitle': 'Ascension',
   'hudChrome.discord.open': 'Discord',
   'hudChrome.discord.viewCharacter': '{name}を表示',
   'hudChrome.discord.rank': 'ランク',
@@ -8446,9 +8446,9 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'hudChrome.devBadge.unlink': 'GitHub の連携を解除',
   'hudChrome.nativeUpdate.title': 'アップデートがあります',
   'hudChrome.nativeUpdate.body':
-    'World of ClaudeCraft の新しいバージョンが利用可能です。今すぐアップデートして最新の修正と改善を入手しましょう。',
+    'Ascension の新しいバージョンが利用可能です。今すぐアップデートして最新の修正と改善を入手しましょう。',
   'hudChrome.nativeUpdate.bodyWithVersion':
-    'World of ClaudeCraft のバージョン {version} が利用可能です。今すぐアップデートして最新の修正と改善を入手しましょう。',
+    'Ascension のバージョン {version} が利用可能です。今すぐアップデートして最新の修正と改善を入手しましょう。',
   'hudChrome.nativeUpdate.notNow': '後で',
   'hudChrome.nativeUpdate.update': '更新',
   'hudChrome.cameraPrompt.title': 'カメラを選択',
@@ -8472,15 +8472,15 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'desktop.update.whatsNew': '変更内容をブラウザで見る',
   'desktop.notify.updateReadyTitle': 'アップデート {version} の準備ができました',
   'desktop.notify.updateReadyTitleNoVersion': 'アップデートの準備ができました',
-  'desktop.notify.updateReadyBody': 'アップデートを適用するには World of ClaudeCraft を再起動してください。',
+  'desktop.notify.updateReadyBody': 'アップデートを適用するには Ascension を再起動してください。',
   'desktop.notify.partyInviteTitle': 'パーティ招待',
   'desktop.notify.partyInviteBody': '{name}があなたをパーティに招待しています。',
-  'desktop.crash.title': 'World of ClaudeCraft',
+  'desktop.crash.title': 'Ascension',
   'desktop.crash.body': 'ゲーム画面が停止しました。再読み込みしますか？',
   'desktop.crash.reload': '再読み込み',
   'desktop.crash.quit': '終了',
   'desktop.titlebar.exitGame': 'ゲームを終了',
-  'desktop.crash.fatalBody': 'World of ClaudeCraft で予期しないエラーが発生したため、終了します。',
+  'desktop.crash.fatalBody': 'Ascension で予期しないエラーが発生したため、終了します。',
   'gpuNotice.bodyDesktop':
     'ゲームがGPUアクセラレーションなしで動作しているため、非常に重くなります。グラフィックドライバーを更新してから、ゲームを再起動してください。Windowsでは、設定 > システム > ディスプレイ > グラフィック でこのゲームを「高パフォーマンス」に設定してください。',
   'gpuNotice.bodyDiscreteInactive':
@@ -8502,7 +8502,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
     'ゲームがGPUアクセラレーションなしで動作しているため、非常に重くなっています。ブラウザーの設定でハードウェアアクセラレーションを有効にし、グラフィックドライバーを更新してから、ブラウザーを再起動してください。',
   'perfNudge.dismiss': '閉じる',
   'editor.appTitle': 'マップエディター',
-  'editor.docTitle': 'マップエディター - World of ClaudeCraft',
+  'editor.docTitle': 'マップエディター - Ascension',
   'editor.untitledMap': '無題のマップ',
   'editor.playtestPlayerName': 'マップ職人',
   'editor.topbar.label': 'エディター操作',
@@ -9431,7 +9431,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'hudChrome.wocMarket.disabledRealm': 'このレルムでは $WOC 取引所を利用できません。',
   'hudChrome.wocMarket.browserOnlyConfirmTitle': 'ブラウザで $WOC 取引所を開きますか？',
   'hudChrome.wocMarket.browserOnlyConfirmBody':
-    '$WOC 取引所は World of ClaudeCraft のブラウザ版でのみ利用できます。ブラウザで World of ClaudeCraft を開きます。そこでログインして取引所を開けます。ゲームはそのまま続行されます。',
+    '$WOC 取引所は Ascension のブラウザ版でのみ利用できます。ブラウザで Ascension を開きます。そこでログインして取引所を開けます。ゲームはそのまま続行されます。',
   'hudChrome.wocMarket.browserOnlyConfirmOpen': 'ブラウザで開く',
   'hudChrome.wocMarket.browserOnlyConfirmCancel': 'キャンセル',
   'hudChrome.wocMarket.pausedBanner':
@@ -10356,7 +10356,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'hudChrome.steam.noTicket':
     'Steamから連携チケットを取得できませんでした。Steamを起動してからもう一度お試しください。',
   'hudChrome.steam.wishlist': 'Steam でウィッシュリストに追加',
-  'hudChrome.steam.wishlistAria': 'Steam でウィッシュリストに追加: World of ClaudeCraft のストアページを開く',
+  'hudChrome.steam.wishlistAria': 'Steam でウィッシュリストに追加: Ascension のストアページを開く',
   'hudChrome.steam.wishlistShort': 'ウィッシュリスト',
   'hudChrome.epic.link': 'Epicと連携',
   'hudChrome.epic.unlink': 'Epic連携を解除',
@@ -10653,7 +10653,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   // Wiki launcher confirm (M16 non-Latin fills).
   'hudChrome.wiki.confirmTitle': 'Wikiを開きますか？',
   'hudChrome.wiki.confirmBody':
-    'World of ClaudeCraft のWikiをブラウザで開きます。ゲームはそのまま続行されます。',
+    'Ascension のWikiをブラウザで開きます。ゲームはそのまま続行されます。',
   'hudChrome.wiki.confirmOpen': 'Wikiを開く',
   'hudChrome.wiki.confirmCancel': 'キャンセル',
   'guide.abilityHook.revenge':
@@ -13829,7 +13829,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'guide.classPage.formLine.form_bear': 'タンクの姿です。分厚い毛皮をまとい、マナの代わりにレイジを使い、追加の脅威で敵の矛先を自分に引きつけ続けます。',
   'guide.riftsPage.floorsBody': 'リフトはいくつかのフロアで構成され、そのどれもがその場で新しく組み上げられます。下への道は、そのフロアがあなたを解放するまで開きません。フロアに居座るものを片づけ、行く手をふさぐ仕掛けを解いてはじめて、下りの道が裂け開きます。最後のフロアはボスで終わります。フロアごとに固有の性格があるので、ひとつの挑戦の中で霜の世界から燃え殻の世界へ移ることもあり、到着するたびにチャットがそのフロアの名を告げます。今回のリフトが何フロアあるのかは、画面のトラッカーでわかります。なお、一部のリフトは生成された下降のかわりに、手作りの舞台を開きます。こちらは決まった長さで進みます。',
   // Performance diagnostics panel chrome. Technical report prose remains English.
-  'hudChrome.perf.diagnostics.panelAria': 'World of ClaudeCraft パフォーマンス診断',
+  'hudChrome.perf.diagnostics.panelAria': 'Ascension パフォーマンス診断',
   'hudChrome.perf.diagnostics.title': 'ClaudeCraft パフォーマンス診断',
   'hudChrome.perf.diagnostics.subtitle': 'ゲーム固有のスキャンで、根拠とコードレベルの修正案を提示します。',
   'hudChrome.perf.diagnostics.aria.liveMeasurements': 'リアルタイムのパフォーマンス測定',
@@ -13945,7 +13945,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.diagnosis.codeFix.cpu': '指定フェーズを計測し、重複処理と割り当てを除き、ゲーム動作を維持してください。',
   'hudChrome.perf.diagnostics.diagnosis.codeFix.loading': '既存の起動とストリーミング予算で、初回処理を事前読込、プール、または分散してください。',
   'hudChrome.perf.diagnostics.diagnosis.codeFix.network': '権威サーバーモデルを弱めずに、配信またはスナップショット処理コストを減らしてください。',
-  'hudChrome.perf.diagnostics.report.title': 'World of ClaudeCraft パフォーマンス診断',
+  'hudChrome.perf.diagnostics.report.title': 'Ascension パフォーマンス診断',
   'hudChrome.perf.diagnostics.report.statusLine': '状態：{status}（{score}/100）',
   'hudChrome.perf.diagnostics.report.capturedLine': '計測日時：{captured}',
   'hudChrome.perf.diagnostics.report.topFindingLine': '最重要項目：{finding}',

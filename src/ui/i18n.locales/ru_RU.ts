@@ -976,7 +976,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'hudChrome.unitFrame.petLabel': 'Ваш питомец',
   'hudChrome.unitFrame.targetAnnounce': 'Цель: {name}',
   'hudChrome.unitFrame.targetLabel': 'Ваша цель',
-  'seo.officialLabel': 'Официальный сайт World of ClaudeCraft',
+  'seo.officialLabel': 'Официальный сайт Ascension',
   'seo.officialBody':
     'worldofclaudecraft.com - официальная бесплатная браузерная MMO для мира Claudemoon. Играйте онлайн с постоянным персонажем, исследуйте мир в одиночку офлайн, читайте wiki и переходите по проверенным ссылкам сообщества с этого сайта.',
   'hudChrome.questShare.notShareable': 'Этим заданием нельзя поделиться.',
@@ -1724,7 +1724,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'stats.charactersCreated': 'Персонажей создано',
   'stats.playersOnline': 'Игроков в сети',
   'stats.realmName': 'Название игрового мира',
-  'footer.copyright': '2026 World of ClaudeCraft',
+  'footer.copyright': '2026 Ascension',
   'footer.githubLink': 'https://github.com/levy-street/world-of-claudecraft',
   'footer.githubLabel': 'Проект с открытым исходным кодом',
   'footer.whitepaper': 'Белая книга',
@@ -1877,7 +1877,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'wallet.seekerAppHelp':
     'Продолжите с Seed Vault Wallet. Проверьте запросы на подключение и подтверждение в Seed Vault, затем вернитесь в игру.',
   'wallet.standaloneAppHelp':
-    'Подключение кошелька пока недоступно в приложении с главного экрана. Для Phantom или Solflare откройте World of ClaudeCraft в Safari или Chrome.',
+    'Подключение кошелька пока недоступно в приложении с главного экрана. Для Phantom или Solflare откройте Ascension в Safari или Chrome.',
   'wallet.openAppTitle': 'Продолжить в {wallet}',
   'wallet.openAppHelp':
     'Откройте {wallet}, чтобы проверить этот запрос. Не закрывайте вкладку с игрой, пока открыто приложение кошелька.',
@@ -1885,7 +1885,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'wallet.manualReturnBrowserHelp':
     'После подтверждения вернитесь на вкладку с игрой. Если iOS откроет другой браузер, закройте его и вручную вернитесь в исходный браузер.',
   'wallet.manualReturnStandaloneHelp':
-    'После подтверждения вернитесь в World of ClaudeCraft с экрана «Домой». Если iOS откроет браузер, закройте его и снова откройте приложение с экрана «Домой».',
+    'После подтверждения вернитесь в Ascension с экрана «Домой». Если iOS откроет браузер, закройте его и снова откройте приложение с экрана «Домой».',
   'wallet.preparingAppButton': 'Подготовка {wallet}...',
   'wallet.walletAppUnavailable':
     'Не удалось подготовить {wallet}. Закройте это окно и повторите попытку.',
@@ -1906,12 +1906,12 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'wallet.browser.extensionHelp':
     'Совместимое расширение кошелька не найдено. Установите или разблокируйте Phantom, Solflare либо другой браузерный кошелек Solana и повторите попытку.',
   'wallet.browser.safety':
-    'World of ClaudeCraft никогда не запрашивает фразу восстановления или закрытый ключ.',
+    'Ascension никогда не запрашивает фразу восстановления или закрытый ключ.',
   'wallet.browser.continueWith': 'Продолжить с {wallet}',
   'wallet.browser.reviewTitle': 'Проверьте запрос в кошельке',
   'wallet.browser.reviewBody': 'Следуйте подсказке {wallet}. Не закрывайте эту страницу браузера.',
   'wallet.browser.completeTitle': 'Авторизация кошелька завершена',
-  'wallet.browser.completeBody': 'Можно вернуться в приложение World of ClaudeCraft.',
+  'wallet.browser.completeBody': 'Можно вернуться в приложение Ascension.',
   'wallet.browser.returnButton': 'Вернуться в приложение',
   'wallet.browser.failed':
     'Авторизация кошелька не удалась или истекла. Вернитесь в приложение и повторите попытку.',
@@ -1981,7 +1981,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'playerCard.arenaStat': 'Арена',
   'playerCard.shareTierBit': ', держатель $WOC ранга {tier}',
   'playerCard.shareText':
-    'Я создаю свою легенду в World of ClaudeCraft: уровень {level}, {className}{tierBit}. Присоединяйтесь к моему миру:',
+    'Я создаю свою легенду в Ascension: уровень {level}, {className}{tierBit}. Присоединяйтесь к моему миру:',
   'playerCard.nativeShareTitle': 'Мир ClaudeCraft',
   'playerCard.fileNameFallback': 'игрок',
   'playerCard.actionShareX': 'Поделиться в X',
@@ -2043,9 +2043,9 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'controls.emoteWheel': 'Удерживать колесо эмоций',
   'controls.friends': 'Друзья и гильдия',
   'controls.chat': 'Открыть чат',
-  'seo.title': 'World of ClaudeCraft: веб-MMO в классическом стиле',
+  'seo.title': 'Ascension: веб-MMO в классическом стиле',
   'seo.description':
-    'Отправьтесь в эпическое приключение в World of ClaudeCraft, микро-MMO в классическом стиле прямо в браузере. Присоединяйтесь к постоянному общему миру, развивайте классы и побеждайте врагов.',
+    'Отправьтесь в эпическое приключение в Ascension, микро-MMO в классическом стиле прямо в браузере. Присоединяйтесь к постоянному общему миру, развивайте классы и побеждайте врагов.',
   'seo.genre': 'MMORPG',
   'seo.playMode': 'Многопользовательская игра',
   'seo.applicationCategory': 'Игра',
@@ -2055,9 +2055,9 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'a11y.mainNavigation': 'Основная навигация',
   'a11y.languageSelection': 'Выбор языка',
   'a11y.characterActions': 'Действия персонажа',
-  'a11y.githubProject': 'Открыть проект World of ClaudeCraft на GitHub',
-  'a11y.discordCommunity': 'Присоединиться к Discord-сообществу World of ClaudeCraft',
-  'a11y.donateProject': 'Пожертвовать на поддержку World of ClaudeCraft',
+  'a11y.githubProject': 'Открыть проект Ascension на GitHub',
+  'a11y.discordCommunity': 'Присоединиться к Discord-сообществу Ascension',
+  'a11y.donateProject': 'Пожертвовать на поддержку Ascension',
   'entryGuard.body':
     'Игра неожиданно закрылась при входе в мир, поэтому графика теперь установлена на {preset}. Вы можете изменить это в переключателе графики ниже или в настройках игры.',
   'entryGuard.dismiss': 'Закрыть',
@@ -2239,19 +2239,19 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
     'Для настоящего полноэкранного режима на iPhone или iPad сначала добавьте эту страницу на домашний экран.',
   'mobilePreflight.iosShareStep': 'В Safari нажмите Поделиться, затем На экран Домой.',
   'mobilePreflight.iosOpenStep':
-    'Откройте World of ClaudeCraft через новый значок на домашнем экране.',
+    'Откройте Ascension через новый значок на домашнем экране.',
   'mobilePreflight.androidStandaloneDetail':
     'Вы в полноэкранном режиме приложения. Держите устройство горизонтально.',
   'mobilePreflight.androidInstallDetail':
     'Для полноэкранного режима на Android установите эту страницу или добавьте ее на главный экран.',
   'mobilePreflight.androidInstallStep':
     'В Chrome откройте меню, затем выберите Установить приложение или Добавить на главный экран.',
-  'mobilePreflight.androidOpenStep': 'Откройте World of ClaudeCraft через новый значок.',
+  'mobilePreflight.androidOpenStep': 'Откройте Ascension через новый значок.',
   'mobilePreflight.otherStandaloneDetail': 'Держите устройство в полноэкранном альбомном режиме.',
   'mobilePreflight.otherInstallDetail':
     'Установите эту страницу или добавьте ее на главный экран для лучшего мобильного полноэкранного опыта.',
-  'serverUnavailable.title': 'World of ClaudeCraft - мир недоступен',
-  'serverUnavailable.logoAlt': 'World of ClaudeCraft',
+  'serverUnavailable.title': 'Ascension - мир недоступен',
+  'serverUnavailable.logoAlt': 'Ascension',
   'serverUnavailable.eyebrow': 'Технические работы',
   'serverUnavailable.heading': 'Мир временно недоступен.',
   'serverUnavailable.body':
@@ -5685,7 +5685,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'mode.caNote':
     'WOC - токен нашего сообщества. Он не нужен для игры. Присоединяйтесь к Discord, чтобы обсудить применение и экосистему WOC.',
   'mode.play': 'Играть',
-  'mode.playAria': 'Играть в World of ClaudeCraft',
+  'mode.playAria': 'Играть в Ascension',
   'mode.serverAria': 'Выберите мир: В сети или Не в сети',
   'mode.serverLabel': 'Выберите свой мир',
   'mode.serverOffline': 'Не в сети',
@@ -6317,7 +6317,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'hudChrome.bags.poolGeneral': 'Общие: {used} из {total}',
   'hudChrome.bags.poolMaterials': 'Материалы: {used} из {total}',
   'hudChrome.bags.capacityPoolsAria': 'Занято ячеек сумок: {used} из {total}. Общие предметы: {generalUsed} из {generalTotal}. Материалы: {materialsUsed} из {materialsTotal}.',
-  'guide.brand': 'World of ClaudeCraft',
+  'guide.brand': 'Ascension',
   'guide.brandShort': 'ClaudeCraft',
   'guide.tagline': 'Классическая MMO, в которую можно играть бесплатно прямо в браузере.',
   'guide.skipToContent': 'Перейти к основному содержимому',
@@ -6446,11 +6446,11 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'guide.footer.github': 'Исходный код на GitHub',
   'guide.footer.discord': 'Присоединиться к Discord',
   'guide.footer.communityWiki': 'Вики сообщества',
-  'guide.footer.rights': 'World of ClaudeCraft',
+  'guide.footer.rights': 'Ascension',
   'guide.language.label': 'Язык',
   'guide.language.select': 'Выберите язык',
   'guide.home.eyebrow': 'Классическая браузерная MMO',
-  'guide.home.title': 'World of ClaudeCraft',
+  'guide.home.title': 'Ascension',
   'guide.home.subtitle':
     'Выполняйте задания, объединяйтесь в группы и исследуйте созданный вручную мир бесплатно прямо в браузере.',
   'guide.home.ctaPlay': 'Играть',
@@ -6808,7 +6808,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'guide.family.reptile.desc':
     'Хладнокровные охотники со своим особым шипением и хваткой, непохожие на теплокровных зверей.',
   'guide.worldPage.heading': 'Мир',
-  'guide.worldPage.intro': 'World of ClaudeCraft — это одна сплошная земля, которую вы пересекаете пешком. Старая дорога идёт с юга на север через начальную долину, топь и пики и продолжает подниматься за ними, в лощину дальше и в снежный край наверху карты. От этой дороги на запад открывается вереница высших царств, а на восток — другая, и у восточного берега Долины лежит остров. Быстрых путешествий нет, нет ни лётных маршрутов, ни повозок: каждый путь проходят пешком или верхом, поэтому дорога до цели — часть приключения.\n\nЗемля ведёт и счёт времени. Цикл дня и ночи идёт по настоящим часам, общим для всех на вашем мире, поэтому небо переходит от рассвета через полдень к сумеркам и тьме для всех вас разом, луна приходит и уходит через свои фазы, а свет на земле меняется вместе с нею. Циферблат вокруг мини-карты — то место, где вы считываете час.',
+  'guide.worldPage.intro': 'Ascension — это одна сплошная земля, которую вы пересекаете пешком. Старая дорога идёт с юга на север через начальную долину, топь и пики и продолжает подниматься за ними, в лощину дальше и в снежный край наверху карты. От этой дороги на запад открывается вереница высших царств, а на восток — другая, и у восточного берега Долины лежит остров. Быстрых путешествий нет, нет ни лётных маршрутов, ни повозок: каждый путь проходят пешком или верхом, поэтому дорога до цели — часть приключения.\n\nЗемля ведёт и счёт времени. Цикл дня и ночи идёт по настоящим часам, общим для всех на вашем мире, поэтому небо переходит от рассвета через полдень к сумеркам и тьме для всех вас разом, луна приходит и уходит через свои фазы, а свет на земле меняется вместе с нею. Циферблат вокруг мини-карты — то место, где вы считываете час.',
   'guide.worldPage.hub': 'Опорная база',
   'guide.worldPage.valeBlurb':
     'Зеленая стартовая долина, где новые герои набираются опыта на волках и разбойниках вокруг города Восточный Брод.',
@@ -8483,7 +8483,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'hudChrome.discord.relay.event.hint': 'Объявите о рейде, встрече или событии',
   'hudChrome.discord.relay.help.hint': 'Попросите сообщество о помощи',
   'hudChrome.discord.title': 'Discord',
-  'hudChrome.discord.panelTitle': 'World of ClaudeCraft',
+  'hudChrome.discord.panelTitle': 'Ascension',
   'hudChrome.discord.open': 'Discord',
   'hudChrome.discord.viewCharacter': 'Показать {name}',
   'hudChrome.discord.rank': 'Ранг',
@@ -8578,9 +8578,9 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'hudChrome.devBadge.unlink': 'Отвязать GitHub',
   'hudChrome.nativeUpdate.title': 'Доступно обновление',
   'hudChrome.nativeUpdate.body':
-    'Доступна новая версия World of ClaudeCraft. Обновите сейчас, чтобы получить последние исправления и улучшения.',
+    'Доступна новая версия Ascension. Обновите сейчас, чтобы получить последние исправления и улучшения.',
   'hudChrome.nativeUpdate.bodyWithVersion':
-    'Доступна версия {version} World of ClaudeCraft. Обновите сейчас, чтобы получить последние исправления и улучшения.',
+    'Доступна версия {version} Ascension. Обновите сейчас, чтобы получить последние исправления и улучшения.',
   'hudChrome.nativeUpdate.notNow': 'Не сейчас',
   'hudChrome.nativeUpdate.update': 'Обновить',
   'hudChrome.cameraPrompt.title': 'Выберите камеру',
@@ -8606,16 +8606,16 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'desktop.update.whatsNew': 'Посмотреть изменения в браузере',
   'desktop.notify.updateReadyTitle': 'Обновление {version} готово',
   'desktop.notify.updateReadyTitleNoVersion': 'Обновление готово',
-  'desktop.notify.updateReadyBody': 'Перезапустите World of ClaudeCraft, чтобы применить обновление.',
+  'desktop.notify.updateReadyBody': 'Перезапустите Ascension, чтобы применить обновление.',
   'desktop.notify.partyInviteTitle': 'Приглашение в группу',
   'desktop.notify.partyInviteBody': '{name} приглашает вас в группу.',
-  'desktop.crash.title': 'World of ClaudeCraft',
+  'desktop.crash.title': 'Ascension',
   'desktop.crash.body': 'Игровой экран перестал отвечать. Перезагрузить его?',
   'desktop.crash.reload': 'Перезагрузить',
   'desktop.crash.quit': 'Выйти',
   'desktop.titlebar.exitGame': 'Выйти из игры',
   'desktop.crash.fatalBody':
-    'World of ClaudeCraft столкнулась с непредвиденной ошибкой и будет закрыта.',
+    'Ascension столкнулась с непредвиденной ошибкой и будет закрыта.',
   'gpuNotice.bodyDesktop':
     'Игра работает без GPU-ускорения и будет сильно тормозить. Обновите драйверы видеокарты и перезапустите игру. В Windows также выберите для игры режим «Высокая производительность» в разделе Параметры > Система > Дисплей > Графика.',
   'gpuNotice.bodyDiscreteInactive':
@@ -8637,7 +8637,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
     'Игра работает без GPU-ускорения и поэтому сильно тормозит. Включите аппаратное ускорение в настройках браузера, обновите драйверы видеокарты и перезапустите браузер.',
   'perfNudge.dismiss': 'Закрыть',
   'editor.appTitle': 'Редактор карт',
-  'editor.docTitle': 'Редактор карт - World of ClaudeCraft',
+  'editor.docTitle': 'Редактор карт - Ascension',
   'editor.untitledMap': 'Карта без названия',
   'editor.playtestPlayerName': 'Картограф',
   'editor.topbar.label': 'Действия редактора',
@@ -9577,7 +9577,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'hudChrome.wocMarket.disabledRealm': 'Биржа $WOC недоступна в этом мире.',
   'hudChrome.wocMarket.browserOnlyConfirmTitle': 'Открыть Биржу $WOC в браузере?',
   'hudChrome.wocMarket.browserOnlyConfirmBody':
-    'Биржа $WOC доступна только в браузерной версии World of ClaudeCraft. В браузере откроется World of ClaudeCraft, где вы сможете войти и открыть биржу, игра продолжит работать здесь.',
+    'Биржа $WOC доступна только в браузерной версии Ascension. В браузере откроется Ascension, где вы сможете войти и открыть биржу, игра продолжит работать здесь.',
   'hudChrome.wocMarket.browserOnlyConfirmOpen': 'Открыть в браузере',
   'hudChrome.wocMarket.browserOnlyConfirmCancel': 'Отмена',
   'hudChrome.wocMarket.pausedBanner':
@@ -10535,7 +10535,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'hudChrome.steam.noTicket':
     'Steam не выдал билет для привязки. Запустите Steam и повторите попытку.',
   'hudChrome.steam.wishlist': 'Добавить в желаемое в Steam',
-  'hudChrome.steam.wishlistAria': 'Добавить в желаемое в Steam: открыть страницу World of ClaudeCraft в магазине',
+  'hudChrome.steam.wishlistAria': 'Добавить в желаемое в Steam: открыть страницу Ascension в магазине',
   'hudChrome.steam.wishlistShort': 'В желаемое',
   'hudChrome.epic.link': 'Привязать Epic',
   'hudChrome.epic.unlink': 'Отвязать Epic',
@@ -10839,7 +10839,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   // Wiki launcher confirm (M16 non-Latin fills).
   'hudChrome.wiki.confirmTitle': 'Открыть вики?',
   'hudChrome.wiki.confirmBody':
-    'Вики World of ClaudeCraft откроется в браузере. Игра продолжит работать.',
+    'Вики Ascension откроется в браузере. Игра продолжит работать.',
   'hudChrome.wiki.confirmOpen': 'Открыть вики',
   'hudChrome.wiki.confirmCancel': 'Отмена',
   'guide.abilityHook.revenge':
@@ -14039,7 +14039,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'guide.classPage.formLine.form_bear': 'Танковый облик: толстая шкура, ярость вместо маны и лишняя угроза, чтобы враги били именно вас.',
   'guide.riftsPage.floorsBody': 'Разлом тянется на несколько этажей, и каждый строится заново, а путь вниз не откроется, пока этаж не отпустит вас: очистите его от всего живого, разберитесь с тем, что он запер на вашей дороге, и спуск разверзнется. Последний этаж заканчивается боссом. У каждого этажа свой нрав, так что один поход способен увести вас из стужи прямо в угли, а чат называет каждый этаж, едва вы на него попадаете. Сколько этажей у этого разлома, подскажет трекер на вашем экране. Иные разломы вместо сгенерированного спуска открывают рукотворную декорацию, у которой своя неизменная длина.',
   // Performance diagnostics panel chrome. Technical report prose remains English.
-  'hudChrome.perf.diagnostics.panelAria': 'World of ClaudeCraft: диагностика производительности',
+  'hudChrome.perf.diagnostics.panelAria': 'Ascension: диагностика производительности',
   'hudChrome.perf.diagnostics.title': 'Диагностика производительности ClaudeCraft',
   'hudChrome.perf.diagnostics.subtitle': 'Игровое сканирование с доказательствами и исправлениями на уровне кода.',
   'hudChrome.perf.diagnostics.aria.liveMeasurements': 'Измерения производительности в реальном времени',
@@ -14155,7 +14155,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.diagnosis.codeFix.cpu': 'Профилируйте указанную фазу, удалите повторную работу и выделения памяти, сохранив поведение игры.',
   'hudChrome.perf.diagnostics.diagnosis.codeFix.loading': 'Предзагрузите, объедините в пул или распределите первую работу по существующим бюджетам запуска и потоковой загрузки.',
   'hudChrome.perf.diagnostics.diagnosis.codeFix.network': 'Снизьте стоимость доставки или обработки снимков, не ослабляя авторитетную модель сервера.',
-  'hudChrome.perf.diagnostics.report.title': 'Диагностика производительности World of ClaudeCraft',
+  'hudChrome.perf.diagnostics.report.title': 'Диагностика производительности Ascension',
   'hudChrome.perf.diagnostics.report.statusLine': 'Состояние: {status} ({score}/100)',
   'hudChrome.perf.diagnostics.report.capturedLine': 'Время замера: {captured}',
   'hudChrome.perf.diagnostics.report.topFindingLine': 'Главное замечание: {finding}',

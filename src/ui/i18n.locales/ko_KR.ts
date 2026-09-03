@@ -969,7 +969,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.unitFrame.petLabel': '내 펫',
   'hudChrome.unitFrame.targetAnnounce': '대상: {name}',
   'hudChrome.unitFrame.targetLabel': '내 대상',
-  'seo.officialLabel': 'World of ClaudeCraft 공식 웹사이트',
+  'seo.officialLabel': 'Ascension 공식 웹사이트',
   'seo.officialBody':
     'worldofclaudecraft.com은 Claudemoon 월드의 공식 무료 브라우저 MMO입니다. 지속 캐릭터로 온라인 플레이를 하거나, 오프라인에서 혼자 탐험하고, 위키를 읽고, 이 사이트에서 검증된 커뮤니티 링크를 확인하세요.',
   'hudChrome.questShare.notShareable': '이 퀘스트는 공유할 수 없습니다.',
@@ -1701,7 +1701,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'stats.charactersCreated': '생성된 캐릭터',
   'stats.playersOnline': '현재 접속자 수',
   'stats.realmName': '월드 이름',
-  'footer.copyright': '2026 World of ClaudeCraft',
+  'footer.copyright': '2026 Ascension',
   'footer.githubLink': 'https://github.com/levy-street/world-of-claudecraft',
   'footer.githubLabel': '오픈 소스 프로젝트',
   'footer.whitepaper': '백서',
@@ -1845,7 +1845,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'wallet.seekerAppHelp':
     'Seed Vault Wallet로 계속하세요. Seed Vault에서 연결 및 인증 요청을 확인한 후 게임으로 돌아오세요.',
   'wallet.standaloneAppHelp':
-    '홈 화면 앱에서는 아직 지갑 연결을 사용할 수 없습니다. Phantom 또는 Solflare를 사용하려면 Safari나 Chrome에서 World of ClaudeCraft를 여세요.',
+    '홈 화면 앱에서는 아직 지갑 연결을 사용할 수 없습니다. Phantom 또는 Solflare를 사용하려면 Safari나 Chrome에서 Ascension를 여세요.',
   'wallet.openAppTitle': '{wallet}에서 계속',
   'wallet.openAppHelp':
     '{wallet}을 열어 이 요청을 확인하세요. 지갑 앱을 사용하는 동안 이 게임 탭을 열어 두세요.',
@@ -1853,7 +1853,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'wallet.manualReturnBrowserHelp':
     '승인 후 이 게임 탭으로 돌아오세요. iOS에서 다른 브라우저가 열리면 닫고 원래 브라우저로 직접 돌아오세요.',
   'wallet.manualReturnStandaloneHelp':
-    '승인 후 홈 화면에서 World of ClaudeCraft로 돌아오세요. iOS에서 브라우저가 열리면 닫고 홈 화면 앱을 다시 여세요.',
+    '승인 후 홈 화면에서 Ascension로 돌아오세요. iOS에서 브라우저가 열리면 닫고 홈 화면 앱을 다시 여세요.',
   'wallet.preparingAppButton': '{wallet} 준비 중...',
   'wallet.walletAppUnavailable': '{wallet}을 준비하지 못했습니다. 이 창을 닫고 다시 시도하세요.',
   'wallet.flowConnect': '지갑을 선택하세요. 인증은 자동으로 계속됩니다.',
@@ -1870,12 +1870,12 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
     '계정에 연결된 지갑을 선택하고 $WOC 거래소 승인 메시지에 서명하세요. 서명은 무료이며 자금이 이동하지 않습니다.',
   'wallet.browser.extensionHelp':
     '호환되는 지갑 확장 프로그램을 찾지 못했습니다. Phantom, Solflare 또는 다른 Solana 브라우저 지갑을 설치하거나 잠금 해제한 뒤 다시 시도하세요.',
-  'wallet.browser.safety': 'World of ClaudeCraft는 복구 문구나 개인 키를 요청하지 않습니다.',
+  'wallet.browser.safety': 'Ascension는 복구 문구나 개인 키를 요청하지 않습니다.',
   'wallet.browser.continueWith': '{wallet}(으)로 계속',
   'wallet.browser.reviewTitle': '지갑에서 검토',
   'wallet.browser.reviewBody': '{wallet}의 안내를 따르세요. 이 브라우저 페이지를 열어 두세요.',
   'wallet.browser.completeTitle': '지갑 인증 완료',
-  'wallet.browser.completeBody': 'World of ClaudeCraft 데스크톱 앱으로 돌아갈 수 있습니다.',
+  'wallet.browser.completeBody': 'Ascension 데스크톱 앱으로 돌아갈 수 있습니다.',
   'wallet.browser.returnButton': '데스크톱 앱으로 돌아가기',
   'wallet.browser.failed':
     '지갑 인증에 실패했거나 만료되었습니다. 데스크톱 앱으로 돌아가 다시 시도하세요.',
@@ -1944,7 +1944,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'playerCard.arenaStat': '투기장',
   'playerCard.shareTierBit': ', {tier} 등급 $WOC 보유자',
   'playerCard.shareText':
-    'World of ClaudeCraft에서 제 전설을 벼리고 있습니다: {level}레벨 {className}{tierBit}. 제 월드에 합류하세요:',
+    'Ascension에서 제 전설을 벼리고 있습니다: {level}레벨 {className}{tierBit}. 제 월드에 합류하세요:',
   'playerCard.nativeShareTitle': 'ClaudeCraft의 세계',
   'playerCard.fileNameFallback': '플레이어',
   'playerCard.actionShareX': 'X에 공유',
@@ -2006,9 +2006,9 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'controls.emoteWheel': '감정표현 휠 길게 누르기',
   'controls.friends': '친구 및 길드',
   'controls.chat': '채팅창 열기',
-  'seo.title': 'World of ClaudeCraft: 클래식 스타일 웹 MMO',
+  'seo.title': 'Ascension: 클래식 스타일 웹 MMO',
   'seo.description':
-    '브라우저에서 바로 즐기는 클래식 스타일 마이크로 MMO, World of ClaudeCraft에서 장대한 모험을 시작하세요. 지속되는 공유 월드에 접속해 직업을 성장시키고 적을 물리치세요.',
+    '브라우저에서 바로 즐기는 클래식 스타일 마이크로 MMO, Ascension에서 장대한 모험을 시작하세요. 지속되는 공유 월드에 접속해 직업을 성장시키고 적을 물리치세요.',
   'seo.genre': 'MMORPG',
   'seo.playMode': '멀티플레이어',
   'seo.applicationCategory': '게임',
@@ -2018,9 +2018,9 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'a11y.mainNavigation': '기본 탐색',
   'a11y.languageSelection': '언어 선택',
   'a11y.characterActions': '캐릭터 작업',
-  'a11y.githubProject': 'GitHub에서 World of ClaudeCraft 프로젝트 열기',
-  'a11y.discordCommunity': 'World of ClaudeCraft Discord 커뮤니티 참여',
-  'a11y.donateProject': 'World of ClaudeCraft 후원하기',
+  'a11y.githubProject': 'GitHub에서 Ascension 프로젝트 열기',
+  'a11y.discordCommunity': 'Ascension Discord 커뮤니티 참여',
+  'a11y.donateProject': 'Ascension 후원하기',
   'entryGuard.body':
     '월드 입장 중 게임이 예기치 않게 종료되어 그래픽이 {preset}(으)로 설정되었습니다. 아래 그래픽 선택기나 게임 내 옵션에서 변경할 수 있습니다.',
   'entryGuard.dismiss': '닫기',
@@ -2193,18 +2193,18 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'mobilePreflight.iosInstallDetail':
     'iPhone 또는 iPad에서 진짜 전체 화면을 사용하려면 먼저 이 페이지를 홈 화면에 추가하세요.',
   'mobilePreflight.iosShareStep': 'Safari에서 공유를 누른 뒤 홈 화면에 추가를 선택하세요.',
-  'mobilePreflight.iosOpenStep': '새 홈 화면 아이콘에서 World of ClaudeCraft를 여세요.',
+  'mobilePreflight.iosOpenStep': '새 홈 화면 아이콘에서 Ascension를 여세요.',
   'mobilePreflight.androidStandaloneDetail': '전체 화면 앱 모드입니다. 기기를 가로로 유지하세요.',
   'mobilePreflight.androidInstallDetail':
     'Android에서 전체 화면을 사용하려면 이 페이지를 설치하거나 홈 화면에 추가하세요.',
   'mobilePreflight.androidInstallStep':
     'Chrome에서 메뉴를 누른 뒤 앱 설치 또는 홈 화면에 추가를 선택하세요.',
-  'mobilePreflight.androidOpenStep': '새 아이콘에서 World of ClaudeCraft를 여세요.',
+  'mobilePreflight.androidOpenStep': '새 아이콘에서 Ascension를 여세요.',
   'mobilePreflight.otherStandaloneDetail': '기기를 가로 전체 화면으로 유지하세요.',
   'mobilePreflight.otherInstallDetail':
     '최상의 모바일 전체 화면 경험을 위해 이 페이지를 설치하거나 홈 화면에 추가하세요.',
-  'serverUnavailable.title': 'World of ClaudeCraft - 월드 이용 불가',
-  'serverUnavailable.logoAlt': 'World of ClaudeCraft',
+  'serverUnavailable.title': 'Ascension - 월드 이용 불가',
+  'serverUnavailable.logoAlt': 'Ascension',
   'serverUnavailable.eyebrow': '월드 점검',
   'serverUnavailable.heading': '월드를 일시적으로 이용할 수 없습니다.',
   'serverUnavailable.body':
@@ -5618,7 +5618,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'mode.caNote':
     'WOC는 커뮤니티 토큰입니다. 플레이에는 필요하지 않습니다. WOC의 활용과 선순환 구조에 관해 이야기하려면 Discord에 참여하세요.',
   'mode.play': '플레이',
-  'mode.playAria': 'World of ClaudeCraft 플레이',
+  'mode.playAria': 'Ascension 플레이',
   'mode.serverAria': '월드 선택: 온라인 또는 오프라인',
   'mode.serverLabel': '월드를 선택하세요',
   'mode.serverOffline': '오프라인',
@@ -6237,7 +6237,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.bags.poolGeneral': '일반: {total}칸 중 {used}칸',
   'hudChrome.bags.poolMaterials': '재료: {total}칸 중 {used}칸',
   'hudChrome.bags.capacityPoolsAria': '사용 중인 가방 칸: {total}칸 중 {used}칸. 일반 아이템: {generalTotal}칸 중 {generalUsed}칸. 재료: {materialsTotal}칸 중 {materialsUsed}칸.',
-  'guide.brand': 'World of ClaudeCraft',
+  'guide.brand': 'Ascension',
   'guide.brandShort': 'ClaudeCraft',
   'guide.tagline': '브라우저에서 무료로 즐기는 클래식 스타일 MMO입니다.',
   'guide.skipToContent': '본문으로 건너뛰기',
@@ -6366,11 +6366,11 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'guide.footer.github': 'GitHub 소스 코드',
   'guide.footer.discord': 'Discord 참여하기',
   'guide.footer.communityWiki': '커뮤니티 위키',
-  'guide.footer.rights': 'World of ClaudeCraft',
+  'guide.footer.rights': 'Ascension',
   'guide.language.label': '언어',
   'guide.language.select': '언어 선택',
   'guide.home.eyebrow': '클래식 스타일 브라우저 MMO',
-  'guide.home.title': 'World of ClaudeCraft',
+  'guide.home.title': 'Ascension',
   'guide.home.subtitle':
     '퀘스트를 수행하고, 파티를 맺고, 손수 빚은 세계를 브라우저에서 무료로 탐험하세요.',
   'guide.home.ctaPlay': '지금 플레이',
@@ -6722,7 +6722,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'guide.family.reptile.desc':
     '쉭쉭거리는 소리와 날카로운 물어뜯기를 지닌 냉혈 사냥꾼들로, 온혈 야수들과는 뚜렷이 다릅니다.',
   'guide.worldPage.heading': '세계',
-  'guide.worldPage.intro': 'World of ClaudeCraft는 당신이 두 발로 가로지르는 하나로 이어진 땅입니다. 옛 길은 남쪽에서 북쪽으로 시작의 골짜기와 늪지와 봉우리를 꿰뚫고, 그것들을 지나 그 너머의 분지와 지도 꼭대기의 눈의 땅까지 계속 올라갑니다. 그 길에서 서쪽으로 더 높은 왕국들이 한 줄, 동쪽으로 또 한 줄 열리고, 밸리의 동쪽 해안 앞바다에는 섬이 하나 놓여 있습니다. 빠른 이동도, 비행 경로도, 마차도 없습니다. 모든 여정은 걷거나 타고 가는 것이므로, 다다르는 일 자체가 모험의 일부입니다.\n\n이 땅은 시간도 셉니다. 낮과 밤의 순환은 당신의 세계에 있는 모두가 함께 쓰는 실제 시계로 돌아가므로, 하늘은 여러분 모두에게 동시에 새벽에서 한낮을 지나 황혼과 어둠으로 옮겨가고, 달은 차고 기울며 오가고, 땅 위의 빛도 그에 따라 바뀝니다. 미니맵을 두른 눈금판이 시각을 읽는 곳입니다.',
+  'guide.worldPage.intro': 'Ascension는 당신이 두 발로 가로지르는 하나로 이어진 땅입니다. 옛 길은 남쪽에서 북쪽으로 시작의 골짜기와 늪지와 봉우리를 꿰뚫고, 그것들을 지나 그 너머의 분지와 지도 꼭대기의 눈의 땅까지 계속 올라갑니다. 그 길에서 서쪽으로 더 높은 왕국들이 한 줄, 동쪽으로 또 한 줄 열리고, 밸리의 동쪽 해안 앞바다에는 섬이 하나 놓여 있습니다. 빠른 이동도, 비행 경로도, 마차도 없습니다. 모든 여정은 걷거나 타고 가는 것이므로, 다다르는 일 자체가 모험의 일부입니다.\n\n이 땅은 시간도 셉니다. 낮과 밤의 순환은 당신의 세계에 있는 모두가 함께 쓰는 실제 시계로 돌아가므로, 하늘은 여러분 모두에게 동시에 새벽에서 한낮을 지나 황혼과 어둠으로 옮겨가고, 달은 차고 기울며 오가고, 땅 위의 빛도 그에 따라 바뀝니다. 미니맵을 두른 눈금판이 시각을 읽는 곳입니다.',
   'guide.worldPage.hub': '본거지',
   'guide.worldPage.valeBlurb':
     '새내기 영웅들이 동개울 마을 주변에서 늑대와 산적을 상대로 실력을 갈고닦는 푸른 시작의 골짜기.',
@@ -8342,7 +8342,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.discord.relay.event.hint': '레이드, 모임 또는 이벤트 공지',
   'hudChrome.discord.relay.help.hint': '커뮤니티에 도움 요청',
   'hudChrome.discord.title': 'Discord',
-  'hudChrome.discord.panelTitle': 'World of ClaudeCraft',
+  'hudChrome.discord.panelTitle': 'Ascension',
   'hudChrome.discord.open': 'Discord',
   'hudChrome.discord.viewCharacter': '{name} 보기',
   'hudChrome.discord.rank': '등급',
@@ -8439,9 +8439,9 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.devBadge.unlink': 'GitHub 연결 해제',
   'hudChrome.nativeUpdate.title': '업데이트 사용 가능',
   'hudChrome.nativeUpdate.body':
-    'World of ClaudeCraft의 새 버전을 사용할 수 있습니다. 지금 업데이트하여 최신 수정 사항과 개선 사항을 받으세요.',
+    'Ascension의 새 버전을 사용할 수 있습니다. 지금 업데이트하여 최신 수정 사항과 개선 사항을 받으세요.',
   'hudChrome.nativeUpdate.bodyWithVersion':
-    'World of ClaudeCraft 버전 {version}을(를) 사용할 수 있습니다. 지금 업데이트하여 최신 수정 사항과 개선 사항을 받으세요.',
+    'Ascension 버전 {version}을(를) 사용할 수 있습니다. 지금 업데이트하여 최신 수정 사항과 개선 사항을 받으세요.',
   'hudChrome.nativeUpdate.notNow': '나중에',
   'hudChrome.nativeUpdate.update': '업데이트',
   'hudChrome.cameraPrompt.title': '카메라 선택',
@@ -8466,15 +8466,15 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'desktop.update.whatsNew': '변경 사항을 브라우저에서 보기',
   'desktop.notify.updateReadyTitle': '업데이트 {version} 준비 완료',
   'desktop.notify.updateReadyTitleNoVersion': '업데이트 준비 완료',
-  'desktop.notify.updateReadyBody': '업데이트를 적용하려면 World of ClaudeCraft를 다시 시작하세요.',
+  'desktop.notify.updateReadyBody': '업데이트를 적용하려면 Ascension를 다시 시작하세요.',
   'desktop.notify.partyInviteTitle': '파티 초대',
   'desktop.notify.partyInviteBody': '{name}님이 파티에 초대했습니다.',
-  'desktop.crash.title': 'World of ClaudeCraft',
+  'desktop.crash.title': 'Ascension',
   'desktop.crash.body': '게임 화면이 응답하지 않습니다. 다시 불러올까요?',
   'desktop.crash.reload': '다시 불러오기',
   'desktop.crash.quit': '종료',
   'desktop.titlebar.exitGame': '게임 종료',
-  'desktop.crash.fatalBody': 'World of ClaudeCraft에 예기치 않은 오류가 발생하여 종료해야 합니다.',
+  'desktop.crash.fatalBody': 'Ascension에 예기치 않은 오류가 발생하여 종료해야 합니다.',
   'gpuNotice.bodyDesktop':
     '게임이 GPU 가속 없이 실행되고 있어 매우 느립니다. 그래픽 드라이버를 업데이트한 뒤 게임을 다시 시작하세요. Windows에서는 설정 > 시스템 > 디스플레이 > 그래픽에서 이 게임을 "고성능"으로 설정하세요.',
   'gpuNotice.bodyDiscreteInactive':
@@ -8496,7 +8496,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
     '게임이 GPU 가속 없이 실행되고 있어 매우 느립니다. 브라우저 설정에서 하드웨어 가속을 켜고 그래픽 드라이버를 업데이트한 뒤 브라우저를 다시 시작하세요.',
   'perfNudge.dismiss': '닫기',
   'editor.appTitle': '맵 편집기',
-  'editor.docTitle': '맵 편집기 - World of ClaudeCraft',
+  'editor.docTitle': '맵 편집기 - Ascension',
   'editor.untitledMap': '제목 없는 맵',
   'editor.playtestPlayerName': '지도제작자',
   'editor.topbar.label': '편집기 동작',
@@ -9401,7 +9401,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.wocMarket.disabledRealm': '이 서버에서는 $WOC 거래소를 이용할 수 없습니다.',
   'hudChrome.wocMarket.browserOnlyConfirmTitle': '브라우저에서 $WOC 거래소를 열까요?',
   'hudChrome.wocMarket.browserOnlyConfirmBody':
-    '$WOC 거래소는 World of ClaudeCraft의 브라우저 버전에서만 이용할 수 있습니다. 브라우저에서 World of ClaudeCraft를 엽니다. 그곳에서 로그인하고 거래소를 열 수 있습니다. 게임은 계속 실행됩니다.',
+    '$WOC 거래소는 Ascension의 브라우저 버전에서만 이용할 수 있습니다. 브라우저에서 Ascension를 엽니다. 그곳에서 로그인하고 거래소를 열 수 있습니다. 게임은 계속 실행됩니다.',
   'hudChrome.wocMarket.browserOnlyConfirmOpen': '브라우저에서 열기',
   'hudChrome.wocMarket.browserOnlyConfirmCancel': '취소',
   'hudChrome.wocMarket.pausedBanner':
@@ -10337,7 +10337,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.steam.noTicket':
     'Steam에서 연동 티켓을 받지 못했습니다. Steam을 실행한 뒤 다시 시도해 주세요.',
   'hudChrome.steam.wishlist': 'Steam에서 위시리스트에 추가',
-  'hudChrome.steam.wishlistAria': 'Steam에서 위시리스트에 추가: World of ClaudeCraft 상점 페이지 열기',
+  'hudChrome.steam.wishlistAria': 'Steam에서 위시리스트에 추가: Ascension 상점 페이지 열기',
   'hudChrome.steam.wishlistShort': '위시리스트',
   'hudChrome.epic.link': 'Epic 연동',
   'hudChrome.epic.unlink': 'Epic 연동 해제',
@@ -10633,7 +10633,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   // Wiki launcher confirm (M16 non-Latin fills).
   'hudChrome.wiki.confirmTitle': '위키를 열까요?',
   'hudChrome.wiki.confirmBody':
-    'World of ClaudeCraft 위키를 브라우저에서 엽니다. 게임은 계속 실행됩니다.',
+    'Ascension 위키를 브라우저에서 엽니다. 게임은 계속 실행됩니다.',
   'hudChrome.wiki.confirmOpen': '위키 열기',
   'hudChrome.wiki.confirmCancel': '취소',
   'guide.abilityHook.revenge':
@@ -13818,7 +13818,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'guide.classPage.formLine.form_bear': '방어를 맡는 형태입니다. 두꺼운 가죽을 두르고, 마나 대신 분노를 쓰며, 위협 수준을 더 쌓아 적이 계속 당신을 때리게 합니다.',
   'guide.riftsPage.floorsBody': '균열은 몇 개 층으로 이어지며 각 층은 새로 지어집니다. 그리고 그 층이 당신을 놓아줄 때까지 아래로 향하는 길은 열리지 않습니다. 층에 살아 있는 것을 정리하고, 길을 가로막아 잠가 둔 것을 풀어내면 비로소 하강로가 찢겨 열립니다. 마지막 층은 우두머리로 끝납니다. 층마다 저마다의 성격이 있어 한 번의 공략이 당신을 서리 속에서 잉걸불 속으로 데려가기도 하며, 새 층에 들어설 때마다 채팅에 그 이름이 뜹니다. 이번 균열이 몇 층짜리인지는 화면의 추적기에서 알 수 있습니다. 어떤 균열은 생성된 하강로 대신 손으로 빚은 특별한 무대를 열며, 그런 곳은 정해진 자기 길이대로 진행됩니다.',
   // Performance diagnostics panel chrome. Technical report prose remains English.
-  'hudChrome.perf.diagnostics.panelAria': 'World of ClaudeCraft 성능 진단',
+  'hudChrome.perf.diagnostics.panelAria': 'Ascension 성능 진단',
   'hudChrome.perf.diagnostics.title': 'ClaudeCraft 성능 진단',
   'hudChrome.perf.diagnostics.subtitle':
     '게임에 맞춘 스캔으로 근거와 코드 수준의 수정안을 제공합니다.',
@@ -13950,7 +13950,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   'hudChrome.perf.diagnostics.diagnosis.codeFix.cpu': '지정된 단계를 프로파일링하고 중복 작업과 할당을 제거하며 게임 동작을 유지하세요.',
   'hudChrome.perf.diagnostics.diagnosis.codeFix.loading': '기존 시작 및 스트리밍 예산으로 최초 사용 작업을 프리로드, 풀링 또는 분산하세요.',
   'hudChrome.perf.diagnostics.diagnosis.codeFix.network': '권위 서버 모델을 약화하지 않고 전송 또는 스냅샷 처리 비용을 줄이세요.',
-  'hudChrome.perf.diagnostics.report.title': 'World of ClaudeCraft 성능 진단',
+  'hudChrome.perf.diagnostics.report.title': 'Ascension 성능 진단',
   'hudChrome.perf.diagnostics.report.statusLine': '상태: {status} ({score}/100)',
   'hudChrome.perf.diagnostics.report.capturedLine': '측정 시간: {captured}',
   'hudChrome.perf.diagnostics.report.topFindingLine': '최우선 결과: {finding}',
