@@ -1,0 +1,561 @@
+import { describe, expect, it, vi } from 'vitest';
+import { tryNearbyInteraction } from '../src/game/nearby_interaction';
+import { ITEMS } from '../src/sim/data';
+import type { Entity, GatherNodeDef, QuestProgress } from '../src/sim/types';
+
+function entity(overrides: Partial<Entity> & Pick<Entity, 'id' | 'kind'>): Entity {
+  return {
+    templateId: 'test',
+    pos: { x: 0, y: 0, z: 0 },
+    dead: false,
+    ghost: false,
+    lootable: false,
+    loot: null,
+    harvestClaimedBy: null,
+    dungeonId: null,
+    ...overrides,
+  } as Entity;
+}
+
+function rig(targets: Entity[] = [], nodes: GatherNodeDef[] = []) {
+  const player = entity({ id: 1, kind: 'player' });
+  const calls: string[] = [];
+  const world = {
+    playerId: 1,
+    player,
+    entities: new Map<number, Entity>([
+      [player.id, player],
+      ...targets.map((target): [number, Entity] => [target.id, target]),
+    ]),
+    questLog: new Map<string, QuestProgress>(),
+    targetEntity: (id: number | null) => {
+      calls.push(`target:${id}`);
+    },
+    interact: () => {
+      calls.push('interact');
+    },
+    lootCorpse: (id: number) => {
+      calls.push(`loot:${id}`);
+      return true;
+    },
+    harvestCorpse: (id: number) => {
+      calls.push(`harvestCorpse:${id}`);
+    },
+    delveInteract: (id: number) => {
+      calls.push(`delve:${id}`);
+      return true;
+    },
+    enterDungeon: (id: string) => {
+      calls.push(`enter:${id}`);
+      return true;
+    },
+    leaveDungeon: () => {
+      calls.push('leave');
+      return true;
+    },
+    pickUpObject: (id: number) => {
+      calls.push(`pickup:${id}`);
+      return true;
+    },
+    resurrectAtSpiritHealer: () => {
+      calls.push('resurrect');
+      return true;
+    },
+    nodeHarvestableByMe: vi.fn(() => true),
+    harvestNode: (id: string) => {
+      calls.push(`harvest:${id}`);
+      return true;
+    },
+  };
+  const hud = {
+    openMailbox: () => calls.push('mailbox'),
+    openQuestDialog: (id: number) => calls.push(`quest:${id}`),
+    openDelveBoard: (id: number) => calls.push(`board:${id}`),
+    showError: (text: string) => calls.push(`error:${text}`),
+    requestSpiritHealerResurrect: () => calls.push('requestResurrect'),
+  };
+  return { world, hud, nodes, calls, player };
+}
+
+function interact(r: ReturnType<typeof rig>) {
+  // null nodeToolGateFor: the tier-agnostic legacy shape (the gate arm has its
+  // own dedicated test below).
+  return tryNearbyInteraction(
+    r.world,
+    r.hud,
+    r.nodes,
+    null,
+    'too far',
+    'not ready',
+    'escort away',
+    'nothing',
+  );
+}
+
+describe('tryNearbyInteraction', () => {
+  it('dispatches the nearest visible corpse loot', () => {
+    const fartherCorpse = entity({
+      id: 2,
+      kind: 'mob',
+      dead: true,
+      lootable: true,
+      loot: { copper: 1, items: [] },
+      pos: { x: 3, y: 0, z: 0 },
+    });
+    const nearerCorpse = entity({
+      id: 3,
+      kind: 'mob',
+      dead: true,
+      lootable: true,
+      loot: { copper: 1, items: [] },
+      pos: { x: 1, y: 0, z: 0 },
+    });
+    const r = rig([fartherCorpse, nearerCorpse]);
+
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['loot:3']);
+  });
+
+  it('skips corpse loot that is personal to another player', () => {
+    const corpse = entity({
+      id: 2,
+      kind: 'mob',
+      dead: true,
+      lootable: true,
+      loot: { copper: 0, items: [{ itemId: 'wolf_fang', count: 1, personalFor: [9] }] },
+      pos: { x: 1, y: 0, z: 0 },
+    });
+    const r = rig([corpse]);
+
+    expect(interact(r)).toBe(false);
+    expect(r.calls).toEqual(['error:nothing']);
+  });
+
+  it.each([
+    [
+      'door',
+      entity({
+        id: 2,
+        kind: 'object',
+        templateId: 'dungeon_door',
+        dungeonId: 'crypt',
+        lootable: true,
+      }),
+      'enter:crypt',
+    ],
+    [
+      'exit',
+      entity({ id: 2, kind: 'object', templateId: 'dungeon_exit', lootable: true }),
+      'leave',
+    ],
+    [
+      'mailbox',
+      entity({ id: 2, kind: 'object', templateId: 'mailbox', lootable: true }),
+      'mailbox',
+    ],
+    ['pickup', entity({ id: 2, kind: 'object', lootable: true }), 'pickup:2'],
+  ])('dispatches a nearby %s object', (_name, target, expected) => {
+    const r = rig([target]);
+
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual([expected]);
+  });
+
+  it.each([
+    ['inside', 3.99, true, ['pickup:2']],
+    ['exactly at', 4, true, ['pickup:2']],
+    ['outside', 4.01, false, ['error:nothing']],
+  ] as const)(
+    'uses the authored noticeboard radius when the board is %s the boundary',
+    (_position, distance, expectedOutcome, expectedCalls) => {
+      const board = entity({
+        id: 2,
+        kind: 'object',
+        templateId: 'noticeboard_eastbrook',
+        lootable: true,
+        pos: { x: distance, y: 0, z: 0 },
+      });
+      const r = rig([board]);
+
+      expect(interact(r)).toBe(expectedOutcome);
+      expect(r.calls).toEqual(expectedCalls);
+    },
+  );
+
+  it('does not let an out-of-range noticeboard mask a closer valid NPC', () => {
+    const board = entity({
+      id: 2,
+      kind: 'object',
+      templateId: 'noticeboard_eastbrook',
+      lootable: true,
+      pos: { x: 4.5, y: 0, z: 0 },
+    });
+    const npc = entity({
+      id: 3,
+      kind: 'npc',
+      templateId: 'elder_maren',
+      pos: { x: 2, y: 0, z: 0 },
+    });
+    const r = rig([board, npc]);
+
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['quest:3']);
+  });
+
+  it('preserves the generic five-yard object interaction range', () => {
+    const object = entity({
+      id: 2,
+      kind: 'object',
+      lootable: true,
+      pos: { x: 4.5, y: 0, z: 0 },
+    });
+    const r = rig([object]);
+
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['pickup:2']);
+  });
+
+  it.each([
+    ['quest', 'elder_maren', 'quest:2'],
+    ['delve board', 'brother_halven_marsh', 'board:2'],
+  ])('opens the nearby %s interaction', (_name, templateId, expected) => {
+    const r = rig([entity({ id: 2, kind: 'npc', templateId })]);
+
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual([expected]);
+  });
+
+  it('harvests a ready node and preserves movement for a not-ready node', () => {
+    const node = {
+      id: 'ore_1',
+      zoneId: 'zone',
+      type: 'ore',
+      pos: { x: 1, z: 0 },
+      level: 1,
+      tier: 1,
+    } as const;
+    const ready = rig([], [node]);
+    expect(interact(ready)).toBe(true);
+    expect(ready.calls).toEqual(['harvest:ore_1']);
+
+    const coolingDown = rig([], [node]);
+    coolingDown.world.nodeHarvestableByMe.mockReturnValue(false);
+    expect(interact(coolingDown)).toBe(false);
+    expect(coolingDown.calls).toEqual(['error:not ready']);
+  });
+
+  it('keeps corpse, delve, object, npc, node priority stable', () => {
+    const npc = entity({ id: 2, kind: 'npc', templateId: 'elder_maren' });
+    const object = entity({ id: 3, kind: 'object', lootable: true });
+    const delve = entity({ id: 4, kind: 'object', templateId: 'delve_chest', lootable: true });
+    const corpse = entity({
+      id: 5,
+      kind: 'mob',
+      dead: true,
+      lootable: true,
+      loot: { copper: 1, items: [] },
+    });
+    const node = {
+      id: 'ore_1',
+      zoneId: 'zone',
+      type: 'ore',
+      pos: { x: 1, z: 0 },
+      level: 1,
+      tier: 1,
+    } as const;
+    const cases = [
+      { targets: [corpse, delve, object, npc], expected: 'loot:5' },
+      { targets: [delve, object, npc], expected: 'delve:4' },
+      { targets: [object, npc], expected: 'pickup:3' },
+      { targets: [npc], expected: 'quest:2' },
+      { targets: [], expected: 'harvest:ore_1' },
+    ];
+
+    for (const { targets, expected } of cases) {
+      const r = rig(targets, [node]);
+      expect(interact(r)).toBe(true);
+      expect(r.calls).toEqual([expected]);
+    }
+  });
+
+  it('resurrects a ghost at a spirit healer and ignores all other dead-player actions', () => {
+    const healer = entity({ id: 2, kind: 'npc', templateId: 'spirit_healer' });
+    const competingNpc = entity({ id: 3, kind: 'npc', templateId: 'elder_maren' });
+    const competingObject = entity({ id: 4, kind: 'object', lootable: true });
+    const competingCorpse = entity({
+      id: 5,
+      kind: 'mob',
+      dead: true,
+      lootable: true,
+      loot: { copper: 1, items: [] },
+    });
+    const ghost = rig([healer, competingNpc, competingObject, competingCorpse]);
+    ghost.player.dead = true;
+    ghost.player.ghost = true;
+    expect(interact(ghost)).toBe(true);
+    // The interact key opens the HUD confirm gate; the resurrect command
+    // itself is only sent from the dialog's OK, never directly from here.
+    expect(ghost.calls).toEqual(['requestResurrect']);
+
+    const corpse = entity({
+      id: 3,
+      kind: 'mob',
+      dead: true,
+      lootable: true,
+      loot: { copper: 1, items: [] },
+    });
+    const dead = rig([corpse]);
+    dead.player.dead = true;
+    expect(interact(dead)).toBe(false);
+    expect(dead.calls).toEqual(['error:nothing']);
+  });
+
+  it('returns false and shows feedback when there is no eligible target', () => {
+    const r = rig();
+
+    expect(interact(r)).toBe(false);
+    expect(r.calls).toEqual(['error:nothing']);
+  });
+
+  it('threads nodeToolGateFor to the picked node and surfaces the unmet line', () => {
+    const lockedNode = {
+      id: 'ore_t2',
+      zoneId: 'zone',
+      type: 'ore',
+      pos: { x: 1, z: 0 },
+      level: 10,
+      tier: 2,
+    } as const;
+    const r = rig([], [lockedNode]);
+    const seen: string[] = [];
+    const gateFor = (node: { id: string; tier: number }) => {
+      seen.push(node.id);
+      return { nodeTier: node.tier, viewerToolTier: 1, unmetText: 'needs tier 2' };
+    };
+    expect(
+      tryNearbyInteraction(
+        r.world,
+        r.hud,
+        r.nodes,
+        gateFor,
+        'too far',
+        'not ready',
+        'escort away',
+        'nothing',
+      ),
+    ).toBe(false);
+    // The resolver ran against the PICKED node, and the tool denial won over
+    // both harvest and not-ready (the node reads locked, not cooling).
+    expect(seen).toEqual(['ore_t2']);
+    expect(r.calls).toEqual(['error:needs tier 2']);
+
+    // The met arm: a sufficient viewer tier lets the harvest through untouched.
+    const met = rig([], [lockedNode]);
+    expect(
+      tryNearbyInteraction(
+        met.world,
+        met.hud,
+        met.nodes,
+        (node) => ({ nodeTier: node.tier, viewerToolTier: 2, unmetText: 'needs tier 2' }),
+        'too far',
+        'not ready',
+        'escort away',
+        'nothing',
+      ),
+    ).toBe(true);
+    expect(met.calls).toEqual(['harvest:ore_t2']);
+  });
+
+  it('returns a rejected authoritative pickup result', async () => {
+    const target = entity({ id: 2, kind: 'object', lootable: true });
+    const r = rig([target]);
+    (r.world as any).pickUpObject = async (id: number) => {
+      r.calls.push(`pickup:${id}`);
+      return false;
+    };
+
+    await expect(interact(r)).resolves.toBe(false);
+    expect(r.calls).toEqual(['pickup:2']);
+  });
+});
+
+// Unified corpse press: the interact key selects by canOpen (either
+// half remaining makes the corpse a target) and dispatches each half gated by
+// the availability predicate, harvest strictly before loot. The halves are
+// separate commands: a denied harvest never blocks the loot half.
+describe('tryNearbyInteraction unified corpse press', () => {
+  function wolfCorpse(overrides: Partial<Entity> = {}): Entity {
+    return entity({
+      id: 2,
+      kind: 'mob',
+      // forest_wolf carries componentTags (#1140): a harvestable corpse.
+      templateId: 'forest_wolf',
+      dead: true,
+      lootable: true,
+      loot: { copper: 1, items: [] },
+      pos: { x: 1, y: 0, z: 0 },
+      ...overrides,
+    });
+  }
+
+  it('dispatches BOTH halves on a corpse with loot and an unclaimed harvest, harvest first', () => {
+    const r = rig([wolfCorpse()]);
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['harvestCorpse:2', 'loot:2']);
+  });
+
+  it('dispatches loot only once the harvest claim is taken', () => {
+    const r = rig([wolfCorpse({ harvestClaimedBy: 9 })]);
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['loot:2']);
+  });
+
+  it('dispatches harvest only on a loot-exhausted corpse inside the grace window', () => {
+    const r = rig([wolfCorpse({ loot: null })]);
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['harvestCorpse:2']);
+  });
+
+  it('dispatches neither on a claimed lootless corpse: it is no target at all', () => {
+    const r = rig([wolfCorpse({ loot: null, harvestClaimedBy: 9 })]);
+    expect(interact(r)).toBe(false);
+    expect(r.calls).toEqual(['error:nothing']);
+  });
+});
+
+// The interact key must agree with what the viewer can actually see. A quest
+// collectable the player is not on the quest for is withheld from the scene
+// entirely (src/render/quest_object_gate_core.ts over the sim's ground-object
+// gate), so pressing Use near one must behave as if it were not there.
+describe('tryNearbyInteraction: off-quest collectables are not there', () => {
+  const SUPPLY_QUEST = (() => {
+    const id = ITEMS.supply_crate?.questId;
+    if (!id) throw new Error('expected supply_crate to name its quest');
+    return id;
+  })();
+  const crate = (x: number) =>
+    entity({
+      id: 2,
+      kind: 'object',
+      templateId: 'ground_supply_crate',
+      objectItemId: 'supply_crate',
+      lootable: true,
+      pos: { x, y: 0, z: 0 },
+    });
+  const active = (): QuestProgress => ({
+    questId: SUPPLY_QUEST,
+    counts: [0],
+    state: 'active',
+  });
+
+  it('never spends the press on a collectable the viewer cannot see', () => {
+    const r = rig([crate(1)]);
+    expect(interact(r)).toBe(false);
+    expect(r.calls).toEqual(['error:nothing']);
+  });
+
+  it('picks up that same collectable once the quest is on the log', () => {
+    const r = rig([crate(1)]);
+    r.world.questLog.set(SUPPLY_QUEST, active());
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['pickup:2']);
+  });
+
+  it('lets a visible npc further away outrank a hidden collectable underfoot', () => {
+    const npc = entity({ id: 3, kind: 'npc', pos: { x: 2, y: 0, z: 0 } });
+    const r = rig([crate(1), npc]);
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['quest:3']);
+  });
+
+  it('still prefers the nearer collectable over that npc while the quest runs', () => {
+    const npc = entity({ id: 3, kind: 'npc', pos: { x: 2, y: 0, z: 0 } });
+    const r = rig([crate(1), npc]);
+    r.world.questLog.set(SUPPLY_QUEST, active());
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['pickup:2']);
+  });
+});
+
+// Two reaches meet on the npc arm. The nearest-wins scan has always accepted an
+// npc just past INTERACT_RANGE (its sentinel is INTERACT_RANGE + 1, so a keypress
+// reaches six yards), while a promotion names an npc the player selected rather
+// than walked up to, so it stops at INTERACT_RANGE.
+describe('tryNearbyInteraction npc reach', () => {
+  const npcAt = (id: number, x: number) =>
+    entity({ id, kind: 'npc', templateId: 'elder_maren', pos: { x, y: 0, z: 0 } });
+
+  const interactPreferring = (r: ReturnType<typeof rig>, preferNpcId: number | null) =>
+    tryNearbyInteraction(
+      r.world,
+      r.hud,
+      r.nodes,
+      null,
+      'too far',
+      'not ready',
+      'escort away',
+      'nothing',
+      true,
+      undefined,
+      preferNpcId,
+    );
+
+  it('talks to an npc standing just past the five yard interact range', () => {
+    const r = rig([npcAt(2, 5.5)]);
+    expect(interact(r)).toBe(true);
+    expect(r.calls).toEqual(['quest:2']);
+  });
+
+  it('stops the scan at the six yard sentinel', () => {
+    const r = rig([npcAt(2, 6)]);
+    expect(interact(r)).toBe(false);
+    expect(r.calls).toEqual(['error:nothing']);
+  });
+
+  it('promotes a selected npc that is farther than the nearest but still in reach', () => {
+    const near = () => npcAt(2, 1);
+    const selected = () => npcAt(3, 4.5);
+    for (const targets of [
+      [near(), selected()],
+      [selected(), near()],
+    ]) {
+      const r = rig(targets);
+      expect(interactPreferring(r, 3)).toBe(true);
+      expect(r.calls).toEqual(['quest:3']);
+    }
+  });
+
+  it('refuses to promote a selected npc past the interact range', () => {
+    const near = () => npcAt(2, 1);
+    const selected = () => npcAt(3, 5.5);
+    for (const targets of [
+      [near(), selected()],
+      [selected(), near()],
+    ]) {
+      const r = rig(targets);
+      expect(interactPreferring(r, 3)).toBe(true);
+      expect(r.calls).toEqual(['quest:2']);
+    }
+  });
+
+  it('promotes a selected npc standing exactly ON the interact range', () => {
+    // The inclusive edge of that reach check: at five yards the promotion still
+    // holds, so the comparison cannot quietly narrow to a strict less-than.
+    const near = () => npcAt(2, 1);
+    const selected = () => npcAt(3, 5);
+    for (const targets of [
+      [near(), selected()],
+      [selected(), near()],
+    ]) {
+      const r = rig(targets);
+      expect(interactPreferring(r, 3)).toBe(true);
+      expect(r.calls).toEqual(['quest:3']);
+    }
+  });
+
+  it('still lets the scan reach an npc the promotion refused', () => {
+    const r = rig([npcAt(3, 5.5)]);
+    expect(interactPreferring(r, 3)).toBe(true);
+    expect(r.calls).toEqual(['quest:3']);
+  });
+});

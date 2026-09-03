@@ -1,21 +1,19 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": false,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": false,
+    "noEmit": true,
     "skipLibCheck": true,
-    "types": ["vite/client", "vitest/globals"]
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "#bot-detector": ["./private/bot_detector/src/index.ts", "./server/bot_detector/stub.ts"]
+    }
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["src", "headless", "tests", "server", "private", "bot"]
 }
