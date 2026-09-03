@@ -25,6 +25,24 @@ Canonical categories:
 - `data/` — authored content data that is safe to serve as static runtime
   content.
 
+## Runtime path contract
+
+Code that needs an Ascension-owned runtime URL should use
+`src/ascension/assets.ts` instead of hard-coding `/ascension/...` strings.
+
+Example:
+
+```ts
+ascensionAssetPath('models', 'village/house-a.glb');
+// /ascension/models/village/house-a.glb
+```
+
+The resolver accepts only the canonical categories above and safe relative
+paths. Absolute paths, dot traversal, backslashes, query/hash suffixes and
+encoded path traversal/separators are rejected. This gives future editor,
+character, map and content integrations one stable boundary while leaving the
+foundation's existing asset loaders untouched.
+
 ## Code boundary
 
 When an Ascension-specific adapter or configuration module becomes necessary,
@@ -49,5 +67,6 @@ implementation is considered.
 
 ## Current phase
 
-Stage 1 only establishes the boundary and directories. No runtime loader is
-changed here, so gameplay and existing asset resolution remain untouched.
+Stage 2.1 establishes the shared runtime path contract. No existing model,
+texture, audio, map or character loader is replaced in this stage, so current
+gameplay asset resolution remains unchanged.
